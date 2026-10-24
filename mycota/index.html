@@ -1,0 +1,1741 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F4EFE3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14130F" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mycota">
+<meta name="description" content="Carnet de terrain privé du mycologue : spots, sorties, spécimens. Tout reste sur ton téléphone.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>Mycota</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}</style>
+</head>
+<body>
+<style>
+/* Mise en page : carnet de terrain à une colonne, cartes à bandeau d'aquarelle, barre d'onglets au pouce. */
+:root {
+  --bg: #F4EFE3;
+  --paper: #FBF7EC;
+  --paper-2: #EEE7D6;
+  --ink: #1F1B16;
+  --ink-2: #645E52;
+  --ink-3: #8E887B;
+  --line: rgba(31, 27, 22, 0.10);
+  --moss: #2D4A2B;
+  --moss-soft: rgba(45, 74, 43, 0.14);
+  --ocher: #8E6A2F;
+  --ocher-soft: rgba(163, 125, 61, 0.16);
+  --slate: #4F6B78;
+  --slate-soft: rgba(95, 122, 134, 0.20);
+  --danger: #9A3A2E;
+  --on-moss: #FBF7EC;
+  --shadow: 0 1px 2px rgba(31, 27, 22, 0.05), 0 4px 14px rgba(31, 27, 22, 0.05);
+  --f-ui: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-serif: "Cormorant Garamond", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --tabbar-h: 64px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14130F; --paper: #1E1C17; --paper-2: #29261E; --ink: #EEE7D7; --ink-2: #B7AE9B; --ink-3: #8A8272;
+    --line: rgba(238, 231, 215, 0.11); --moss: #95BE90; --moss-soft: rgba(149, 190, 144, 0.16);
+    --ocher: #D6AD66; --ocher-soft: rgba(214, 173, 102, 0.16); --slate: #97B3BF; --slate-soft: rgba(151, 179, 191, 0.20);
+    --danger: #E3907F; --on-moss: #14130F; --shadow: 0 1px 2px rgba(0, 0, 0, 0.3); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14130F; --paper: #1E1C17; --paper-2: #29261E; --ink: #EEE7D7; --ink-2: #B7AE9B; --ink-3: #8A8272;
+  --line: rgba(238, 231, 215, 0.11); --moss: #95BE90; --moss-soft: rgba(149, 190, 144, 0.16);
+  --ocher: #D6AD66; --ocher-soft: rgba(214, 173, 102, 0.16); --slate: #97B3BF; --slate-soft: rgba(151, 179, 191, 0.20);
+  --danger: #E3907F; --on-moss: #14130F; --shadow: 0 1px 2px rgba(0, 0, 0, 0.3); color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-ui); font-size: 15px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  -webkit-tap-highlight-color: transparent;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+#app { max-width: 560px; margin: 0 auto; padding-block: 8px calc(var(--tabbar-h) + 40px + env(safe-area-inset-bottom, 0px)); }
+#app.no-tabs { padding-block-end: 40px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--moss); outline-offset: 2px; }
+.vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.latin { font-family: var(--f-serif); font-style: italic; font-size: 1.08em; letter-spacing: 0.005em; }
+.serif { font-family: var(--f-serif); }
+.muted { color: var(--ink-2); }
+.faint { color: var(--ink-3); }
+.num { font-variant-numeric: tabular-nums; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.row { display: flex; align-items: center; gap: 10px; }
+.grow { flex: 1; min-width: 0; }
+.wrap { flex-wrap: wrap; }
+
+/* En-têtes */
+.masthead { padding: 18px 2px 6px; }
+.eyebrow { font-family: var(--f-serif); font-style: italic; font-size: 15px; color: var(--ink-3); letter-spacing: 0.02em; }
+.h1 { font-family: var(--f-serif); font-weight: 600; font-size: 44px; line-height: 1; letter-spacing: -0.01em; margin: 2px 0 0; text-wrap: balance; }
+.h2 { font-family: var(--f-serif); font-weight: 600; font-size: 30px; line-height: 1.05; margin: 0; text-wrap: balance; }
+.h3 { font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin: 0; }
+.section { margin-top: 26px; }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 0 2px 10px; }
+.section-title { font-family: var(--f-serif); font-weight: 600; font-size: 23px; margin: 0; }
+.bar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; display: flex; align-items: center; gap: 6px;
+  margin: 0 -6px; padding: 8px 0; background: var(--bg);
+}
+.bar-title { flex: 1; min-width: 0; font-weight: 600; font-size: 15px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.icon-btn {
+  width: 44px; height: 44px; display: inline-grid; place-items: center; border: 0; border-radius: 12px; background: transparent; color: var(--ink-2);
+}
+.icon-btn:active { background: var(--paper-2); }
+.icon-btn svg, .btn svg, .tab svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Statistiques de saison */
+.season { display: flex; gap: 22px; margin-top: 14px; flex-wrap: wrap; }
+.season div { display: flex; flex-direction: column; }
+.season b { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.season span { font-size: 12px; color: var(--ink-3); }
+.rainline { margin-top: 14px; display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--slate-soft); color: var(--ink); font-size: 14px; border: 0; width: 100%; text-align: left; }
+.rainline .drop { width: 10px; height: 14px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background: var(--slate); flex: none; }
+.notice { margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: var(--paper-2); font-size: 13.5px; color: var(--ink-2); }
+.notice b { color: var(--ink); }
+
+/* Cartes à bandeau d'aquarelle */
+.card {
+  position: relative; display: block; width: 100%; text-align: left; border: 0; color: inherit;
+  background: var(--paper); border-radius: 14px; padding: 14px 16px 14px 22px; overflow: hidden; box-shadow: var(--shadow);
+  --band: var(--ink-3); --band-soft: transparent;
+}
+.card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--band); opacity: 0.9; }
+.card::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 46px; background: linear-gradient(90deg, var(--band-soft), transparent); pointer-events: none; }
+button.card:active { transform: scale(0.992); }
+.b-moss { --band: var(--moss); --band-soft: var(--moss-soft); }
+.b-ocher { --band: var(--ocher); --band-soft: var(--ocher-soft); }
+.b-slate { --band: var(--slate); --band-soft: var(--slate-soft); }
+.b-mute { --band: var(--ink-3); --band-soft: transparent; }
+.b-mute::before { opacity: 0.35; }
+.cards { display: flex; flex-direction: column; gap: 10px; }
+.card-t { font-weight: 600; font-size: 16.5px; letter-spacing: -0.01em; line-height: 1.25; }
+.card-meta { font-size: 12.5px; color: var(--ink-3); margin-top: 2px; }
+.card-line { font-size: 13.5px; color: var(--ink-2); margin-top: 7px; }
+.card-side { text-align: right; flex: none; font-size: 11.5px; color: var(--ink-3); line-height: 1.35; }
+.card-side b { display: block; font-size: 18px; color: var(--ink); font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.tag { display: inline-block; font-size: 11.5px; font-weight: 600; letter-spacing: 0.02em; padding: 2px 8px; border-radius: 99px; background: var(--paper-2); color: var(--ink-2); }
+.tag.moss { background: var(--moss-soft); color: var(--moss); }
+.tag.ocher { background: var(--ocher-soft); color: var(--ocher); }
+.tag.slate { background: var(--slate-soft); color: var(--slate); }
+
+/* Boutons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 18px;
+  border-radius: 14px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 600; font-size: 15px; text-decoration: none;
+}
+.btn.primary { background: var(--moss); color: var(--on-moss); border-color: transparent; }
+.btn.danger { color: var(--danger); }
+.btn.block { width: 100%; }
+.btn.big { min-height: 60px; font-size: 16.5px; border-radius: 16px; }
+.btn:disabled { opacity: 0.45; }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-row .btn { flex: 1 1 140px; }
+.link { border: 0; background: none; padding: 6px 0; color: var(--moss); font-weight: 600; font-size: 14px; }
+
+/* Formulaires */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.label { font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.in {
+  width: 100%; min-height: 48px; padding: 11px 13px; border-radius: 12px; border: 1px solid var(--line); background: var(--paper);
+  font-size: 16px; outline: none; appearance: none;
+}
+.in:focus { border-color: var(--moss); }
+textarea.in { min-height: 88px; resize: vertical; line-height: 1.45; }
+select.in { background-image: linear-gradient(45deg, transparent 50%, var(--ink-3) 50%), linear-gradient(135deg, var(--ink-3) 50%, transparent 50%); background-position: calc(100% - 18px) 21px, calc(100% - 13px) 21px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 34px; }
+.in.latin-in { font-family: var(--f-serif); font-style: italic; font-size: 17px; }
+.panel { background: var(--paper); border-radius: 16px; padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { min-height: 38px; padding: 0 14px; border-radius: 99px; border: 1px solid var(--line); background: var(--paper); font-size: 14px; color: var(--ink-2); }
+.chip[aria-pressed="true"] { background: var(--moss); color: var(--on-moss); border-color: transparent; }
+.obs { display: flex; flex-direction: column; gap: 10px; }
+.obs-row { background: var(--paper-2); border-radius: 14px; padding: 10px; display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.obs-row .in { background: var(--paper); }
+.obs-names { display: flex; flex-direction: column; gap: 6px; min-width: 0; grid-column: 1 / -1; }
+.obs-qty { display: flex; gap: 8px; align-items: center; grid-column: 1 / -1; }
+.stepper { display: flex; align-items: center; background: var(--paper); border-radius: 12px; border: 1px solid var(--line); }
+.stepper button { width: 48px; height: 46px; border: 0; background: none; font-size: 22px; color: var(--moss); }
+.stepper output { min-width: 40px; text-align: center; font-weight: 600; font-size: 17px; font-variant-numeric: tabular-nums; }
+.qty-label { font-size: 12.5px; color: var(--ink-3); }
+.in.weight { width: 92px; min-height: 46px; flex: none; }
+.photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ph { position: relative; aspect-ratio: 1; max-width: 100%; border-radius: 12px; overflow: hidden; background: var(--paper-2); border: 0; padding: 0; }
+.ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ph .x { position: absolute; top: 4px; right: 4px; width: 30px; height: 30px; border-radius: 50%; border: 0; background: rgba(20, 19, 15, 0.6); color: #F4EFE3; font-size: 16px; line-height: 1; }
+.ph-add { display: grid; place-items: center; text-align: center; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--ink-2); border: 1.5px dashed var(--line); background: transparent; cursor: pointer; }
+.ph-add svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.coords { font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+/* Spécimen guidé */
+.steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.step { position: relative; border-radius: 14px; background: var(--paper); box-shadow: var(--shadow); overflow: hidden; min-height: 132px; display: flex; flex-direction: column; justify-content: flex-end; padding: 12px; cursor: pointer; }
+.step.wide { grid-column: 1 / -1; min-height: 110px; }
+.step img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.step.done::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 45%, rgba(20, 19, 15, 0.72)); }
+.step-n { position: relative; z-index: 1; font-family: var(--f-serif); font-style: italic; font-size: 14px; color: var(--ocher); }
+.step-t { position: relative; z-index: 1; font-weight: 600; font-size: 16px; }
+.step-h { position: relative; z-index: 1; font-size: 12px; color: var(--ink-3); line-height: 1.3; margin-top: 2px; }
+.step.done .step-n, .step.done .step-t, .step.done .step-h { color: #F4EFE3; }
+.step .ok { position: absolute; top: 10px; right: 10px; z-index: 1; width: 26px; height: 26px; border-radius: 50%; background: var(--moss); color: var(--on-moss); display: grid; place-items: center; font-size: 14px; }
+.progress { height: 6px; border-radius: 99px; background: var(--paper-2); overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--ocher); border-radius: 99px; transition: width 0.3s; }
+
+/* Détail */
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14px; }
+.kv dt { color: var(--ink-3); }
+.kv dd { margin: 0; min-width: 0; }
+.obs-list { display: flex; flex-direction: column; }
+.obs-item { display: flex; align-items: baseline; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.obs-item:first-child { border-top: 0; }
+.obs-item b { font-size: 20px; font-weight: 600; min-width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+.quote { font-family: var(--f-serif); font-style: italic; font-size: 18px; line-height: 1.45; color: var(--ink); margin: 0; white-space: pre-wrap; }
+.months { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; }
+.months div { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.months i { width: 100%; height: 30px; border-radius: 5px; background: var(--paper-2); }
+.months span { font-size: 10.5px; color: var(--ink-3); }
+.sp-list { display: flex; flex-direction: column; gap: 6px; }
+.sp-list div { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; }
+
+/* Barre d'onglets */
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--line);
+  padding: 6px max(10px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left, 0px));
+}
+.tabbar-in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr 76px 1fr 1fr; align-items: center; }
+.tab { display: flex; flex-direction: column; align-items: center; gap: 2px; border: 0; background: none; color: var(--ink-3); font-size: 11px; font-weight: 600; padding: 6px 0; min-height: 52px; }
+.tab[aria-current="page"] { color: var(--moss); }
+.fab { justify-self: center; width: 62px; height: 62px; margin-top: -26px; border-radius: 50%; border: 4px solid var(--bg); background: var(--moss); color: var(--on-moss); display: grid; place-items: center; box-shadow: 0 6px 18px rgba(45, 74, 43, 0.3); }
+.fab svg { width: 28px; height: 28px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+
+/* Feuille modale et toast */
+.scrim { position: fixed; inset: 0; z-index: 60; background: rgba(20, 19, 15, 0.42); display: flex; align-items: flex-end; justify-content: center; }
+.sheet {
+  width: 100%; max-width: 560px; background: var(--bg); border-radius: 22px 22px 0 0; max-height: 88dvh; overflow: auto;
+  padding: 10px max(18px, env(safe-area-inset-right, 0px)) calc(22px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
+  animation: up 0.22s ease-out;
+}
+.sheet .grab { width: 40px; height: 5px; border-radius: 99px; background: var(--line); margin: 0 auto 14px; }
+@keyframes up { from { transform: translateY(30px); opacity: 0.6; } }
+.choice { display: flex; gap: 14px; align-items: center; }
+.choice .ic { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: var(--band-soft); color: var(--band); flex: none; }
+.choice .ic svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.toast { position: fixed; left: 50%; bottom: calc(var(--tabbar-h) + 28px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 80; background: var(--ink); color: var(--bg); padding: 11px 16px; border-radius: 12px; font-size: 14px; font-weight: 500; max-width: calc(100vw - 32px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); }
+.viewer { position: fixed; inset: 0; z-index: 90; background: #0D0C0A; display: grid; place-items: center; }
+.viewer img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.viewer button { position: absolute; top: calc(10px + env(safe-area-inset-top, 0px)); right: max(10px, env(safe-area-inset-right, 0px)); color: #EEE7D7; }
+
+/* Carte */
+.map { position: relative; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; border-radius: 16px; background-color: var(--paper-2);
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 48px 48px; }
+.map-full { height: calc(100dvh - var(--tabbar-h) - 150px - env(safe-area-inset-bottom, 0px) - env(safe-area-inset-top, 0px)); min-height: 340px; }
+.map-pick { height: 260px; }
+.map-tiles, .map-marks { position: absolute; inset: 0; }
+.tile { position: absolute; left: 0; top: 0; max-width: none; transform-origin: 0 0; pointer-events: none; }
+:root[data-theme="dark"] .tile { filter: brightness(0.75) contrast(1.1) saturate(0.8); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tile { filter: brightness(0.75) contrast(1.1) saturate(0.8); } }
+.tile.miss { visibility: hidden; }
+.pin { position: absolute; left: 0; top: 0; width: 34px; height: 34px; margin: -34px 0 0 -17px; border: 0; background: none; padding: 0; }
+.pin span { position: absolute; left: 5px; top: 2px; width: 24px; height: 24px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: var(--band); border: 3px solid var(--paper); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); }
+.pin.sel span { width: 30px; height: 30px; left: 2px; top: -4px; }
+.me { position: absolute; left: 0; top: 0; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: var(--slate); border: 3px solid #FBF7EC; box-shadow: 0 0 0 7px var(--slate-soft); pointer-events: none; }
+.cross { position: absolute; left: 50%; top: 50%; width: 36px; height: 36px; margin: -36px 0 0 -18px; pointer-events: none; }
+.cross span { position: absolute; left: 5px; top: 2px; width: 26px; height: 26px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: var(--moss); border: 3px solid var(--paper); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); }
+.map-ctl { position: absolute; right: 10px; top: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 3; }
+.map-ctl button { width: 42px; height: 42px; border-radius: 12px; border: 0; background: var(--paper); color: var(--ink); box-shadow: var(--shadow); font-size: 20px; display: grid; place-items: center; }
+.map-ctl svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; }
+.map-attr { position: absolute; right: 6px; bottom: 4px; z-index: 3; font-size: 10.5px; color: var(--ink-2); background: color-mix(in srgb, var(--paper) 80%, transparent); padding: 1px 6px; border-radius: 6px; }
+.map-note { position: absolute; left: 10px; top: 10px; right: 64px; z-index: 3; font-size: 12.5px; color: var(--ink-2); background: var(--paper); padding: 7px 10px; border-radius: 10px; box-shadow: var(--shadow); }
+.map-card { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 4; }
+.veil { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; text-align: center; padding: 24px; background: color-mix(in srgb, var(--bg) 70%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+
+/* Climat */
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.fact { background: var(--paper); border-radius: 14px; padding: 12px; box-shadow: var(--shadow); }
+.fact b { display: block; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.fact span { font-size: 12px; color: var(--ink-3); line-height: 1.3; display: block; }
+.chart { background: var(--paper); border-radius: 16px; padding: 14px 12px 10px; box-shadow: var(--shadow); }
+.readout { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin: 0 2px 10px; min-height: 24px; }
+.readout b { font-size: 18px; font-variant-numeric: tabular-nums; }
+.readout span { font-size: 13px; color: var(--ink-2); }
+.plot { position: relative; height: 150px; margin-left: 26px; }
+.grid-y { position: absolute; left: 0; right: 0; border-top: 1px solid var(--line); }
+.grid-y span { position: absolute; left: -28px; top: -8px; width: 24px; text-align: right; font-size: 10.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.bars { position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 2px; }
+.barb { flex: 1; height: 100%; border: 0; padding: 0; background: none; display: flex; align-items: flex-end; min-width: 0; }
+.barb i { display: block; width: 100%; height: var(--h); min-height: 0; background: var(--slate); border-radius: 4px 4px 0 0; }
+.barb.zero i { height: 2px; background: var(--line); border-radius: 0; }
+.barb.fc i { background: repeating-linear-gradient(135deg, var(--slate) 0 3px, transparent 3px 6px); box-shadow: inset 0 0 0 1px var(--slate); }
+.barb.sel i { background: var(--ink); box-shadow: none; }
+.today-line { position: absolute; top: -6px; bottom: 0; border-left: 1.5px dashed var(--ink-3); }
+.xlab { display: flex; justify-content: space-between; margin: 6px 0 0 26px; font-size: 11px; color: var(--ink-3); }
+.legend { display: flex; gap: 16px; margin: 10px 2px 0; font-size: 12px; color: var(--ink-2); }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: var(--slate); vertical-align: -2px; margin-right: 6px; }
+.legend i.fc { background: repeating-linear-gradient(135deg, var(--slate) 0 2px, transparent 2px 4px); box-shadow: inset 0 0 0 1px var(--slate); }
+.fc-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; text-align: center; }
+.fc-row div { background: var(--paper); border-radius: 12px; padding: 8px 2px; box-shadow: var(--shadow); }
+.fc-row .d { font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; }
+.fc-row .t { font-size: 14px; font-weight: 600; margin: 3px 0; font-variant-numeric: tabular-nums; }
+.fc-row .r { font-size: 11.5px; color: var(--slate); font-weight: 600; font-variant-numeric: tabular-nums; }
+.fc-row .r.dry { color: var(--ink-3); font-weight: 400; }
+table.days { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+table.days td, table.days th { padding: 5px 4px; border-top: 1px solid var(--line); text-align: right; }
+table.days th { text-align: left; font-weight: 500; color: var(--ink-2); }
+details summary { cursor: pointer; color: var(--moss); font-weight: 600; font-size: 14px; padding: 8px 0; }
+
+/* Retrouver */
+.finder { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding-top: 10px; }
+.dial { position: relative; width: min(78vw, 300px); aspect-ratio: 1; max-width: 100%; border-radius: 50%; background: var(--paper); box-shadow: var(--shadow); margin: 14px 0 6px; }
+.dial .n { position: absolute; left: 50%; top: 10px; transform: translateX(-50%); font-family: var(--f-serif); font-weight: 600; font-size: 18px; color: var(--ocher); }
+.dial .rose { position: absolute; inset: 0; transition: transform 0.25s ease-out; }
+.arrow { position: absolute; inset: 14%; transition: transform 0.25s ease-out; }
+.arrow svg { width: 100%; height: 100%; }
+.dist { font-family: var(--f-serif); font-weight: 600; font-size: 64px; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+
+/* Verrou */
+.lock { min-height: 80dvh; display: flex; flex-direction: column; justify-content: center; gap: 16px; max-width: 380px; margin: 0 auto; }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+@media (max-width: 380px) { .h1 { font-size: 38px; } .dist { font-size: 52px; } .facts { grid-template-columns: 1fr 1fr; } }
+</style>
+
+<div id="app" aria-live="polite"></div>
+
+<nav class="tabbar" id="tabbar" aria-label="Navigation principale">
+  <div class="tabbar-in">
+    <button class="tab" data-act="tab" data-v="carnet"><svg viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg>Carnet</button>
+    <button class="tab" data-act="tab" data-v="carte"><svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>Carte</button>
+    <button class="fab" data-act="note" aria-label="Noter"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    <button class="tab" data-act="tab" data-v="chrono"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Chronologie</button>
+    <button class="tab" data-act="tab" data-v="climat"><svg viewBox="0 0 24 24"><path d="M7 15a4 4 0 0 1 .5-8A5 5 0 0 1 17 8a3.5 3.5 0 0 1 0 7z"/><path d="M9 18l-1 2M13 18l-1 2M17 18l-1 2"/></svg>Climat</button>
+  </div>
+</nav>
+<input type="file" id="import-file" class="vh" accept="application/json,.json">
+
+<script>
+'use strict';
+/* ==========================================================================
+   Mycota — carnet de terrain du mycologue
+   Tout reste sur l'appareil : IndexedDB pour les fiches, photos réencodées
+   (métadonnées GPS supprimées), coordonnées chiffrées si un code est défini.
+   ========================================================================== */
+
+const IN_CLAUDE = typeof window.claude === 'object' && window.claude !== null;
+const PREFERS_TOUCH = matchMedia('(pointer: coarse)').matches;
+
+/* ---------- utilitaires ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const pad = n => String(n).padStart(2, '0');
+const localISO = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const dayISO = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const MONTHS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+const MONTHS_S = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+const DAYS_S = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
+const nf = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 });
+const startOfDay = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
+const daysBetween = (a, b) => Math.round((startOfDay(b) - startOfDay(a)) / 864e5);
+const fmtDay = iso => { const d = new Date(iso); return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`; };
+const fmtDayNoYear = iso => { const d = new Date(iso); return `${d.getDate()} ${MONTHS[d.getMonth()]}`; };
+const fmtTime = iso => { const d = new Date(iso); return `${pad(d.getHours())}h${pad(d.getMinutes())}`; };
+function ago(iso) {
+  const n = daysBetween(new Date(iso), new Date());
+  if (n < 0) return 'à venir';
+  if (n === 0) return "aujourd'hui";
+  if (n === 1) return 'hier';
+  if (n < 31) return `il y a ${n} jours`;
+  const m = Math.round(n / 30.4);
+  if (m < 12) return `il y a ${m} mois`;
+  const y = Math.round(n / 365);
+  return `il y a ${y} an${y > 1 ? 's' : ''}`;
+}
+const plural = (n, one, many) => `${nf.format(n)} ${n > 1 ? many : one}`;
+const R = 6371000, rad = x => x * Math.PI / 180, deg = x => x * 180 / Math.PI;
+function distance(a, b) {
+  const dLat = rad(b.lat - a.lat), dLng = rad(b.lng - a.lng);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+function bearing(a, b) {
+  const y = Math.sin(rad(b.lng - a.lng)) * Math.cos(rad(b.lat));
+  const x = Math.cos(rad(a.lat)) * Math.sin(rad(b.lat)) - Math.sin(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.cos(rad(b.lng - a.lng));
+  return (deg(Math.atan2(y, x)) + 360) % 360;
+}
+const CARDS = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+const cardinal = d => CARDS[Math.round(d / 45) % 8];
+const fmtDist = m => m < 1000 ? `${Math.round(m)} m` : `${nf.format(m / 1000)} km`;
+const hasPos = o => o && typeof o.lat === 'number' && typeof o.lng === 'number';
+const fmtCoords = o => S.settings.mask ? 'Coordonnées masquées' : `${o.lat.toFixed(5)}, ${o.lng.toFixed(5)}`;
+
+const I = {
+  back: '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
+  gear: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  edit: '<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+  trash: '<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+  camera: '<svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+  image: '<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 16l5-5 4 4 3-3 4 4"/></svg>',
+  pin: '<svg viewBox="0 0 24 24"><path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg>',
+  walk: '<svg viewBox="0 0 24 24"><circle cx="13" cy="4.5" r="1.8"/><path d="M10 21l2-6 3 3v3M8 12l3-4 3 1 2 4 3 1M12 15l-1-5"/></svg>',
+  lens: '<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="5.5"/><path d="M15 15l5 5"/></svg>',
+  compass: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>',
+  locate: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7"/></svg>',
+  fit: '<svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
+  lock: '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+  plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+};
+
+/* ---------- référentiel de noms (noms seuls, aucune fiche descriptive) ---------- */
+const SPECIES = [
+  ['Cèpe de Bordeaux', 'Boletus edulis'], ['Cèpe bronzé', 'Boletus aereus'], ["Cèpe d'été", 'Boletus reticulatus'], ['Cèpe des pins', 'Boletus pinophilus'],
+  ['Bolet bai', 'Imleria badia'], ['Bolet à pied rouge', 'Neoboletus luridiformis'], ['Bolet orangé', 'Leccinum aurantiacum'], ['Bolet rude', 'Leccinum scabrum'],
+  ['Bolet de Satan', 'Rubroboletus satanas'], ['Girolle', 'Cantharellus cibarius'], ['Chanterelle en tube', 'Craterellus tubaeformis'],
+  ['Trompette de la mort', 'Craterellus cornucopioides'], ['Pied-de-mouton', 'Hydnum repandum'], ['Morille commune', 'Morchella esculenta'],
+  ['Morille conique', 'Morchella elata'], ['Coulemelle', 'Macrolepiota procera'], ['Rosé des prés', 'Agaricus campestris'], ['Pleurote en huître', 'Pleurotus ostreatus'],
+  ['Lactaire délicieux', 'Lactarius deliciosus'], ['Russule charbonnière', 'Russula cyanoxantha'], ['Russule verdoyante', 'Russula virescens'],
+  ['Amanite des Césars', 'Amanita caesarea'], ['Amanite phalloïde', 'Amanita phalloides'], ['Amanite tue-mouches', 'Amanita muscaria'],
+  ['Amanite panthère', 'Amanita pantherina'], ['Amanite rougissante', 'Amanita rubescens'], ['Pied bleu', 'Lepista nuda'], ['Clitocybe nébuleux', 'Clitocybe nebularis'],
+  ['Mousseron de la Saint-Georges', 'Calocybe gambosa'], ['Marasme des Oréades', 'Marasmius oreades'], ['Tricholome équestre', 'Tricholoma equestre'],
+  ['Tricholome terreux', 'Tricholoma terreum'], ['Armillaire couleur de miel', 'Armillaria mellea'], ['Hypholome en touffe', 'Hypholoma fasciculare'],
+  ['Polypore soufré', 'Laetiporus sulphureus'], ['Langue de bœuf', 'Fistulina hepatica'], ['Vesse-de-loup perlée', 'Lycoperdon perlatum'],
+  ['Pholiote changeante', 'Kuehneromyces mutabilis'], ['Cortinaire couleur de rocou', 'Cortinarius orellanus'], ['Hygrophore de mars', 'Hygrophorus marzuolus'],
+  ['Hydne hérisson', 'Hericium erinaceus'], ['Collybie à pied velouté', 'Flammulina velutipes'], ['Satyre puant', 'Phallus impudicus'],
+  ['Gyromitre', 'Gyromitra esculenta'], ['Sparassis crépu', 'Sparassis crispa'], ['Clavaire dorée', 'Ramaria aurea'],
+];
+const FOREST = ['Chênaie', 'Hêtraie', 'Châtaigneraie', 'Charmaie', 'Chênaie-hêtraie', 'Pinède', 'Sapinière', 'Pessière', 'Forêt mixte', 'Bois humide', 'Lisière', 'Prairie', 'Parc ou jardin', 'Autre'];
+const SOL = ['Sec', 'Frais', 'Humide', 'Détrempé'];
+const CIEL = ['Soleil', 'Nuageux', 'Pluie', 'Brouillard', 'Gelée', 'Vent'];
+const SPOREE = ['Blanche', 'Crème', 'Jaune', 'Rose', 'Ocre', 'Brun rouille', 'Brun pourpre', 'Noire'];
+const ODEURS = ['Aucune', 'Farine', 'Anis', 'Radis', 'Fruitée', 'Iode', 'Désagréable'];
+const STEPS = [
+  ['chapeau', 'Chapeau', 'Vu de dessus, puis un peu de profil'],
+  ['lames', 'Hyménophore', 'Dessous : lames, tubes ou aiguillons'],
+  ['pied', 'Pied entier', 'Le spécimen sorti avec sa base'],
+  ['base', 'Base du pied', 'Volve, bulbe, mycélium, débris'],
+  ['coupe', 'Coupe verticale', 'Couleur de la chair, bleuissement'],
+];
+const SP_BY_FR = new Map(SPECIES.map(([f, l]) => [f.toLowerCase(), l]));
+const SP_BY_LA = new Map(SPECIES.map(([f, l]) => [l.toLowerCase(), f]));
+
+/* ---------- stockage local (IndexedDB, repli mémoire) ---------- */
+const STORES = ['spots', 'sorties', 'specimens', 'photos', 'meta'];
+const DB = {
+  db: null, mem: null,
+  open() {
+    return new Promise(res => {
+      const fallback = () => { this.mem = Object.fromEntries(STORES.map(s => [s, new Map()])); res(false); };
+      try {
+        const r = indexedDB.open('mycota', 1);
+        r.onupgradeneeded = () => { const d = r.result; STORES.forEach(s => { if (!d.objectStoreNames.contains(s)) d.createObjectStore(s, { keyPath: 'id' }); }); };
+        r.onsuccess = () => { this.db = r.result; res(true); };
+        r.onerror = fallback; r.onblocked = fallback;
+      } catch { fallback(); }
+    });
+  },
+  run(store, mode, fn) {
+    if (this.mem) {
+      const m = this.mem[store];
+      const fake = { getAll: () => ({ result: [...m.values()] }), get: k => ({ result: m.get(k) }), put: v => { m.set(v.id, v); return { result: v.id }; }, delete: k => { m.delete(k); return {}; }, clear: () => { m.clear(); return {}; } };
+      return Promise.resolve(fn(fake).result);
+    }
+    return new Promise((res, rej) => {
+      let t; try { t = this.db.transaction(store, mode); } catch (e) { rej(e); return; }
+      const r = fn(t.objectStore(store));
+      t.oncomplete = () => res(r ? r.result : undefined);
+      t.onerror = t.onabort = () => rej(t.error);
+    });
+  },
+  all(s) { return this.run(s, 'readonly', st => st.getAll()); },
+  get(s, k) { return this.run(s, 'readonly', st => st.get(k)); },
+  put(s, v) { return this.run(s, 'readwrite', st => st.put(v)); },
+  del(s, k) { return this.run(s, 'readwrite', st => st.delete(k)); },
+  clear(s) { return this.run(s, 'readwrite', st => st.clear()); },
+};
+
+/* ---------- coffre : chiffrement AES-GCM des coordonnées ---------- */
+const b64 = u8 => { let s = ''; u8.forEach(c => { s += String.fromCharCode(c); }); return btoa(s); };
+const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const Vault = {
+  key: null,
+  async derive(pass, salt) {
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 250000, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  },
+  async enc(obj) {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, this.key, new TextEncoder().encode(JSON.stringify(obj)));
+    return { iv: b64(iv), ct: b64(new Uint8Array(ct)) };
+  },
+  async dec(e) {
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(e.iv) }, this.key, unb64(e.ct));
+    return JSON.parse(new TextDecoder().decode(pt));
+  },
+};
+async function pack(rec) {
+  if (!Vault.key || !hasPos(rec)) return rec;
+  const { lat, lng, acc, ...rest } = rec;
+  return { ...rest, enc: await Vault.enc({ lat, lng, acc }) };
+}
+async function unpack(rec) {
+  if (!rec || !rec.enc) return rec;
+  const { enc, ...rest } = rec;
+  if (!Vault.key) return rest;
+  try { return { ...rest, ...(await Vault.dec(enc)) }; } catch { return rest; }
+}
+
+/* ---------- état ---------- */
+const S = {
+  spots: [], sorties: [], specimens: [],
+  settings: { mask: false },
+  climate: null, lastPos: null, vault: null,
+  view: 'carnet', params: {}, draft: null, unmount: null,
+};
+const STORE_OF = { spot: 'spots', sortie: 'sorties', specimen: 'specimens' };
+async function saveRec(kind, rec) {
+  const store = STORE_OF[kind];
+  rec.updatedAt = new Date().toISOString();
+  rec.createdAt = rec.createdAt || rec.updatedAt;
+  const list = S[store];
+  const i = list.findIndex(x => x.id === rec.id);
+  if (i >= 0) list[i] = rec; else list.push(rec);
+  try { await DB.put(store, await pack(rec)); } catch (e) { toast("Enregistrement impossible : l'espace de stockage est indisponible."); throw e; }
+  return rec;
+}
+async function deleteRec(kind, id) {
+  const store = STORE_OF[kind];
+  const rec = S[store].find(x => x.id === id);
+  S[store] = S[store].filter(x => x.id !== id);
+  await DB.del(store, id).catch(() => {});
+  const ph = [...(rec?.photoIds || []), ...Object.values(rec?.photos || {}).filter(Boolean)];
+  for (const p of ph) await DB.del('photos', p).catch(() => {});
+}
+const metaPut = (id, value) => DB.put('meta', { id, value }).catch(() => {});
+async function loadAll() {
+  const [sp, so, sm, meta] = await Promise.all(['spots', 'sorties', 'specimens', 'meta'].map(s => DB.all(s).catch(() => [])));
+  S.spots = await Promise.all(sp.map(unpack));
+  S.sorties = await Promise.all(so.map(unpack));
+  S.specimens = await Promise.all(sm.map(unpack));
+  const m = Object.fromEntries(meta.map(x => [x.id, x.value]));
+  S.settings = { mask: false, ...(m.settings || {}) };
+  S.climate = m.climate || null;
+}
+
+/* ---------- requêtes dérivées ---------- */
+const spotById = id => S.spots.find(s => s.id === id);
+const sortiesOf = spotId => S.sorties.filter(s => s.spotId === spotId).sort((a, b) => b.date.localeCompare(a.date));
+const countOf = so => (so.obs || []).reduce((n, o) => n + (Number(o.count) || 0), 0);
+const fruitful = so => (so.obs || []).some(o => (o.species || '').trim());
+const speciesOf = list => { const m = new Map(); list.forEach(so => (so.obs || []).forEach(o => { const k = (o.species || '').trim(); if (!k) return; const e = m.get(k) || { name: k, latin: o.latin, n: 0, visits: 0 }; e.n += Number(o.count) || 0; e.visits++; if (!e.latin && o.latin) e.latin = o.latin; m.set(k, e); })); return [...m.values()].sort((a, b) => b.n - a.n); };
+function bandOfSpot(spot) {
+  const last = sortiesOf(spot.id)[0];
+  if (!last) return 'b-mute';
+  if (daysBetween(new Date(last.date), new Date()) > 300) return 'b-mute';
+  return fruitful(last) ? 'b-moss' : 'b-ocher';
+}
+const bandOfSortie = so => daysBetween(new Date(so.date), new Date()) > 300 ? 'b-mute' : (fruitful(so) ? 'b-moss' : 'b-ocher');
+const posOfSortie = so => hasPos(so) ? so : spotById(so.spotId);
+function nearestSpot(pos, max = 250) {
+  let best = null;
+  S.spots.forEach(s => { if (!hasPos(s)) return; const d = distance(pos, s); if (d <= max && (!best || d < best.d)) best = { spot: s, d }; });
+  return best;
+}
+function speciesHistory() {
+  const m = new Map();
+  S.sorties.forEach(so => (so.obs || []).forEach(o => { if (o.species) m.set(o.species.trim(), o.latin || ''); }));
+  S.specimens.forEach(sp => { if (sp.hypothese) m.set(sp.hypothese.trim(), sp.latin || ''); });
+  SPECIES.forEach(([f, l]) => { if (!m.has(f)) m.set(f, l); });
+  return m;
+}
+function matchLatin(name) {
+  const k = (name || '').trim().toLowerCase();
+  if (!k) return null;
+  if (SP_BY_FR.has(k)) return { fr: name.trim(), la: SP_BY_FR.get(k) };
+  if (SP_BY_LA.has(k)) return { fr: SP_BY_LA.get(k), la: SPECIES.find(s => s[1].toLowerCase() === k)[1] };
+  for (const so of S.sorties) for (const o of so.obs || []) if ((o.species || '').trim().toLowerCase() === k && o.latin) return { fr: name.trim(), la: o.latin };
+  return null;
+}
+
+/* ---------- photos ---------- */
+const urlCache = new Map();
+function loadImage(file) {
+  return new Promise((res, rej) => { const u = URL.createObjectURL(file); const i = new Image(); i.onload = () => res(i); i.onerror = () => { URL.revokeObjectURL(u); rej(new Error('image')); }; i.src = u; });
+}
+function resize(img, max, q) {
+  const r = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(img.naturalWidth * r)); c.height = Math.max(1, Math.round(img.naturalHeight * r));
+  c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+  return new Promise(res => c.toBlob(b => res(b), 'image/jpeg', q));
+}
+async function addPhoto(file) {
+  const img = await loadImage(file);
+  const blob = await resize(img, 1800, 0.82);
+  const thumb = await resize(img, 420, 0.72);
+  URL.revokeObjectURL(img.src);
+  const p = { id: 'p' + uid(), blob, thumb, createdAt: new Date().toISOString() };
+  await DB.put('photos', p);
+  return p.id;
+}
+async function photoURL(id, full = false) {
+  const k = id + (full ? ':f' : ':t');
+  if (urlCache.has(k)) return urlCache.get(k);
+  const p = await DB.get('photos', id).catch(() => null);
+  if (!p) return null;
+  const u = URL.createObjectURL(full ? p.blob : (p.thumb || p.blob));
+  urlCache.set(k, u);
+  return u;
+}
+function hydratePhotos(root) {
+  $$('img[data-photo]', root).forEach(async img => { const u = await photoURL(img.dataset.photo); if (u) img.src = u; else img.closest('.ph, .step')?.classList.add('lost'); });
+}
+async function viewPhoto(id) {
+  const u = await photoURL(id, true);
+  if (!u) return;
+  const v = document.createElement('div');
+  v.className = 'viewer';
+  v.innerHTML = `<img alt="Photo en grand" src="${u}"><button class="icon-btn" aria-label="Fermer">✕</button>`;
+  v.addEventListener('click', () => v.remove());
+  document.body.appendChild(v);
+}
+
+/* ---------- position ---------- */
+function getPos(timeout = 15000) {
+  return new Promise(res => {
+    if (!('geolocation' in navigator)) return res({ error: 'unsupported' });
+    try {
+      navigator.geolocation.getCurrentPosition(
+        p => { const v = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy, at: Date.now() }; S.lastPos = v; res(v); },
+        e => res({ error: e.code === 1 ? 'denied' : 'unavailable' }),
+        { enableHighAccuracy: true, timeout, maximumAge: 20000 });
+    } catch { res({ error: 'unavailable' }); }
+  });
+}
+const posError = e => e === 'denied' ? 'Position refusée. Autorise la localisation pour Mycota dans les réglages du téléphone.'
+  : IN_CLAUDE ? "La position n'est pas accessible dans l'aperçu claude.ai. Elle fonctionne dans la version installée."
+  : 'Position introuvable pour le moment. Réessaie à découvert.';
+
+/* ---------- météo (Open-Meteo, données brutes uniquement) ---------- */
+async function getJSON(url, ms = 12000) {
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), ms);
+  try { const r = await fetch(url, { signal: ctl.signal }); if (!r.ok) throw new Error('http ' + r.status); return await r.json(); }
+  finally { clearTimeout(t); }
+}
+async function fetchClimate(pos) {
+  const u = `https://api.open-meteo.com/v1/forecast?latitude=${pos.lat.toFixed(2)}&longitude=${pos.lng.toFixed(2)}&daily=precipitation_sum,temperature_2m_max,temperature_2m_min&past_days=30&forecast_days=7&timezone=auto`;
+  const j = await getJSON(u);
+  const d = j.daily;
+  const days = d.time.map((t, i) => ({ d: t, mm: d.precipitation_sum[i], tmax: d.temperature_2m_max[i], tmin: d.temperature_2m_min[i] }));
+  const c = { at: Date.now(), place: pos.place || 'Autour de toi', days };
+  S.climate = c; metaPut('climate', c);
+  return c;
+}
+async function rainBefore(pos, dateStr) {
+  const end = new Date(dateStr); const start = new Date(end); start.setDate(start.getDate() - 9);
+  const age = daysBetween(end, new Date());
+  if (age < 0) return null;
+  const host = age > 80 ? 'https://archive-api.open-meteo.com/v1/archive' : 'https://api.open-meteo.com/v1/forecast';
+  const j = await getJSON(`${host}?latitude=${pos.lat.toFixed(2)}&longitude=${pos.lng.toFixed(2)}&daily=precipitation_sum&start_date=${dayISO(start)}&end_date=${dayISO(end)}&timezone=auto`);
+  const vals = (j.daily?.precipitation_sum || []).filter(v => typeof v === 'number');
+  if (!vals.length) return null;
+  return { mm: Math.round(vals.reduce((a, b) => a + b, 0) * 10) / 10, days: 10, at: Date.now() };
+}
+let syncing = false;
+async function syncWeather() {
+  if (syncing || !navigator.onLine) return;
+  syncing = true;
+  try {
+    const todo = S.sorties.filter(so => !so.wx && !so.demo && hasPos(posOfSortie(so)) && daysBetween(new Date(so.date), new Date()) >= 0).slice(0, 8);
+    for (const so of todo) {
+      try { const wx = await rainBefore(posOfSortie(so), so.date); if (wx) { so.wx = wx; await saveRec('sortie', so); } } catch { break; }
+    }
+  } finally { syncing = false; }
+}
+function rainSummary(c = S.climate) {
+  if (!c) return null;
+  const today = dayISO(new Date());
+  const past = c.days.filter(x => x.d <= today);
+  const sum = n => Math.round(past.slice(-n).reduce((a, x) => a + (x.mm || 0), 0) * 10) / 10;
+  let lastWet = null;
+  for (let i = past.length - 1; i >= 0; i--) if ((past[i].mm || 0) >= 5) { lastWet = past[i]; break; }
+  const next = c.days.find(x => x.d > today && (x.mm || 0) >= 2);
+  return { r10: sum(10), r30: sum(30), lastWet, next };
+}
+
+/* ---------- enregistrement de fichiers ---------- */
+async function saveFile(name, blob) {
+  if (IN_CLAUDE && window.claude.use) {
+    let dl = null;
+    try { dl = await Promise.race([window.claude.use('downloads'), new Promise(r => setTimeout(() => r(null), 5000))]); } catch { dl = null; }
+    if (dl) {
+      try { await dl.save({ filename: name, data: blob }); return true; }
+      catch (e) {
+        const c = e && e.code;
+        toast(c === 'declined' ? 'Enregistrement annulé.' : c === 'rejected_extension' ? "Ce format ne peut pas être enregistré depuis l'aperçu. Utilise la version installée." : "Enregistrement impossible ici.");
+        return false;
+      }
+    }
+  }
+  const file = new File([blob], name, { type: blob.type || 'application/octet-stream' });
+  if (PREFERS_TOUCH && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: name }); return true; }
+    catch (e) { if (e && e.name === 'AbortError') return false; }
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  return true;
+}
+
+/* ---------- interface : toast, feuille, barre ---------- */
+let toastT = null;
+function toast(msg) {
+  let t = $('.toast');
+  if (!t) { t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3200);
+}
+function openSheet(html) {
+  closeSheet();
+  const s = document.createElement('div');
+  s.className = 'scrim'; s.id = 'scrim';
+  s.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div>`;
+  s.addEventListener('click', e => { if (e.target === s) closeSheet(); });
+  document.body.appendChild(s);
+  return s;
+}
+const closeSheet = () => $('#scrim')?.remove();
+function confirmSheet({ title, text, ok, danger = true, onOk }) {
+  const s = openSheet(`<div class="stack"><h2 class="h2">${esc(title)}</h2>${text ? `<p class="muted" style="margin:0">${esc(text)}</p>` : ''}
+    <div class="btn-row"><button class="btn" data-x="no">Annuler</button><button class="btn ${danger ? 'danger' : 'primary'}" data-x="ok">${esc(ok)}</button></div></div>`);
+  $('[data-x="no"]', s).onclick = closeSheet;
+  $('[data-x="ok"]', s).onclick = async () => { closeSheet(); await onOk(); };
+}
+const topbar = (title, right = '') => `<header class="bar"><button class="icon-btn" data-act="back" aria-label="Retour">${I.back}</button><div class="bar-title">${esc(title)}</div>${right || '<span style="width:44px"></span>'}</header>`;
+const photoGrid = (ids, editable) => `<div class="photos">${ids.map(id => `<div class="ph"><button class="ph" style="width:100%;height:100%" data-act="photo" data-id="${id}" aria-label="Voir la photo"><img data-photo="${id}" alt=""></button>${editable ? `<button class="x" data-act="photoDel" data-id="${id}" aria-label="Retirer la photo">✕</button>` : ''}</div>`).join('')}
+  ${editable ? `<label class="ph ph-add">${I.camera}<span>Photo</span><input type="file" class="vh" accept="image/*" capture="environment" data-photo-in="draft"></label>
+  <label class="ph ph-add">${I.image}<span>Galerie</span><input type="file" class="vh" accept="image/*" multiple data-photo-in="draft"></label>` : ''}</div>`;
+const chipGroup = (name, items, selected, multi = false) => `<div class="chips" role="group">${items.map(v => `<button type="button" class="chip" data-act="chip" data-group="${name}" data-multi="${multi ? 1 : 0}" data-val="${esc(v)}" aria-pressed="${(multi ? (selected || []).includes(v) : selected === v) ? 'true' : 'false'}">${esc(v)}</button>`).join('')}</div>`;
+function speciesDatalist() {
+  return `<datalist id="species-list">${[...speciesHistory().entries()].map(([f, l]) => `<option value="${esc(f)}">${esc(l)}</option>`).join('')}</datalist>`;
+}
+
+/* ---------- navigation ---------- */
+function go(view, params = {}, { replace = false } = {}) {
+  S.unmount?.(); S.unmount = null;
+  S.view = view; S.params = params;
+  const depth = (history.state?.depth || 0) + (replace ? 0 : 1);
+  try { (replace ? history.replaceState : history.pushState).call(history, { view, params, depth }, ''); } catch { /* cadre restreint */ }
+  render(); window.scrollTo(0, 0);
+}
+window.addEventListener('popstate', e => {
+  if (!e.state || !e.state.view) return;
+  closeSheet(); S.unmount?.(); S.unmount = null;
+  S.view = e.state.view; S.params = e.state.params || {};
+  render();
+});
+const TABS = ['carnet', 'carte', 'chrono', 'climat'];
+function render() {
+  const app = $('#app');
+  const V = VIEWS[S.view] || VIEWS.carnet;
+  const out = V(S.params) || { html: '' };
+  app.innerHTML = out.html;
+  const tabbed = TABS.includes(S.view);
+  $('#tabbar').hidden = !tabbed || S.view === 'lock';
+  app.classList.toggle('no-tabs', !tabbed);
+  $$('.tab').forEach(t => t.setAttribute('aria-current', t.dataset.v === S.view ? 'page' : 'false'));
+  S.unmount = out.unmount || null;
+  out.mount?.();
+  hydratePhotos(app);
+}
+
+/* ---------- carte glissante maison (tuiles OpenStreetMap) ---------- */
+const TS = 256;
+const lng2x = (lng, z) => (lng + 180) / 360 * TS * 2 ** z;
+const lat2y = (lat, z) => { const r = rad(Math.max(-85, Math.min(85, lat))); return (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * TS * 2 ** z; };
+const x2lng = (x, z) => x / (TS * 2 ** z) * 360 - 180;
+const y2lat = (y, z) => { const n = Math.PI - 2 * Math.PI * y / (TS * 2 ** z); return deg(Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)))); };
+class SlipMap {
+  constructor(el, { center, zoom = 13, onMove, onTap } = {}) {
+    this.el = el; this.c = center || { lat: 46.6, lng: 2.4 }; this.z = zoom; this.onMove = onMove; this.onTap = onTap;
+    this.tiles = new Map(); this.marks = []; this.ptr = new Map(); this.miss = 0; this.ok = 0;
+    el.classList.add('map');
+    el.insertAdjacentHTML('afterbegin', '<div class="map-tiles"></div><div class="map-marks"></div><div class="map-attr">© OpenStreetMap</div>');
+    this.tl = $('.map-tiles', el); this.ml = $('.map-marks', el);
+    this.down = this.down.bind(this); this.move = this.move.bind(this); this.up = this.up.bind(this); this.wheel = this.wheel.bind(this);
+    el.addEventListener('pointerdown', this.down);
+    el.addEventListener('wheel', this.wheel, { passive: false });
+    el.addEventListener('dblclick', e => { const r = el.getBoundingClientRect(); this.zoomAbout(this.z + 1, e.clientX - r.left, e.clientY - r.top); });
+    this.ro = new ResizeObserver(() => this.draw()); this.ro.observe(el);
+    this.draw();
+  }
+  get W() { return this.el.clientWidth; } get H() { return this.el.clientHeight; }
+  screenOf(p) { return { x: this.W / 2 + lng2x(p.lng, this.z) - lng2x(this.c.lng, this.z), y: this.H / 2 + lat2y(p.lat, this.z) - lat2y(this.c.lat, this.z) }; }
+  draw() {
+    if (this.raf) return;
+    this.raf = requestAnimationFrame(() => { this.raf = 0; this.paint(); });
+  }
+  paint() {
+    const W = this.W, H = this.H; if (!W || !H) return;
+    const zi = Math.max(0, Math.min(19, Math.round(this.z))), s = 2 ** (this.z - zi), ts = TS * s, n = 2 ** zi;
+    const left = W / 2 - lng2x(this.c.lng, zi) * s, top = H / 2 - lat2y(this.c.lat, zi) * s;
+    const keep = new Set();
+    for (let x = Math.floor(-left / ts); x <= Math.floor((W - left) / ts); x++) {
+      for (let y = Math.floor(-top / ts); y <= Math.floor((H - top) / ts); y++) {
+        if (y < 0 || y >= n) continue;
+        const xx = ((x % n) + n) % n, key = `${zi}/${x}/${y}`;
+        let img = this.tiles.get(key);
+        if (!img) {
+          img = new Image(); img.className = 'tile'; img.alt = ''; img.draggable = false; img.decoding = 'async';
+          if (!IN_CLAUDE) img.crossOrigin = 'anonymous';
+          img.onload = () => { this.ok++; };
+          img.onerror = () => { img.classList.add('miss'); this.miss++; if (this.miss > 3 && !this.ok) this.onOffline?.(); };
+          img.src = `https://tile.openstreetmap.org/${zi}/${xx}/${y}.png`;
+          this.tl.appendChild(img); this.tiles.set(key, img);
+        }
+        img.style.width = img.style.height = (ts + 0.5) + 'px';
+        img.style.transform = `translate(${left + x * ts}px, ${top + y * ts}px)`;
+        keep.add(key);
+      }
+    }
+    for (const [k, img] of this.tiles) if (!keep.has(k)) { img.remove(); this.tiles.delete(k); }
+    this.marks.forEach(m => { const p = this.screenOf(m.pos); m.el.style.transform = `translate(${p.x}px, ${p.y}px)`; });
+  }
+  setMarks(list) {
+    this.ml.innerHTML = ''; this.marks = [];
+    list.forEach(m => { const el = document.createElement(m.tag || 'button'); el.className = m.cls; if (m.html) el.innerHTML = m.html; if (m.id) el.dataset.id = m.id; if (m.label) el.setAttribute('aria-label', m.label); this.ml.appendChild(el); this.marks.push({ el, pos: m.pos }); });
+    this.draw();
+  }
+  setView(c, z) { this.c = { lat: c.lat, lng: c.lng }; if (z != null) this.z = Math.max(3, Math.min(18, z)); this.draw(); this.onMove?.(this.c); }
+  fit(points, maxZ = 15) {
+    if (!points.length) return;
+    if (points.length === 1) return this.setView(points[0], maxZ);
+    const lats = points.map(p => p.lat), lngs = points.map(p => p.lng);
+    const box = { n: Math.max(...lats), s: Math.min(...lats), e: Math.max(...lngs), w: Math.min(...lngs) };
+    let z = maxZ;
+    while (z > 3 && (lng2x(box.e, z) - lng2x(box.w, z) > this.W - 90 || lat2y(box.s, z) - lat2y(box.n, z) > this.H - 110)) z -= 0.5;
+    this.setView({ lat: (box.n + box.s) / 2, lng: (box.e + box.w) / 2 }, z);
+  }
+  zoomAbout(nz, px, py) {
+    nz = Math.max(3, Math.min(18, nz));
+    const wx = lng2x(this.c.lng, this.z) + px - this.W / 2, wy = lat2y(this.c.lat, this.z) + py - this.H / 2;
+    const pt = { lng: x2lng(wx, this.z), lat: y2lat(wy, this.z) };
+    const cx = lng2x(pt.lng, nz) - (px - this.W / 2), cy = lat2y(pt.lat, nz) - (py - this.H / 2);
+    this.z = nz; this.c = { lng: x2lng(cx, nz), lat: y2lat(cy, nz) };
+    this.draw(); this.onMove?.(this.c);
+  }
+  down(e) {
+    if (e.target.closest('.map-ctl, .map-card, .veil, .map-note')) return;
+    this.ptr.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (this.ptr.size === 1) { this.moved = 0; this.startTarget = e.target; window.addEventListener('pointermove', this.move); window.addEventListener('pointerup', this.up); window.addEventListener('pointercancel', this.up); }
+    this.pinch = null;
+  }
+  move(e) {
+    const prev = this.ptr.get(e.pointerId); if (!prev) return;
+    const cur = { x: e.clientX, y: e.clientY };
+    if (this.ptr.size === 1) {
+      const dx = cur.x - prev.x, dy = cur.y - prev.y; this.moved += Math.abs(dx) + Math.abs(dy);
+      const cx = lng2x(this.c.lng, this.z) - dx, cy = lat2y(this.c.lat, this.z) - dy;
+      this.c = { lng: x2lng(cx, this.z), lat: y2lat(cy, this.z) }; this.draw(); this.onMove?.(this.c);
+    } else if (this.ptr.size === 2) {
+      this.ptr.set(e.pointerId, cur);
+      const [a, b] = [...this.ptr.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y);
+      const r = this.el.getBoundingClientRect(); const mx = (a.x + b.x) / 2 - r.left, my = (a.y + b.y) / 2 - r.top;
+      if (this.pinch) this.zoomAbout(this.z + Math.log2(d / this.pinch), mx, my);
+      this.pinch = d; this.moved += 10; return;
+    }
+    this.ptr.set(e.pointerId, cur);
+  }
+  up(e) {
+    this.ptr.delete(e.pointerId); this.pinch = null;
+    if (this.ptr.size === 0) {
+      window.removeEventListener('pointermove', this.move); window.removeEventListener('pointerup', this.up); window.removeEventListener('pointercancel', this.up);
+      if (this.moved < 8) { const pin = this.startTarget?.closest?.('[data-id]'); this.onTap?.(pin ? pin.dataset.id : null); }
+    }
+  }
+  wheel(e) { e.preventDefault(); const r = this.el.getBoundingClientRect(); this.zoomAbout(this.z + (e.deltaY < 0 ? 0.5 : -0.5), e.clientX - r.left, e.clientY - r.top); }
+  destroy() { this.ro.disconnect(); window.removeEventListener('pointermove', this.move); window.removeEventListener('pointerup', this.up); }
+}
+
+/* ==========================================================================
+   VUES
+   ========================================================================== */
+const VIEWS = {};
+
+/* ----- Carnet (accueil) ----- */
+VIEWS.carnet = () => {
+  const y = new Date().getFullYear();
+  const season = S.sorties.filter(s => new Date(s.date).getFullYear() === y);
+  const total = season.reduce((n, s) => n + countOf(s), 0);
+  const nsp = speciesOf(season).length;
+  const rs = rainSummary();
+  const climAge = S.climate ? ago(new Date(S.climate.at).toISOString()) : '';
+  const pending = S.specimens.filter(s => s.status !== 'identifie').sort((a, b) => b.date.localeCompare(a.date));
+  const spots = [...S.spots].sort((a, b) => ((sortiesOf(b.id)[0]?.date) || b.createdAt || '').localeCompare((sortiesOf(a.id)[0]?.date) || a.createdAt || ''));
+  const demo = S.spots.some(s => s.demo);
+  const here = S.lastPos;
+
+  const spotCard = sp => {
+    const so = sortiesOf(sp.id), last = so[0];
+    const n = so.reduce((a, s) => a + countOf(s), 0);
+    const lastTxt = !last ? 'Jamais visité' : fruitful(last)
+      ? `${esc(last.obs.filter(o => o.species).slice(0, 2).map(o => `${o.species} · ${o.count}`).join(', '))} <span class="faint">· ${ago(last.date)}</span>`
+      : `Sortie sans observation <span class="faint">· ${ago(last.date)}</span>`;
+    const dist = here && hasPos(sp) ? ` · à ${fmtDist(distance(here, sp))}` : '';
+    return `<button class="card ${bandOfSpot(sp)}" data-act="go" data-v="spot" data-id="${sp.id}">
+      <div class="row" style="align-items:flex-start"><div class="grow"><div class="card-t">${esc(sp.name)}</div>
+      <div class="card-meta">${esc(sp.forest || 'Milieu non précisé')}${dist}</div><div class="card-line">${lastTxt}</div></div>
+      <div class="card-side"><b>${nf.format(n)}</b>exemplaires<br>${plural(so.length, 'sortie', 'sorties')}</div></div></button>`;
+  };
+
+  const html = `
+  <div class="masthead">
+    <div class="row"><div class="grow"><div class="eyebrow">Saison ${y}</div><h1 class="h1">Mycota</h1></div>
+    <button class="icon-btn" data-act="go" data-v="reglages" aria-label="Réglages">${I.gear}</button></div>
+    <div class="season">
+      <div><b>${season.length}</b><span>sorties</span></div>
+      <div><b>${nf.format(total)}</b><span>exemplaires observés</span></div>
+      <div><b>${nsp}</b><span>espèces</span></div>
+    </div>
+    <button class="rainline" data-act="tab" data-v="climat"><span class="drop"></span><span class="grow">${rs
+      ? `<b class="num">${nf.format(rs.r10)} mm</b> de pluie ces 10 derniers jours autour de toi <span class="faint">· relevé ${climAge}</span>`
+      : 'Pluie récente autour de toi : ouvre Climat pour la relever'}</span></button>
+    ${IN_CLAUDE ? `<div class="notice"><b>Aperçu claude.ai.</b> Ici, la position, le fond de carte et la météo sont bloqués. Tout fonctionne dans la version installée sur ton téléphone.</div>` : ''}
+    ${demo ? `<div class="notice">Ce carnet contient des <b>exemples</b>. <button class="link" data-act="clearDemo">Retirer les exemples</button></div>` : ''}
+  </div>
+  ${pending.length ? `<section class="section"><div class="section-head"><h2 class="section-title">À identifier</h2><span class="faint">${pending.length}</span></div>
+    <div class="cards">${pending.map(sp => {
+      const done = STEPS.filter(([k]) => sp.photos?.[k]).length;
+      const spot = spotById(sp.spotId);
+      return `<button class="card b-ocher" data-act="go" data-v="specimen" data-id="${sp.id}"><div class="row"><div class="grow">
+        <div class="card-t">${sp.hypothese ? esc(sp.hypothese) : 'Spécimen sans hypothèse'}</div>
+        <div class="card-meta">${fmtDay(sp.date)}${spot ? ' · ' + esc(spot.name) : ''}</div>
+        <div class="card-line">${done}/5 prises${sp.sporee ? ' · sporée ' + esc(sp.sporee.toLowerCase()) : ''}${sp.odeur ? ' · odeur ' + esc(sp.odeur.toLowerCase()) : ''}</div></div>
+        <span class="tag ocher">à identifier</span></div></button>`;
+    }).join('')}</div></section>` : ''}
+  <section class="section">
+    <div class="section-head"><h2 class="section-title">Spots</h2><button class="link" data-act="go" data-v="spotForm">+ Nouveau spot</button></div>
+    ${spots.length ? `<div class="cards">${spots.map(spotCard).join('')}</div>` : `
+    <div class="panel">
+      <div class="h2">Ton carnet est vierge.</div>
+      <p class="muted" style="margin:0">Un spot, c'est un coin que tu veux retrouver et suivre d'une saison à l'autre. Sur place, touche le bouton vert pour noter une sortie : la position est prise automatiquement.</p>
+      <div class="btn-row"><button class="btn primary" data-act="go" data-v="spotForm">Créer un spot</button><button class="btn" data-act="loadDemo">Voir avec des exemples</button></div>
+    </div>`}
+  </section>`;
+  return { html };
+};
+
+/* ----- Fiche spot ----- */
+VIEWS.spot = ({ id }) => {
+  const sp = spotById(id);
+  if (!sp) return VIEWS.carnet();
+  const so = sortiesOf(id);
+  const n = so.reduce((a, s) => a + countOf(s), 0);
+  const fr = so.filter(fruitful).length;
+  const sps = speciesOf(so);
+  const months = Array(12).fill(0); so.filter(fruitful).forEach(s => { months[new Date(s.date).getMonth()]++; });
+  const maxM = Math.max(1, ...months);
+  const html = `${topbar('Spot', `<button class="icon-btn" data-act="go" data-v="spotForm" data-id="${id}" aria-label="Modifier le spot">${I.edit}</button>`)}
+  <div class="masthead" style="padding-top:4px">
+    <div class="eyebrow">${esc(sp.forest || 'Milieu non précisé')}</div>
+    <h1 class="h2" style="font-size:36px;margin-top:2px">${esc(sp.name)}</h1>
+    <div class="coords" style="margin-top:8px">${hasPos(sp) ? esc(fmtCoords(sp)) : 'Sans position'}${S.lastPos && hasPos(sp) ? ` · à ${fmtDist(distance(S.lastPos, sp))}` : ''}</div>
+    <div class="season">
+      <div><b>${so.length}</b><span>sorties</span></div>
+      <div><b>${nf.format(n)}</b><span>exemplaires</span></div>
+      <div><b>${so.length ? Math.round(fr / so.length * 100) : 0} %</b><span>sorties fructueuses</span></div>
+    </div>
+  </div>
+  <div class="btn-row" style="margin-top:14px">
+    <button class="btn primary" data-act="newSortie" data-id="${id}">Noter une sortie</button>
+    ${hasPos(sp) ? `<button class="btn" data-act="go" data-v="retrouver" data-id="${id}">${I.compass} Retrouver</button>` : ''}
+  </div>
+  ${sp.notes ? `<section class="section"><p class="quote">« ${esc(sp.notes)} »</p></section>` : ''}
+  <section class="section"><div class="section-head"><h2 class="section-title">Calendrier du spot</h2><span class="faint">sorties fructueuses par mois</span></div>
+    <div class="panel"><div class="months">${months.map((v, i) => `<div><i style="background:${v ? `color-mix(in srgb, var(--moss) ${Math.round(18 + 82 * v / maxM)}%, var(--paper-2))` : 'var(--paper-2)'}" title="${MONTHS[i]} : ${v}"></i><span>${MONTHS_S[i]}</span></div>`).join('')}</div></div>
+  </section>
+  ${sps.length ? `<section class="section"><div class="section-head"><h2 class="section-title">Espèces observées ici</h2></div><div class="panel"><div class="sp-list">${sps.map(e => `<div><span>${esc(e.name)} ${e.latin ? `<span class="latin muted">${esc(e.latin)}</span>` : ''}</span><span class="num faint">${e.n} ex. · ${plural(e.visits, 'fois', 'fois')}</span></div>`).join('')}</div></div></section>` : ''}
+  <section class="section"><div class="section-head"><h2 class="section-title">Sorties</h2></div>
+    ${so.length ? `<div class="cards">${so.map(sortieCard).join('')}</div>` : '<p class="muted">Aucune sortie notée ici pour le moment.</p>'}
+  </section>`;
+  return { html };
+};
+function sortieCard(so, withSpot = false) {
+  const spot = spotById(so.spotId);
+  const obs = (so.obs || []).filter(o => o.species);
+  return `<button class="card ${bandOfSortie(so)}" data-act="go" data-v="sortie" data-id="${so.id}">
+    ${withSpot ? `<div class="card-meta" style="text-transform:uppercase;letter-spacing:.05em;margin:0 0 3px">${esc(spot?.name || 'Spot supprimé')}</div>` : ''}
+    <div class="card-meta" style="margin:0">${fmtDay(so.date)} · ${ago(so.date)}${so.wx ? ` · <span style="color:var(--slate)">${nf.format(so.wx.mm)} mm sur 10 j</span>` : ''}</div>
+    <div class="card-t" style="margin-top:4px">${obs.length ? esc(obs.map(o => o.species).slice(0, 3).join(', ')) + (obs.length > 3 ? '…' : '') : 'Sortie sans observation'}</div>
+    ${obs.length ? `<div class="card-line">${obs.slice(0, 3).map(o => `${o.latin ? `<span class="latin">${esc(o.latin)}</span>` : esc(o.species)} <span class="faint num">— ${o.count} ex.</span>`).join('<br>')}</div>` : ''}
+    ${so.notes ? `<div class="card-line serif" style="font-style:italic;font-size:15px">« ${esc(so.notes.slice(0, 120))}${so.notes.length > 120 ? '…' : ''} »</div>` : ''}
+  </button>`;
+}
+
+/* ----- Formulaire spot ----- */
+VIEWS.spotForm = ({ id, here }) => {
+  const ex = id ? spotById(id) : null;
+  if (!S.draft || S.draft.kind !== 'spot' || S.draft.id !== (id || null)) {
+    S.draft = ex ? { kind: 'spot', ...structuredClone(ex) } : { kind: 'spot', id: null, name: '', forest: '', notes: '', lat: S.lastPos?.lat, lng: S.lastPos?.lng, acc: S.lastPos?.acc };
+  }
+  const d = S.draft;
+  const html = `${topbar(ex ? 'Modifier le spot' : 'Nouveau spot')}
+  <div class="stack" style="margin-top:6px">
+    <div class="field"><label class="label" for="f-name">Nom du spot</label><input class="in" id="f-name" value="${esc(d.name)}" placeholder="Sous-bois du chêne tordu" autocomplete="off"></div>
+    <div class="field"><label class="label" for="f-forest">Milieu</label><select class="in" id="f-forest"><option value="">Non précisé</option>${FOREST.map(f => `<option ${d.forest === f ? 'selected' : ''}>${f}</option>`).join('')}</select></div>
+    <div class="field"><span class="label">Position</span>
+      <div id="pick" class="map map-pick"><div class="cross"><span></span></div><div class="map-ctl"><button type="button" data-act="pickHere" aria-label="Ma position">${I.locate}</button></div></div>
+      <div class="coords" id="pick-coords">${hasPos(d) ? `Centre du viseur : ${d.lat.toFixed(5)}, ${d.lng.toFixed(5)}${d.acc ? ` · précision GPS ±${Math.round(d.acc)} m` : ''}` : 'Fais glisser la carte pour placer le viseur, ou utilise ta position.'}</div>
+      <details><summary>Saisir les coordonnées</summary><div class="row" style="margin-top:6px"><input class="in num" id="f-lat" inputmode="decimal" placeholder="Latitude" value="${hasPos(d) ? d.lat.toFixed(6) : ''}"><input class="in num" id="f-lng" inputmode="decimal" placeholder="Longitude" value="${hasPos(d) ? d.lng.toFixed(6) : ''}"><button class="btn" data-act="pickManual">OK</button></div></details>
+    </div>
+    <div class="field"><label class="label" for="f-notes">Notes sur le milieu</label><textarea class="in" id="f-notes" placeholder="Exposition, sol, essences, repères pour retrouver le coin…">${esc(d.notes)}</textarea></div>
+    <button class="btn primary big block" data-act="saveSpot">${ex ? 'Enregistrer' : 'Créer le spot'}</button>
+    ${ex ? `<button class="btn danger block" data-act="delSpot" data-id="${ex.id}">${I.trash} Supprimer ce spot</button>` : ''}
+  </div>`;
+  let map;
+  return {
+    html,
+    mount() {
+      const c = hasPos(d) ? d : S.lastPos || (S.spots.find(hasPos)) || { lat: 45.65, lng: 0.16 };
+      map = new SlipMap($('#pick'), { center: c, zoom: hasPos(d) ? 16 : 12, onMove: p => { d.lat = p.lat; d.lng = p.lng; d.acc = null; const el = $('#pick-coords'); if (el) el.textContent = `Centre du viseur : ${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}`; } });
+      S.pickMap = map;
+      if (here && !hasPos(d)) ACT.pickHere();
+    },
+    unmount() { map?.destroy(); S.pickMap = null; },
+  };
+};
+
+/* ----- Formulaire sortie ----- */
+function newSortieDraft(spotId) {
+  return { kind: 'sortie', id: null, spotId: spotId || '', newSpotName: '', date: localISO(), obs: [{ species: '', latin: '', count: 1, weight: '' }], photoIds: [], meteo: { sol: '', ciel: [], text: '' }, notes: '', lat: S.lastPos?.lat, lng: S.lastPos?.lng, acc: S.lastPos?.acc };
+}
+VIEWS.sortieForm = ({ id, spotId, newHere }) => {
+  const ex = id ? S.sorties.find(s => s.id === id) : null;
+  if (!S.draft || S.draft.kind !== 'sortie' || S.draft.id !== (id || null)) {
+    S.draft = ex ? { kind: 'sortie', ...structuredClone(ex) } : newSortieDraft(spotId);
+    if (!ex && newHere) S.draft.spotId = '__new';
+  }
+  const d = S.draft;
+  const spots = [...S.spots].sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+  const html = `${topbar(ex ? 'Modifier la sortie' : 'Nouvelle sortie')}
+  ${speciesDatalist()}
+  <div class="stack" style="margin-top:6px">
+    <div class="field"><label class="label" for="f-spot">Spot</label>
+      <select class="in" id="f-spot" data-act-change="spotSel">
+        <option value="">Choisir un spot…</option>
+        ${hasPos(S.lastPos) ? `<option value="__new" ${d.spotId === '__new' ? 'selected' : ''}>＋ Nouveau spot à ma position</option>` : ''}
+        ${spots.map(s => `<option value="${s.id}" ${d.spotId === s.id ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}
+      </select>
+      ${d.spotId === '__new' ? `<input class="in" id="f-newspot" value="${esc(d.newSpotName)}" placeholder="Nom du nouveau spot">` : ''}
+    </div>
+    <div class="field"><label class="label" for="f-date">Date et heure</label><input class="in" type="datetime-local" id="f-date" value="${esc(d.date)}"></div>
+    <div class="field"><span class="label">Observations</span>
+      <div class="obs">${d.obs.map((o, i) => `
+        <div class="obs-row" data-i="${i}">
+          <div class="obs-names">
+            <input class="in" list="species-list" data-f="species" value="${esc(o.species)}" placeholder="Espèce, nom français ou latin" autocomplete="off" aria-label="Espèce">
+            <input class="in latin-in" data-f="latin" value="${esc(o.latin)}" placeholder="Nom latin" autocomplete="off" aria-label="Nom latin">
+          </div>
+          <div class="obs-qty">
+            <div class="stepper"><button type="button" data-act="obsStep" data-i="${i}" data-d="-1" aria-label="Moins">−</button><output class="num">${o.count}</output><button type="button" data-act="obsStep" data-i="${i}" data-d="1" aria-label="Plus">+</button></div>
+            <span class="qty-label grow">exemplaires</span>
+            <input class="in weight num" data-f="weight" inputmode="decimal" value="${esc(o.weight)}" placeholder="poids g" aria-label="Poids en grammes, facultatif">
+            <button type="button" class="icon-btn" data-act="obsDel" data-i="${i}" aria-label="Retirer">${I.trash}</button>
+          </div>
+        </div>`).join('')}</div>
+      <button type="button" class="btn block" data-act="obsAdd">+ Ajouter une espèce</button>
+      ${!d.obs.length ? '<p class="faint" style="margin:0;font-size:13px">Aucune espèce : la sortie sera notée comme sortie sans observation. Elle compte aussi.</p>' : ''}
+    </div>
+    <div class="field"><span class="label">Photos</span>${photoGrid(d.photoIds, true)}</div>
+    <div class="panel">
+      <div class="field"><span class="label">Sol observé</span>${chipGroup('sol', SOL, d.meteo.sol)}</div>
+      <div class="field"><span class="label">Ciel</span>${chipGroup('ciel', CIEL, d.meteo.ciel, true)}</div>
+      <div class="field"><label class="label" for="f-wx">Conditions, en tes mots</label><input class="in" id="f-wx" value="${esc(d.meteo.text)}" placeholder="Grosse pluie dimanche, sol frais sous la mousse…"></div>
+      <p class="faint" style="margin:0;font-size:12.5px">La pluie relevée par Open-Meteo sur les 10 jours précédents s'ajoute seule à la fiche quand le réseau est là.</p>
+    </div>
+    <div class="field"><label class="label" for="f-notes">Notes</label><textarea class="in" id="f-notes" placeholder="Sosies écartés, comportement de la poussée, repères…">${esc(d.notes)}</textarea></div>
+    <button class="btn primary big block" data-act="saveSortie">${ex ? 'Enregistrer' : 'Enregistrer la sortie'}</button>
+    ${ex ? `<button class="btn danger block" data-act="delSortie" data-id="${ex.id}">${I.trash} Supprimer la sortie</button>` : ''}
+  </div>`;
+  return { html };
+};
+function syncSortieDraft() {
+  const d = S.draft; if (!d || d.kind !== 'sortie') return;
+  d.spotId = $('#f-spot')?.value ?? d.spotId;
+  d.newSpotName = $('#f-newspot')?.value ?? d.newSpotName;
+  d.date = $('#f-date')?.value || d.date;
+  d.notes = $('#f-notes')?.value ?? d.notes;
+  d.meteo.text = $('#f-wx')?.value ?? d.meteo.text;
+  $$('.obs-row').forEach(r => { const o = d.obs[+r.dataset.i]; if (!o) return; $$('[data-f]', r).forEach(inp => { o[inp.dataset.f] = inp.value; }); });
+}
+
+/* ----- Détail sortie ----- */
+VIEWS.sortie = ({ id }) => {
+  const so = S.sorties.find(s => s.id === id);
+  if (!so) return VIEWS.carnet();
+  const spot = spotById(so.spotId);
+  const obs = (so.obs || []).filter(o => o.species);
+  const wxBits = [so.meteo?.sol && `sol ${so.meteo.sol.toLowerCase()}`, ...(so.meteo?.ciel || []).map(c => c.toLowerCase())].filter(Boolean);
+  const html = `${topbar('Sortie', `<button class="icon-btn" data-act="editSortie" data-id="${id}" aria-label="Modifier">${I.edit}</button>`)}
+  <div class="masthead" style="padding-top:4px">
+    <div class="eyebrow">${fmtDay(so.date)} · ${fmtTime(so.date)}</div>
+    <h1 class="h2" style="font-size:34px;margin-top:2px">${spot ? `<button class="link" style="font:inherit;color:inherit;padding:0;text-align:left" data-act="go" data-v="spot" data-id="${spot.id}">${esc(spot.name)}</button>` : 'Spot supprimé'}</h1>
+    <div style="margin-top:8px"><span class="tag ${fruitful(so) ? 'moss' : 'ocher'}">${fruitful(so) ? `${countOf(so)} exemplaires · ${plural(obs.length, 'espèce', 'espèces')}` : 'sortie sans observation'}</span></div>
+  </div>
+  ${obs.length ? `<section class="section"><div class="panel"><div class="obs-list">${obs.map(o => `<div class="obs-item"><b>${o.count}</b><div class="grow"><div>${esc(o.species)}</div>${o.latin ? `<div class="latin muted">${esc(o.latin)}</div>` : ''}</div>${o.weight ? `<span class="faint num">${esc(o.weight)} g</span>` : ''}</div>`).join('')}</div></div></section>` : ''}
+  ${so.photoIds?.length ? `<section class="section">${photoGrid(so.photoIds, false)}</section>` : ''}
+  <section class="section"><div class="section-head"><h2 class="section-title">Conditions</h2></div>
+    <div class="panel">
+      <dl class="kv">
+        <dt>Observé</dt><dd>${wxBits.length ? esc(wxBits.join(', ')) : '<span class="faint">rien noté</span>'}${so.meteo?.text ? `<br><span class="serif" style="font-style:italic;font-size:16px">« ${esc(so.meteo.text)} »</span>` : ''}</dd>
+        <dt>Pluie</dt><dd>${so.wx ? `<b class="num">${nf.format(so.wx.mm)} mm</b> sur les 10 jours précédents <span class="faint">(Open-Meteo)</span>` : '<span class="faint">en attente de réseau</span>'}</dd>
+        ${hasPos(so) ? `<dt>Position</dt><dd class="coords">${esc(fmtCoords(so))}${so.acc ? ` · ±${Math.round(so.acc)} m` : ''}</dd>` : ''}
+      </dl>
+    </div>
+  </section>
+  ${so.notes ? `<section class="section"><p class="quote">« ${esc(so.notes)} »</p></section>` : ''}`;
+  return { html };
+};
+
+/* ----- Spécimen : capture guidée et fiche ----- */
+VIEWS.specimen = ({ id }) => {
+  const ex = id ? S.specimens.find(s => s.id === id) : null;
+  if (!S.draft || S.draft.kind !== 'specimen' || S.draft.id !== (id || null)) {
+    const near = S.lastPos ? nearestSpot(S.lastPos) : null;
+    S.draft = ex ? { kind: 'specimen', ...structuredClone(ex) } : { kind: 'specimen', id: null, date: localISO(), spotId: near?.spot.id || '', photos: {}, extra: [], odeur: '', sporee: '', hypothese: '', latin: '', notes: '', status: 'a_identifier', lat: S.lastPos?.lat, lng: S.lastPos?.lng };
+  }
+  const d = S.draft;
+  const done = STEPS.filter(([k]) => d.photos[k]).length;
+  const html = `${topbar(ex ? 'Spécimen' : 'Spécimen à identifier')}
+  ${speciesDatalist()}
+  <div class="masthead" style="padding-top:2px"><div class="eyebrow">Fiche de détermination · ${fmtDay(d.date)}</div>
+    <h1 class="h2" style="margin-top:2px">${d.hypothese ? esc(d.hypothese) : 'Cinq prises, puis le livre.'}</h1>
+    ${d.latin ? `<div class="latin muted" style="font-size:19px">${esc(d.latin)}</div>` : ''}
+  </div>
+  <div class="stack" style="margin-top:12px">
+    <div class="row"><div class="progress grow"><i style="width:${done * 20}%"></i></div><span class="faint num" style="font-size:13px">${done}/5 prises</span></div>
+    <div class="steps">${STEPS.map(([k, t, h], i) => {
+      const p = d.photos[k];
+      return `<label class="step ${p ? 'done' : ''} ${i === 4 ? 'wide' : ''}">
+        ${p ? `<img data-photo="${p}" alt="${esc(t)}"><span class="ok">✓</span>` : ''}
+        <span class="step-n">${['Premier', 'Deuxième', 'Troisième', 'Quatrième', 'Cinquième'][i]} plan</span><span class="step-t">${esc(t)}</span><span class="step-h">${p ? 'Toucher pour reprendre' : esc(h)}</span>
+        <input type="file" class="vh" accept="image/*" capture="environment" data-photo-in="step:${k}"></label>`;
+    }).join('')}</div>
+    ${d.extra.length ? `<div class="field"><span class="label">Prises libres</span>${photoGrid(d.extra, true).replace(/data-photo-in="draft"/g, 'data-photo-in="extra"').replace(/data-act="photoDel"/g, 'data-act="extraDel"')}</div>` : `<label class="btn block">${I.camera} Prise libre (habitat, détail…)<input type="file" class="vh" accept="image/*" capture="environment" data-photo-in="extra"></label>`}
+    <div class="panel">
+      <div class="field"><label class="label" for="f-odeur">Odeur</label>${chipGroup('odeur', ODEURS, d.odeur)}<input class="in" id="f-odeur" value="${esc(ODEURS.includes(d.odeur) ? '' : d.odeur)}" placeholder="Autre odeur, saveur notée…"></div>
+      <div class="field"><span class="label">Sporée</span>${chipGroup('sporee', SPOREE, d.sporee)}</div>
+      <div class="field"><label class="label" for="f-hyp">Hypothèse</label><input class="in" id="f-hyp" list="species-list" value="${esc(d.hypothese)}" placeholder="Ce que tu penses, à vérifier au livre" autocomplete="off">
+        <input class="in latin-in" id="f-latin" value="${esc(d.latin)}" placeholder="Nom latin" autocomplete="off"></div>
+      <div class="field"><label class="label" for="f-spot">Récolté à</label><select class="in" id="f-spot"><option value="">Aucun spot</option>${S.spots.map(s => `<option value="${s.id}" ${d.spotId === s.id ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></div>
+      <div class="field"><label class="label" for="f-notes">Observations</label><textarea class="in" id="f-notes" placeholder="Réactions chimiques, lait, anneau, chair, page du livre consultée…">${esc(d.notes)}</textarea></div>
+      <div class="field"><span class="label">Statut</span>${chipGroup('status', ['À identifier', 'Identifié'], d.status === 'identifie' ? 'Identifié' : 'À identifier')}</div>
+    </div>
+    <p class="faint" style="margin:0;font-size:12.5px">Mycota n'identifie rien à ta place. Ne consomme jamais un champignon sur la seule foi d'une fiche : fais confirmer par un mycologue ou un pharmacien formé.</p>
+    <button class="btn primary big block" data-act="saveSpecimen">Enregistrer le spécimen</button>
+    ${ex && ex.status === 'identifie' && !ex.sortieId ? `<button class="btn block" data-act="specToSortie" data-id="${ex.id}">Ajouter à une sortie</button>` : ''}
+    ${ex?.sortieId ? `<button class="btn block" data-act="go" data-v="sortie" data-id="${ex.sortieId}">Voir la sortie liée</button>` : ''}
+    ${ex ? `<button class="btn danger block" data-act="delSpecimen" data-id="${ex.id}">${I.trash} Supprimer le spécimen</button>` : ''}
+  </div>`;
+  return { html };
+};
+function syncSpecimenDraft() {
+  const d = S.draft; if (!d || d.kind !== 'specimen') return;
+  const o = $('#f-odeur')?.value.trim(); if (o) d.odeur = o;
+  d.hypothese = $('#f-hyp')?.value ?? d.hypothese;
+  d.latin = $('#f-latin')?.value ?? d.latin;
+  d.spotId = $('#f-spot')?.value ?? d.spotId;
+  d.notes = $('#f-notes')?.value ?? d.notes;
+}
+
+/* ----- Carte ----- */
+VIEWS.carte = () => {
+  const pts = S.spots.filter(hasPos);
+  const html = `<div class="masthead" style="padding-bottom:12px"><div class="eyebrow">${plural(pts.length, 'spot placé', 'spots placés')}</div><h1 class="h1" style="font-size:38px">Carte</h1></div>
+  <div id="bigmap" class="map map-full">
+    <div class="map-ctl"><button data-act="mapLocate" aria-label="Ma position">${I.locate}</button><button data-act="mapFit" aria-label="Voir tous les spots">${I.fit}</button><button data-act="mapZoom" data-d="1" aria-label="Zoomer">+</button><button data-act="mapZoom" data-d="-1" aria-label="Dézoomer">−</button></div>
+    <div class="map-note" id="map-note" hidden>Fond de carte indisponible hors réseau. Tes spots restent placés les uns par rapport aux autres.</div>
+    <div class="map-card" id="map-card" hidden></div>
+    ${S.settings.mask ? `<div class="veil" id="veil"><div class="stack" style="align-items:center"><span style="color:var(--ink-2)">${I.lock}</span><div class="h2" style="font-size:24px">Carte masquée</div><p class="muted" style="margin:0">Le masquage des coordonnées est activé.</p><button class="btn" data-act="unveil">Afficher la carte</button></div></div>` : ''}
+  </div>`;
+  let map;
+  const marks = () => {
+    const list = pts.map(s => ({ cls: `pin ${bandOfSpot(s)}${S.mapSel === s.id ? ' sel' : ''}`, html: '<span></span>', id: s.id, pos: s, label: s.name }));
+    if (S.lastPos) list.push({ tag: 'div', cls: 'me', pos: S.lastPos });
+    map.setMarks(list);
+  };
+  return {
+    html,
+    mount() {
+      S.mapSel = null;
+      map = new SlipMap($('#bigmap'), {
+        center: pts[0] || S.lastPos || { lat: 45.65, lng: 0.16 }, zoom: 12,
+        onTap: id => { S.mapSel = id; marks(); showCard(id); },
+      });
+      map.onOffline = () => { const n = $('#map-note'); if (n) n.hidden = false; };
+      S.bigMap = map; S.mapMarks = marks;
+      marks();
+      if (pts.length) map.fit(pts); else if (S.lastPos) map.setView(S.lastPos, 14);
+    },
+    unmount() { map?.destroy(); S.bigMap = null; },
+  };
+};
+function showCard(id) {
+  const box = $('#map-card'); if (!box) return;
+  const sp = id && spotById(id);
+  if (!sp) { box.hidden = true; return; }
+  const last = sortiesOf(id)[0];
+  box.hidden = false;
+  box.innerHTML = `<div class="card ${bandOfSpot(sp)}" style="padding-right:12px"><div class="row"><div class="grow"><div class="card-t">${esc(sp.name)}</div>
+    <div class="card-meta">${esc(sp.forest || 'Milieu non précisé')}${S.lastPos ? ` · à ${fmtDist(distance(S.lastPos, sp))}` : ''}</div>
+    <div class="card-line">${last ? `Dernière sortie ${ago(last.date)}` : 'Jamais visité'}</div></div></div>
+    <div class="btn-row" style="margin-top:10px"><button class="btn" data-act="go" data-v="spot" data-id="${id}">Ouvrir</button><button class="btn primary" data-act="go" data-v="retrouver" data-id="${id}">${I.compass} Retrouver</button></div></div>`;
+}
+
+/* ----- Chronologie ----- */
+VIEWS.chrono = () => {
+  const f = S.chronoF || (S.chronoF = { q: '', spot: '', sp: '' });
+  const allSp = speciesOf(S.sorties).map(e => e.name).sort((a, b) => a.localeCompare(b, 'fr'));
+  const html = `<div class="masthead" style="padding-bottom:12px"><div class="eyebrow">${plural(S.sorties.length, 'sortie notée', 'sorties notées')}</div><h1 class="h1" style="font-size:38px">Chronologie</h1></div>
+  <div class="stack">
+    <input class="in" id="c-q" type="search" placeholder="Rechercher dans les notes, espèces, spots" value="${esc(f.q)}" aria-label="Rechercher">
+    <div class="row">
+      <select class="in" id="c-spot" aria-label="Filtrer par spot"><option value="">Tous les spots</option>${S.spots.map(s => `<option value="${s.id}" ${f.spot === s.id ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select>
+      <select class="in" id="c-sp" aria-label="Filtrer par espèce"><option value="">Toutes les espèces</option>${allSp.map(n => `<option ${f.sp === n ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select>
+    </div>
+  </div>
+  <div id="c-list"></div>`;
+  return { html, mount: renderChronoList };
+};
+function renderChronoList() {
+  const f = S.chronoF, box = $('#c-list'); if (!box) return;
+  const q = f.q.trim().toLowerCase();
+  const list = S.sorties.filter(so => {
+    if (f.spot && so.spotId !== f.spot) return false;
+    if (f.sp && !(so.obs || []).some(o => o.species === f.sp)) return false;
+    if (q) {
+      const hay = [spotById(so.spotId)?.name, so.notes, so.meteo?.text, ...(so.obs || []).flatMap(o => [o.species, o.latin])].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  }).sort((a, b) => b.date.localeCompare(a.date));
+  if (!list.length) { box.innerHTML = `<div class="panel" style="margin-top:18px"><p class="muted" style="margin:0">${S.sorties.length ? 'Aucune sortie ne correspond à ces filtres.' : 'Les sorties que tu notes apparaîtront ici, mois après mois.'}</p></div>`; return; }
+  const groups = new Map();
+  list.forEach(so => { const d = new Date(so.date); const k = `${d.getFullYear()}-${pad(d.getMonth())}`; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(so); });
+  let lastYear = null;
+  box.innerHTML = [...groups.entries()].map(([k, arr]) => {
+    const [yy, mm] = k.split('-').map(Number);
+    const yearHead = lastYear !== null && yy !== lastYear ? `<div class="h3" style="text-align:center;margin:30px 0 4px">Saison ${yy}</div>` : '';
+    lastYear = yy;
+    const n = arr.reduce((a, s) => a + countOf(s), 0);
+    return `${yearHead}<section class="section" style="margin-top:22px"><div class="section-head"><h2 class="section-title" style="font-size:26px">${MONTHS[mm][0].toUpperCase() + MONTHS[mm].slice(1)} ${yy}</h2><span class="faint num" style="font-size:12.5px">${plural(arr.length, 'sortie', 'sorties')} · ${n} ex.</span></div>
+      <div class="cards">${arr.map(so => sortieCard(so, true)).join('')}</div></section>`;
+  }).join('');
+}
+
+/* ----- Climat ----- */
+VIEWS.climat = () => {
+  const c = S.climate, rs = rainSummary();
+  const html = `<div class="masthead" style="padding-bottom:12px"><div class="row"><div class="grow"><div class="eyebrow">${c ? esc(c.place) + ' · relevé ' + ago(new Date(c.at).toISOString()) : 'Pluie autour de toi'}</div><h1 class="h1" style="font-size:38px">Climat</h1></div>
+    <button class="btn" data-act="climRefresh" id="clim-btn">Actualiser</button></div>
+    <p class="muted" style="margin:8px 0 0;font-size:14px">Les chiffres bruts d'Open-Meteo pour ta position. À toi de juger si tes coins sont prêts.</p></div>
+  <div id="clim-body">${c ? climateBody(c, rs) : `<div class="panel"><p class="muted" style="margin:0">Aucun relevé pour l'instant. Touche Actualiser : Mycota demande ta position puis la pluie des 30 derniers jours et des 7 prochains.</p></div>`}</div>`;
+  return { html, mount() { if (!c || Date.now() - c.at > 3 * 3600e3) ACT.climRefresh(null, true); } };
+};
+function climateBody(c, rs) {
+  const today = dayISO(new Date());
+  const days = c.days;
+  const max = Math.max(5, ...days.map(x => x.mm || 0));
+  const step = max <= 10 ? 5 : max <= 25 ? 10 : max <= 60 ? 20 : 50;
+  const top = Math.ceil(max / step) * step;
+  const ti = days.findIndex(x => x.d === today);
+  const fc = days.filter(x => x.d > today);
+  return `<div class="facts">
+    <div class="fact"><b>${nf.format(rs.r10)}<small style="font-size:13px"> mm</small></b><span>10 derniers jours</span></div>
+    <div class="fact"><b>${nf.format(rs.r30)}<small style="font-size:13px"> mm</small></b><span>30 derniers jours</span></div>
+    <div class="fact"><b>${rs.lastWet ? daysBetween(new Date(rs.lastWet.d), new Date()) + ' j' : '—'}</b><span>${rs.lastWet ? `depuis la dernière pluie de 5 mm ou plus (${nf.format(rs.lastWet.mm)} mm)` : 'aucune pluie de 5 mm en 30 jours'}</span></div>
+  </div>
+  <section class="section" style="margin-top:14px"><div class="chart">
+    <div class="readout" id="readout"><span>Touche une barre pour le détail</span><span>${rs.next ? `pluie prévue le <b style="font-size:15px">${fmtDayNoYear(rs.next.d)}</b>` : 'pas de pluie prévue'}</span></div>
+    <div class="plot">
+      ${Array.from({ length: top / step + 1 }, (_, i) => `<div class="grid-y" style="bottom:${i * step / top * 100}%"><span>${i * step}</span></div>`).join('')}
+      <div class="bars">${days.map((x, i) => `<button class="barb ${x.d > today ? 'fc' : ''} ${(x.mm || 0) < 0.1 ? 'zero' : ''}" data-act="wxDay" data-i="${i}" style="--h:${Math.max(0, (x.mm || 0) / top * 100)}%" aria-label="${fmtDayNoYear(x.d)} : ${nf.format(x.mm || 0)} mm"><i></i></button>`).join('')}</div>
+      ${ti >= 0 ? `<div class="today-line" style="left:calc(${(ti + 1) / days.length * 100}% - 1px)"></div>` : ''}
+    </div>
+    <div class="xlab"><span>il y a 30 j</span><span>il y a 15 j</span><span>aujourd'hui</span><span>+7 j</span></div>
+    <div class="legend"><span><i></i>Mesuré</span><span><i class="fc"></i>Prévu</span><span class="faint">mm par jour</span></div>
+  </div></section>
+  ${fc.length ? `<section class="section"><div class="section-head"><h2 class="section-title">Les 7 prochains jours</h2></div><div class="fc-row">${fc.map(x => { const dd = new Date(x.d + 'T12:00'); return `<div><div class="d">${DAYS_S[dd.getDay()]}</div><div class="t">${Math.round(x.tmax)}°<span class="faint" style="font-weight:400"> ${Math.round(x.tmin)}°</span></div><div class="r ${(x.mm || 0) < 0.5 ? 'dry' : ''}">${(x.mm || 0) < 0.5 ? 'sec' : nf.format(x.mm) + ' mm'}</div></div>`; }).join('')}</div></section>` : ''}
+  <details style="margin-top:14px"><summary>Voir le tableau jour par jour</summary>
+    <div style="overflow-x:auto"><table class="days"><tr><th>Jour</th><td>Pluie</td><td>Min</td><td>Max</td></tr>${[...days].reverse().map(x => `<tr><th>${fmtDayNoYear(x.d)}${x.d > today ? ' <span class="faint">(prévu)</span>' : ''}</th><td>${nf.format(x.mm || 0)} mm</td><td>${Math.round(x.tmin)}°</td><td>${Math.round(x.tmax)}°</td></tr>`).join('')}</table></div>
+  </details>`;
+}
+
+/* ----- Retrouver un spot (fonctionne sans réseau, GPS seul) ----- */
+VIEWS.retrouver = ({ id }) => {
+  const sp = spotById(id);
+  if (!sp || !hasPos(sp)) return VIEWS.carnet();
+  const needsPerm = typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function';
+  const html = `${topbar('Retrouver')}
+  <div class="finder">
+    <div class="eyebrow">Direction de</div>
+    <h1 class="h2">${esc(sp.name)}</h1>
+    <div class="dial">
+      <div class="rose" id="rose"><span class="n">N</span></div>
+      <div class="arrow" id="arrow"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 6 L70 62 L50 52 L30 62 Z" fill="var(--moss)"/><path d="M50 52 L70 62 L50 94 L30 62 Z" fill="var(--paper-2)"/></svg></div>
+    </div>
+    <div class="dist" id="dist">…</div>
+    <div class="muted" id="dir">Recherche de ta position</div>
+    <div class="faint" id="acc" style="font-size:13px"></div>
+    <p class="faint" id="hint" style="font-size:13px;max-width:320px">${needsPerm ? 'Active la boussole pour que la flèche suive ton téléphone.' : "Tiens le téléphone à plat. Sans boussole, la flèche se lit par rapport au nord indiqué en haut du cadran."}</p>
+    ${needsPerm ? '<button class="btn" data-act="compass" id="cmp-btn">Activer la boussole</button>' : ''}
+  </div>`;
+  let watch = null, heading = null, pos = null;
+  const update = () => {
+    if (!pos) return;
+    const d = distance(pos, sp), b = bearing(pos, sp);
+    $('#dist').textContent = d < 15 ? 'Ici' : fmtDist(d);
+    $('#dir').textContent = d < 15 ? 'Tu es sur le spot.' : `Cap ${Math.round(b)}° · ${cardinal(b)}`;
+    $('#acc').textContent = `Précision GPS ±${Math.round(pos.acc)} m`;
+    const rot = heading == null ? b : b - heading;
+    $('#arrow').style.transform = `rotate(${d < 15 ? 0 : rot}deg)`;
+    $('#arrow').style.opacity = d < 15 ? '0.25' : '1';
+    $('#rose').style.transform = `rotate(${heading == null ? 0 : -heading}deg)`;
+  };
+  const onOri = e => {
+    let h = null;
+    if (typeof e.webkitCompassHeading === 'number') h = e.webkitCompassHeading;
+    else if (e.absolute && typeof e.alpha === 'number') h = 360 - e.alpha;
+    if (h != null) { heading = h; update(); }
+  };
+  S.attachCompass = () => { window.addEventListener('deviceorientationabsolute', onOri); window.addEventListener('deviceorientation', onOri); };
+  return {
+    html,
+    mount() {
+      if (!needsPerm) S.attachCompass();
+      if (!('geolocation' in navigator)) { $('#dir').textContent = posError('unsupported'); return; }
+      try {
+        watch = navigator.geolocation.watchPosition(p => { pos = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy }; S.lastPos = { ...pos, at: Date.now() }; update(); },
+          e => { $('#dist').textContent = '—'; $('#dir').textContent = posError(e.code === 1 ? 'denied' : 'unavailable'); },
+          { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 });
+      } catch { $('#dir').textContent = posError('unavailable'); }
+    },
+    unmount() { if (watch != null) navigator.geolocation.clearWatch(watch); window.removeEventListener('deviceorientationabsolute', onOri); window.removeEventListener('deviceorientation', onOri); },
+  };
+};
+
+/* ----- Réglages ----- */
+VIEWS.reglages = () => {
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  const html = `${topbar('Réglages')}
+  <div class="stack" style="margin-top:6px">
+    <section><div class="section-head"><h2 class="section-title">Confidentialité</h2></div>
+      <div class="panel">
+        <div class="row"><div class="grow"><b>Masquer les coordonnées</b><div class="faint" style="font-size:13px">Les fiches n'affichent que le nom du spot, la carte reste voilée jusqu'à ce que tu la découvres.</div></div>
+          <button class="chip" data-act="toggleMask" aria-pressed="${S.settings.mask}">${S.settings.mask ? 'Activé' : 'Désactivé'}</button></div>
+        <div class="row" style="border-top:1px solid var(--line);padding-top:14px"><div class="grow"><b>Code de protection</b><div class="faint" style="font-size:13px">${S.vault ? 'Activé : les positions de tes spots et sorties sont chiffrées (AES-256) sur ce téléphone.' : "Chiffre les positions avec un code demandé à chaque ouverture. Sans le code, elles sont illisibles, y compris pour toi."}</div></div>
+          <button class="chip" data-act="${S.vault ? 'vaultOff' : 'vaultOn'}" aria-pressed="${!!S.vault}">${S.vault ? 'Activé' : 'Activer'}</button></div>
+        <p class="faint" style="margin:0;font-size:12.5px">Aucun compte, aucun serveur. Les photos sont réencodées à l'ajout : leurs métadonnées, position GPS comprise, disparaissent.</p>
+      </div></section>
+    <section><div class="section-head"><h2 class="section-title">Sauvegarde</h2></div>
+      <div class="panel">
+        <p class="muted" style="margin:0;font-size:14px">Tes données ne vivent que sur ce téléphone. Exporte une sauvegarde complète après tes sorties et range-la dans Fichiers ou sur ton ordinateur.</p>
+        <button class="btn primary block" data-act="exportJSON">Sauvegarde complète (photos comprises)</button>
+        <label class="btn block">Restaurer une sauvegarde<input type="file" class="vh" accept="application/json,.json" data-import="1"></label>
+        <div class="btn-row"><button class="btn" data-act="exportCSV">Observations en CSV</button><button class="btn" data-act="exportGPX">Spots en GPX</button></div>
+        <div class="faint" id="storage-info" style="font-size:12.5px"></div>
+      </div></section>
+    ${!standalone && !IN_CLAUDE ? `<section><div class="section-head"><h2 class="section-title">Installer</h2></div><div class="panel"><p class="muted" style="margin:0;font-size:14px">Sur iPhone : bouton Partager, puis « Sur l'écran d'accueil ». Installée, l'app s'ouvre sans réseau en forêt et Safari ne vide plus ses données.</p></div></section>` : ''}
+    <section><div class="section-head"><h2 class="section-title">Données</h2></div>
+      <div class="panel">
+        <div class="row wrap"><span class="grow muted" style="font-size:14px">${plural(S.spots.length, 'spot', 'spots')}, ${plural(S.sorties.length, 'sortie', 'sorties')}, ${plural(S.specimens.length, 'spécimen', 'spécimens')}</span>
+          ${S.spots.some(s => s.demo) ? '<button class="btn" data-act="clearDemo">Retirer les exemples</button>' : '<button class="btn" data-act="loadDemo">Charger des exemples</button>'}</div>
+        <button class="btn danger block" data-act="wipe">Tout effacer sur ce téléphone</button>
+      </div></section>
+    <p class="faint serif" style="text-align:center;font-style:italic;font-size:16px;margin:18px 0 0">Tes coins restent tes coins. Ton savoir reste ton savoir.</p>
+    <p class="faint" style="text-align:center;font-size:12px;margin:0">Mycota ${APP_VERSION} · météo Open-Meteo · fond de carte © OpenStreetMap</p>
+  </div>`;
+  return {
+    html,
+    async mount() {
+      try {
+        const est = await navigator.storage?.estimate?.(); const per = await navigator.storage?.persisted?.();
+        const el = $('#storage-info');
+        if (el && est) el.textContent = `${nf.format((est.usage || 0) / 1048576)} Mo utilisés · stockage ${per ? 'protégé contre le nettoyage automatique' : 'non protégé : installe l’app et exporte régulièrement'}`;
+      } catch { /* indisponible */ }
+    },
+  };
+};
+
+/* ----- Déverrouillage ----- */
+VIEWS.lock = () => ({
+  html: `<div class="lock"><div class="eyebrow">Carnet protégé</div><h1 class="h1">Mycota</h1>
+    <p class="muted" style="margin:0">Entre ton code pour déchiffrer les positions de tes spots.</p>
+    <input class="in" type="password" id="unlock-pass" autocomplete="current-password" placeholder="Code" aria-label="Code">
+    <button class="btn primary big block" data-act="unlock">Ouvrir le carnet</button>
+    <p class="faint" id="unlock-err" style="margin:0;font-size:13px"></p></div>`,
+  mount() { const i = $('#unlock-pass'); i?.focus(); i?.addEventListener('keydown', e => { if (e.key === 'Enter') ACT.unlock(); }); },
+});
+
+/* ==========================================================================
+   ACTIONS
+   ========================================================================== */
+const ACT = {
+  back() { if (history.state?.depth > 0) history.back(); else { S.draft = null; go('carnet', {}, { replace: true }); } },
+  go(t) { const p = {}; if (t.dataset.id) p.id = t.dataset.id; S.draft = null; go(t.dataset.v, p); },
+  tab(t) { S.draft = null; go(t.dataset.v, {}, { replace: TABS.includes(S.view) }); },
+  photo(t) { viewPhoto(t.dataset.id); },
+  async note() {
+    const s = openSheet(`<div class="stack"><div><div class="eyebrow">Sur le terrain</div><h2 class="h2">Que veux-tu noter ?</h2><div class="faint" id="note-pos" style="font-size:13px;margin-top:4px">Recherche de ta position…</div></div>
+      <button class="card b-moss" data-x="sortie"><div class="choice"><span class="ic">${I.walk}</span><div class="grow"><div class="card-t">Une sortie ici</div><div class="card-meta" id="note-near">Observations, photos, conditions</div></div></div></button>
+      <button class="card b-slate" data-x="spot"><div class="choice"><span class="ic">${I.pin}</span><div class="grow"><div class="card-t">Un nouveau spot</div><div class="card-meta">Marquer ce coin pour le retrouver</div></div></div></button>
+      <button class="card b-ocher" data-x="specimen"><div class="choice"><span class="ic">${I.lens}</span><div class="grow"><div class="card-t">Un spécimen à identifier</div><div class="card-meta">Cinq prises guidées pour le livre, ce soir</div></div></div></button></div>`);
+    let near = null;
+    $('[data-x="sortie"]', s).onclick = () => { closeSheet(); S.draft = null; go('sortieForm', near ? { spotId: near.spot.id } : (hasPos(S.lastPos) ? { newHere: true } : {})); };
+    $('[data-x="spot"]', s).onclick = () => { closeSheet(); S.draft = null; go('spotForm', { here: true }); };
+    $('[data-x="specimen"]', s).onclick = () => { closeSheet(); S.draft = null; go('specimen', {}); };
+    const p = await getPos(12000);
+    const el = $('#note-pos'); if (!el) return;
+    if (p.error) { el.textContent = posError(p.error); return; }
+    near = nearestSpot(p);
+    el.textContent = `Position trouvée · précision ±${Math.round(p.acc)} m`;
+    const nn = $('#note-near');
+    if (nn) nn.textContent = near ? `Tu es à ${fmtDist(near.d)} de « ${near.spot.name} »` : 'Aucun spot connu à moins de 250 m : un nouveau sera créé';
+  },
+  newSortie(t) { S.draft = null; go('sortieForm', { spotId: t.dataset.id }); },
+  editSortie(t) { S.draft = null; go('sortieForm', { id: t.dataset.id }); },
+  chip(t) {
+    const d = S.draft; if (!d) return;
+    const g = t.dataset.group, v = t.dataset.val, multi = t.dataset.multi === '1';
+    if (d.kind === 'sortie') {
+      if (g === 'sol') d.meteo.sol = d.meteo.sol === v ? '' : v;
+      if (g === 'ciel') d.meteo.ciel = d.meteo.ciel.includes(v) ? d.meteo.ciel.filter(x => x !== v) : [...d.meteo.ciel, v];
+    } else if (d.kind === 'specimen') {
+      if (g === 'odeur') { d.odeur = d.odeur === v ? '' : v; const i = $('#f-odeur'); if (i) i.value = ''; }
+      if (g === 'sporee') d.sporee = d.sporee === v ? '' : v;
+      if (g === 'status') d.status = v === 'Identifié' ? 'identifie' : 'a_identifier';
+    }
+    $$(`.chip[data-group="${g}"]`).forEach(c => {
+      const on = multi ? (g === 'ciel' ? d.meteo.ciel.includes(c.dataset.val) : false)
+        : (g === 'sol' ? d.meteo?.sol === c.dataset.val : g === 'odeur' ? d.odeur === c.dataset.val : g === 'sporee' ? d.sporee === c.dataset.val : g === 'status' ? (d.status === 'identifie') === (c.dataset.val === 'Identifié') : false);
+      c.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  },
+  obsStep(t) { syncSortieDraft(); const o = S.draft.obs[+t.dataset.i]; o.count = Math.max(0, (Number(o.count) || 0) + Number(t.dataset.d)); const out = t.parentElement.querySelector('output'); if (out) out.textContent = o.count; },
+  obsAdd() { syncSortieDraft(); S.draft.obs.push({ species: '', latin: '', count: 1, weight: '' }); render(); const rows = $$('.obs-row'); rows[rows.length - 1]?.querySelector('input')?.focus(); },
+  obsDel(t) { syncSortieDraft(); S.draft.obs.splice(+t.dataset.i, 1); render(); },
+  photoDel(t) { if (S.draft.kind === 'sortie') syncSortieDraft(); S.draft.photoIds = S.draft.photoIds.filter(x => x !== t.dataset.id); DB.del('photos', t.dataset.id).catch(() => {}); render(); },
+  extraDel(t) { syncSpecimenDraft(); S.draft.extra = S.draft.extra.filter(x => x !== t.dataset.id); DB.del('photos', t.dataset.id).catch(() => {}); render(); },
+  async saveSortie() {
+    syncSortieDraft();
+    const d = S.draft;
+    if (!d.spotId) { toast('Choisis un spot pour cette sortie.'); $('#f-spot')?.focus(); return; }
+    let spotId = d.spotId;
+    if (spotId === '__new') {
+      if (!hasPos(S.lastPos)) { toast('Position indisponible pour créer le spot.'); return; }
+      const sp = await saveRec('spot', { id: 's' + uid(), name: d.newSpotName.trim() || `Spot du ${fmtDayNoYear(d.date)}`, forest: '', notes: '', lat: S.lastPos.lat, lng: S.lastPos.lng, acc: S.lastPos.acc });
+      spotId = sp.id;
+    }
+    const obs = d.obs.map(o => ({ species: o.species.trim(), latin: o.latin.trim(), count: Math.max(0, Number(o.count) || 0), weight: String(o.weight || '').trim() })).filter(o => o.species);
+    const ex = d.id ? S.sorties.find(s => s.id === d.id) : null;
+    const rec = { ...(ex || {}), id: d.id || 'o' + uid(), spotId, date: d.date, obs, photoIds: d.photoIds, meteo: d.meteo, notes: d.notes.trim() };
+    if (!ex && hasPos(S.lastPos) && Date.now() - (S.lastPos.at || 0) < 30 * 60e3) Object.assign(rec, { lat: S.lastPos.lat, lng: S.lastPos.lng, acc: S.lastPos.acc });
+    if (ex && ex.date !== rec.date) delete rec.wx;
+    await saveRec('sortie', rec);
+    S.draft = null;
+    toast(obs.length ? 'Sortie enregistrée.' : 'Sortie sans observation enregistrée.');
+    go('sortie', { id: rec.id }, { replace: true });
+    syncWeather().then(() => { if (S.view === 'sortie' && S.params.id === rec.id) render(); });
+  },
+  delSortie(t) {
+    confirmSheet({ title: 'Supprimer cette sortie ?', text: 'Ses observations et ses photos seront effacées de ce téléphone.', ok: 'Supprimer', onOk: async () => { await deleteRec('sortie', t.dataset.id); S.draft = null; toast('Sortie supprimée.'); go('carnet', {}, { replace: true }); } });
+  },
+  async saveSpot() {
+    const d = S.draft;
+    d.name = $('#f-name').value.trim(); d.forest = $('#f-forest').value; d.notes = $('#f-notes').value.trim();
+    if (!d.name) { toast('Donne un nom à ce spot.'); $('#f-name').focus(); return; }
+    if (!hasPos(d)) { toast('Place le spot sur la carte ou saisis ses coordonnées.'); return; }
+    const ex = d.id ? spotById(d.id) : null;
+    const { kind, ...rest } = d;
+    const rec = await saveRec('spot', { ...(ex || {}), ...rest, id: d.id || 's' + uid() });
+    S.draft = null; toast(ex ? 'Spot mis à jour.' : 'Spot créé.');
+    go('spot', { id: rec.id }, { replace: true });
+  },
+  delSpot(t) {
+    const n = sortiesOf(t.dataset.id).length;
+    confirmSheet({ title: 'Supprimer ce spot ?', text: n ? `Ses ${n} sorties et leurs photos seront aussi effacées.` : 'Il sera effacé de ce téléphone.', ok: 'Supprimer', onOk: async () => {
+      for (const so of sortiesOf(t.dataset.id)) await deleteRec('sortie', so.id);
+      await deleteRec('spot', t.dataset.id); S.draft = null; toast('Spot supprimé.'); go('carnet', {}, { replace: true });
+    } });
+  },
+  async pickHere() {
+    toast('Recherche de ta position…');
+    const p = await getPos();
+    if (p.error) { toast(posError(p.error)); return; }
+    if (S.draft) { S.draft.lat = p.lat; S.draft.lng = p.lng; S.draft.acc = p.acc; }
+    S.pickMap?.setView(p, 17);
+    const el = $('#pick-coords'); if (el) el.textContent = `Ta position : ${p.lat.toFixed(5)}, ${p.lng.toFixed(5)} · précision GPS ±${Math.round(p.acc)} m`;
+    if (S.draft) S.draft.acc = p.acc;
+  },
+  pickManual() {
+    const lat = parseFloat(($('#f-lat').value || '').replace(',', '.')), lng = parseFloat(($('#f-lng').value || '').replace(',', '.'));
+    if (!(Math.abs(lat) <= 90 && Math.abs(lng) <= 180)) { toast('Coordonnées invalides. Exemple : 45.6935 et 0.2915'); return; }
+    S.pickMap?.setView({ lat, lng }, 16);
+  },
+  async saveSpecimen() {
+    syncSpecimenDraft();
+    const d = S.draft;
+    const ex = d.id ? S.specimens.find(s => s.id === d.id) : null;
+    const { kind, ...rest } = d;
+    const m = !rest.latin && matchLatin(rest.hypothese); if (m) rest.latin = m.la;
+    const rec = await saveRec('specimen', { ...(ex || {}), ...rest, id: d.id || 'm' + uid() });
+    S.draft = null; toast('Spécimen enregistré.');
+    go('specimen', { id: rec.id }, { replace: true });
+  },
+  async specToSortie(t) {
+    const sp = S.specimens.find(s => s.id === t.dataset.id); if (!sp) return;
+    if (!sp.spotId) { toast("Indique d'abord le spot où il a été récolté."); return; }
+    const day = sp.date.slice(0, 10);
+    let so = S.sorties.find(s => s.spotId === sp.spotId && s.date.slice(0, 10) === day);
+    const ob = { species: sp.hypothese || 'Espèce identifiée', latin: sp.latin || '', count: 1, weight: '' };
+    if (so) { so.obs = [...(so.obs || []), ob]; } else { so = { id: 'o' + uid(), spotId: sp.spotId, date: sp.date, obs: [ob], photoIds: [], meteo: { sol: '', ciel: [], text: '' }, notes: '' }; }
+    await saveRec('sortie', so);
+    sp.sortieId = so.id; await saveRec('specimen', sp);
+    toast('Ajouté à la sortie du ' + fmtDayNoYear(so.date) + '.');
+    go('sortie', { id: so.id });
+  },
+  delSpecimen(t) {
+    confirmSheet({ title: 'Supprimer ce spécimen ?', text: 'Ses photos seront effacées.', ok: 'Supprimer', onOk: async () => { await deleteRec('specimen', t.dataset.id); S.draft = null; toast('Spécimen supprimé.'); go('carnet', {}, { replace: true }); } });
+  },
+  async mapLocate() {
+    const p = await getPos();
+    if (p.error) { toast(posError(p.error)); return; }
+    S.bigMap?.setView(p, 15); S.mapMarks?.();
+  },
+  mapFit() { const pts = S.spots.filter(hasPos); if (pts.length) S.bigMap?.fit(pts); },
+  mapZoom(t) { const m = S.bigMap; if (m) m.zoomAbout(Math.round(m.z) + Number(t.dataset.d), m.W / 2, m.H / 2); },
+  unveil() { $('#veil')?.remove(); },
+  wxDay(t) {
+    const x = S.climate?.days[+t.dataset.i]; if (!x) return;
+    $$('.barb.sel').forEach(b => b.classList.remove('sel')); t.classList.add('sel');
+    const fut = x.d > dayISO(new Date());
+    $('#readout').innerHTML = `<span>${fmtDayNoYear(x.d)}${fut ? ' · prévu' : ''} · ${Math.round(x.tmin)}–${Math.round(x.tmax)} °C</span><b>${nf.format(x.mm || 0)} mm</b>`;
+  },
+  async climRefresh(t, quiet) {
+    const btn = $('#clim-btn'); if (btn) { btn.disabled = true; btn.textContent = '…'; }
+    let pos = await getPos(10000), place = 'Autour de toi';
+    if (pos.error) {
+      const sp = S.spots.find(hasPos);
+      if (sp) { pos = { lat: sp.lat, lng: sp.lng }; place = `Autour de « ${sp.name} »`; }
+      else { if (btn) { btn.disabled = false; btn.textContent = 'Actualiser'; } if (!quiet) toast(posError(pos.error)); return; }
+    }
+    try { await fetchClimate({ ...pos, place }); if (S.view === 'climat') render(); }
+    catch { if (!quiet || !S.climate) toast(IN_CLAUDE ? "Open-Meteo n'est pas joignable depuis l'aperçu claude.ai." : 'Open-Meteo injoignable. Hors réseau ? Le dernier relevé reste affiché.'); if (btn) { btn.disabled = false; btn.textContent = 'Actualiser'; } }
+  },
+  async compass() {
+    try { const r = await DeviceOrientationEvent.requestPermission(); if (r === 'granted') { S.attachCompass?.(); $('#cmp-btn')?.remove(); $('#hint').textContent = 'Boussole active. La flèche pointe vers le spot.'; } else toast('Boussole refusée : la flèche reste orientée vers le nord.'); }
+    catch { toast('Boussole indisponible sur cet appareil.'); }
+  },
+  async toggleMask() { S.settings.mask = !S.settings.mask; await metaPut('settings', S.settings); render(); },
+  vaultOn() {
+    const s = openSheet(`<div class="stack"><h2 class="h2">Protéger les positions</h2>
+      <p class="muted" style="margin:0">Choisis un code d'au moins 6 caractères. Il sera demandé à chaque ouverture. <b>Perdu, il ne se récupère pas</b> : les positions resteraient chiffrées. Garde aussi une sauvegarde.</p>
+      <input class="in" type="password" id="v1" autocomplete="new-password" placeholder="Code" aria-label="Code">
+      <input class="in" type="password" id="v2" autocomplete="new-password" placeholder="Confirmer le code" aria-label="Confirmer le code">
+      <button class="btn primary big block" id="v-ok">Chiffrer mes positions</button></div>`);
+    $('#v-ok', s).onclick = async () => {
+      const a = $('#v1', s).value, b = $('#v2', s).value;
+      if (a.length < 6) { toast('Le code doit faire au moins 6 caractères.'); return; }
+      if (a !== b) { toast('Les deux codes ne correspondent pas.'); return; }
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      Vault.key = await Vault.derive(a, salt);
+      const check = await Vault.enc({ ok: 'mycota' });
+      S.vault = { salt: b64(salt), check }; await metaPut('vault', S.vault);
+      for (const k of ['spot', 'sortie', 'specimen']) for (const r of S[STORE_OF[k]]) await DB.put(STORE_OF[k], await pack(r));
+      closeSheet(); toast('Positions chiffrées.'); render();
+    };
+  },
+  vaultOff() {
+    confirmSheet({ title: 'Retirer le code ?', text: 'Les positions seront à nouveau stockées en clair sur ce téléphone.', ok: 'Retirer le code', onOk: async () => {
+      Vault.key = null; S.vault = null; await DB.del('meta', 'vault');
+      for (const k of ['spot', 'sortie', 'specimen']) for (const r of S[STORE_OF[k]]) await DB.put(STORE_OF[k], r);
+      toast('Code retiré.'); render();
+    } });
+  },
+  async unlock() {
+    const pass = $('#unlock-pass').value, err = $('#unlock-err');
+    try {
+      Vault.key = await Vault.derive(pass, unb64(S.vault.salt));
+      await Vault.dec(S.vault.check);
+      await loadAll(); go('carnet', {}, { replace: true }); afterBoot();
+    } catch { Vault.key = null; err.textContent = 'Code incorrect.'; }
+  },
+  async exportJSON() {
+    toast('Préparation de la sauvegarde…');
+    const photos = await DB.all('photos').catch(() => []);
+    const toData = b => new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.onerror = () => r(null); fr.readAsDataURL(b); });
+    const out = { app: 'Mycota', format: 1, exportedAt: new Date().toISOString(), note: 'Contient les coordonnées de tes spots en clair.',
+      spots: S.spots, sorties: S.sorties, specimens: S.specimens, settings: S.settings,
+      photos: await Promise.all(photos.map(async p => ({ id: p.id, createdAt: p.createdAt, blob: await toData(p.blob), thumb: p.thumb ? await toData(p.thumb) : null }))) };
+    await saveFile(`mycota-sauvegarde-${dayISO(new Date())}.json`, new Blob([JSON.stringify(out)], { type: 'application/json' }));
+  },
+  async exportCSV() {
+    const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const rows = [['date', 'spot', 'milieu', 'latitude', 'longitude', 'espece', 'nom_latin', 'exemplaires', 'poids_g', 'sol', 'ciel', 'conditions', 'pluie_10j_mm', 'notes']];
+    [...S.sorties].sort((a, b) => a.date.localeCompare(b.date)).forEach(so => {
+      const sp = spotById(so.spotId) || {}; const p = posOfSortie(so) || {};
+      const base = [so.date.replace('T', ' '), sp.name, sp.forest, S.settings.mask ? '' : p.lat?.toFixed(6), S.settings.mask ? '' : p.lng?.toFixed(6)];
+      const tail = [so.meteo?.sol, (so.meteo?.ciel || []).join(' / '), so.meteo?.text, so.wx?.mm, so.notes];
+      const obs = (so.obs || []).filter(o => o.species);
+      if (!obs.length) rows.push([...base, '', '', 0, '', ...tail]);
+      obs.forEach(o => rows.push([...base, o.species, o.latin, o.count, o.weight, ...tail]));
+    });
+    const csv = '﻿' + rows.map(r => r.map(q).join(';')).join('\r\n');
+    await saveFile(`mycota-observations-${dayISO(new Date())}.csv`, new Blob([csv], { type: 'text/csv' }));
+  },
+  async exportGPX() {
+    const x = s => esc(s);
+    const gpx = `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Mycota" xmlns="http://www.topografix.com/GPX/1/1">\n${S.spots.filter(hasPos).map(s => `  <wpt lat="${s.lat.toFixed(6)}" lon="${s.lng.toFixed(6)}"><name>${x(s.name)}</name><desc>${x([s.forest, s.notes].filter(Boolean).join(' — '))}</desc></wpt>`).join('\n')}\n</gpx>\n`;
+    await saveFile(`mycota-spots-${dayISO(new Date())}.gpx`, new Blob([gpx], { type: 'application/gpx+xml' }));
+  },
+  loadDemo() { confirmSheet({ title: 'Charger des exemples ?', text: 'Trois spots fictifs et quelques sorties, marqués comme exemples. Tu pourras les retirer en un geste.', ok: 'Charger', danger: false, onOk: async () => { await loadDemo(); toast('Exemples chargés.'); go('carnet', {}, { replace: true }); } }); },
+  async clearDemo() {
+    for (const k of ['sortie', 'specimen', 'spot']) for (const r of [...S[STORE_OF[k]]]) if (r.demo) await deleteRec(k, r.id);
+    toast('Exemples retirés.'); render();
+  },
+  wipe() {
+    confirmSheet({ title: 'Tout effacer ?', text: 'Spots, sorties, spécimens et photos seront supprimés de ce téléphone. Sans sauvegarde, rien ne pourra être récupéré.', ok: 'Tout effacer', onOk: async () => {
+      for (const s of STORES) await DB.clear(s).catch(() => {});
+      S.spots = []; S.sorties = []; S.specimens = []; S.climate = null; S.settings = { mask: false }; S.vault = null; Vault.key = null;
+      toast('Carnet effacé.'); go('carnet', {}, { replace: true });
+    } });
+  },
+};
+
+/* ---------- délégation d'évènements ---------- */
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-act]');
+  if (!t || t.closest('.map-marks')) return;
+  const f = ACT[t.dataset.act];
+  if (f) { e.preventDefault(); f(t, e); }
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'c-q') { S.chronoF.q = t.value; renderChronoList(); }
+});
+document.addEventListener('change', async e => {
+  const t = e.target;
+  if (t.id === 'c-spot' || t.id === 'c-sp') { S.chronoF[t.id === 'c-spot' ? 'spot' : 'sp'] = t.value; renderChronoList(); return; }
+  if (t.id === 'f-spot' && S.draft?.kind === 'sortie') { syncSortieDraft(); render(); return; }
+  if (t.dataset.f === 'species') {
+    const m = matchLatin(t.value); const row = t.closest('.obs-row');
+    if (m && row) { const la = $('[data-f="latin"]', row); if (!la.value) la.value = m.la; if (m.fr !== t.value.trim() && SP_BY_LA.has(t.value.trim().toLowerCase())) { t.value = m.fr; la.value = m.la; } }
+    return;
+  }
+  if (t.id === 'f-hyp') { const m = matchLatin(t.value); if (m && !$('#f-latin').value) $('#f-latin').value = m.la; return; }
+  if (t.dataset.import) { await importFile(t.files[0]); t.value = ''; return; }
+  if (t.dataset.photoIn && t.files?.length) {
+    const target = t.dataset.photoIn, files = [...t.files];
+    const d = S.draft; if (!d) return;
+    if (d.kind === 'sortie') syncSortieDraft(); else if (d.kind === 'specimen') syncSpecimenDraft();
+    toast(files.length > 1 ? `Ajout de ${files.length} photos…` : 'Ajout de la photo…');
+    try {
+      for (const f of files) {
+        const id = await addPhoto(f);
+        if (target === 'draft') d.photoIds.push(id);
+        else if (target === 'extra') d.extra.push(id);
+        else if (target.startsWith('step:')) { const k = target.slice(5); if (d.photos[k]) DB.del('photos', d.photos[k]).catch(() => {}); d.photos[k] = id; }
+      }
+      if (d.kind === 'specimen' && !hasPos(d) && hasPos(S.lastPos)) Object.assign(d, { lat: S.lastPos.lat, lng: S.lastPos.lng });
+      render();
+      $('.toast') && ($('.toast').hidden = true);
+    } catch { toast("Cette image n'a pas pu être lue. Essaie une photo JPEG ou HEIC depuis l'appareil."); }
+  }
+});
+
+/* ---------- import ---------- */
+function dataURLtoBlob(d) {
+  const [h, b] = d.split(','); const mime = (h.match(/data:(.*?);/) || [])[1] || 'image/jpeg';
+  const bin = atob(b); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  return new Blob([u], { type: mime });
+}
+async function importFile(file) {
+  if (!file) return;
+  let j;
+  try { j = JSON.parse(await file.text()); } catch { toast("Ce fichier n'est pas une sauvegarde lisible."); return; }
+  if (j.app !== 'Mycota') { toast("Ce fichier n'est pas une sauvegarde Mycota."); return; }
+  toast('Restauration…');
+  for (const p of j.photos || []) { if (p.blob) await DB.put('photos', { id: p.id, createdAt: p.createdAt, blob: dataURLtoBlob(p.blob), thumb: p.thumb ? dataURLtoBlob(p.thumb) : null }); }
+  for (const r of j.spots || []) await saveRec('spot', r);
+  for (const r of j.sorties || []) await saveRec('sortie', r);
+  for (const r of j.specimens || []) await saveRec('specimen', r);
+  toast(`Restauré : ${plural((j.spots || []).length, 'spot', 'spots')}, ${plural((j.sorties || []).length, 'sortie', 'sorties')}.`);
+  go('carnet', {}, { replace: true });
+}
+
+/* ---------- exemples (marqués demo) ---------- */
+async function loadDemo() {
+  const now = new Date();
+  const ago = (d, h = 10) => { const x = new Date(now); x.setDate(x.getDate() - d); x.setHours(h, 30, 0, 0); return localISO(x); };
+  const spots = [
+    { id: 'demo-s1', name: 'Chênaie du Puits-Rond', forest: 'Chênaie', lat: 45.69352, lng: 0.29148, notes: 'Vieux chênes sessiles sur le versant nord, sol acide sous la mousse. Entrer par le chemin forestier, à gauche après la barrière.' },
+    { id: 'demo-s2', name: 'Hêtraie de la Combe', forest: 'Hêtraie', lat: 45.71023, lng: 0.30577, notes: 'Fond de vallon frais, litière épaisse. Les trompettes sortent après les premières gelées.' },
+    { id: 'demo-s3', name: 'Lisière aux châtaigniers', forest: 'Châtaigneraie', lat: 45.82894, lng: 0.19722, notes: 'Talus exposé sud-est. Donne tôt, sèche vite.' },
+  ].map(s => ({ ...s, demo: true }));
+  const O = (species, count, weight = '') => ({ species, latin: SP_BY_FR.get(species.toLowerCase()) || '', count, weight });
+  const sorties = [
+    { spotId: 'demo-s1', date: ago(4), obs: [O('Cèpe de Bordeaux', 7, '840'), O('Girolle', 23)], meteo: { sol: 'Humide', ciel: ['Nuageux'], text: 'Grosse pluie dix jours plus tôt, sol frais sous la mousse' }, notes: 'Spécimens jeunes et fermes, surtout au pied des deux chênes jumeaux.', wx: { mm: 34.2, days: 10 } },
+    { spotId: 'demo-s2', date: ago(11), obs: [], meteo: { sol: 'Sec', ciel: ['Soleil'], text: 'Litière craquante' }, notes: 'Trop tôt. Revenir après les prochaines pluies.', wx: { mm: 6.1, days: 10 } },
+    { spotId: 'demo-s3', date: ago(19), obs: [O('Cèpe bronzé', 3), O('Amanite des Césars', 2)], meteo: { sol: 'Frais', ciel: ['Soleil'], text: '' }, notes: 'Les Césars sous le grand châtaignier, laissées en place.', wx: { mm: 21.8, days: 10 } },
+    { spotId: 'demo-s1', date: ago(33), obs: [O('Girolle', 41), O('Russule charbonnière', 6)], meteo: { sol: 'Humide', ciel: ['Pluie'], text: 'Bruine continue' }, notes: '', wx: { mm: 48.5, days: 10 } },
+    { spotId: 'demo-s2', date: ago(372), obs: [O('Trompette de la mort', 120, '650'), O('Pied-de-mouton', 15)], meteo: { sol: 'Détrempé', ciel: ['Brouillard', 'Gelée'], text: 'Premier coup de gel la veille' }, notes: 'Poussée synchronisée le long du ru.', wx: { mm: 62.0, days: 10 } },
+    { spotId: 'demo-s1', date: ago(383), obs: [O('Cèpe de Bordeaux', 12, '1600')], meteo: { sol: 'Humide', ciel: ['Nuageux'], text: '' }, notes: 'Meilleure sortie de la saison passée.', wx: { mm: 41.3, days: 10 } },
+  ].map((s, i) => ({ id: 'demo-o' + i, photoIds: [], demo: true, ...s }));
+  const specimens = [{ id: 'demo-m1', date: ago(4, 16), spotId: 'demo-s1', photos: {}, extra: [], odeur: 'Farine', sporee: 'Rose', hypothese: 'Clitocybe nébuleux', latin: 'Clitocybe nebularis', notes: "Lames décurrentes serrées. À comparer avec l'entolome livide avant tout.", status: 'a_identifier', demo: true }];
+  for (const s of spots) await saveRec('spot', s);
+  for (const s of sorties) await saveRec('sortie', s);
+  for (const s of specimens) await saveRec('specimen', s);
+}
+
+/* ---------- démarrage ---------- */
+const APP_VERSION = '1.0';
+function afterBoot() {
+  try { navigator.storage?.persist?.(); } catch { /* sans effet */ }
+  syncWeather();
+  window.addEventListener('online', syncWeather);
+}
+(async () => {
+  await DB.open();
+  if (DB.mem) setTimeout(() => toast("Stockage indisponible : rien ne sera conservé après fermeture."), 600);
+  if (!IN_CLAUDE && 'serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(() => {});
+  const vault = await DB.get('meta', 'vault').catch(() => null);
+  if (vault) { S.vault = vault.value; S.view = 'lock'; render(); return; }
+  await loadAll();
+  const st = history.state;
+  if (st && st.view && st.view !== 'lock') { S.view = st.view; S.params = st.params || {}; }
+  try { history.replaceState({ view: S.view, params: S.params, depth: st?.depth || 0 }, ''); } catch { /* cadre restreint */ }
+  render();
+  afterBoot();
+})();
+</script>
+</body>
+</html>

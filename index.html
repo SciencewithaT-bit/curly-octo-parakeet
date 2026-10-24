@@ -198,6 +198,7 @@ select.in { background-image: linear-gradient(45deg, transparent 50%, var(--ink-
 .cell-art img { width: 100%; height: 50px; object-fit: cover; border-radius: 4px; }
 .cell-fr { font-size: 12.5px; font-weight: 650; line-height: 1.15; }
 .cell.no .cell-fr { color: var(--ink-2); font-weight: 600; }
+.cell-gb { margin-top: auto; padding-top: 4px; font-family: var(--f-mono); font-size: 10px; color: var(--ink-3); }
 .cell-la { font-size: 11px; font-style: italic; color: var(--ink-2); line-height: 1.2; overflow-wrap: anywhere; }
 .shroom { width: 56px; height: 42px; }
 .hunt { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
@@ -328,7 +329,7 @@ details summary { cursor: pointer; color: var(--green); font-weight: 600; font-s
    Tout reste sur l'appareil : IndexedDB, photos réencodées (sans EXIF),
    positions chiffrées si un code est défini.
    ========================================================================== */
-const APP_VERSION = '2.0';
+const APP_VERSION = '2.1';
 const IN_CLAUDE = typeof window.claude === 'object' && window.claude !== null;
 const PREFERS_TOUCH = matchMedia('(pointer: coarse)').matches;
 
@@ -412,7 +413,7 @@ const shroom = (cap, stem, stroke, dash = '0', cls = 'shroom') => `<svg class="$
    tox : 'mortelle' ou 'toxique' quand l'espèce est notoirement dangereuse
    ========================================================================== */
 const GROUPS = [
-  ['bolets', 'Bolets'], ['chanterelles', 'Chanterelles et hydnes'], ['amanites', 'Amanites'], ['russules', 'Russules et lactaires'],
+  ['bolets', 'Bolets'], ['chanterelles', 'Chanterelles, hydnes, clavaires'], ['amanites', 'Amanites'], ['russules', 'Russules et lactaires'],
   ['lames', 'Champignons à lames'], ['agarics', 'Agarics, lépiotes, vesses'], ['lignicoles', 'Lignicoles et polypores'],
   ['ascos', 'Morilles et ascomycètes'], ['curiosites', 'Curiosités'],
 ];
@@ -455,6 +456,17 @@ const REF = REF_RAW.map(([g, la, fr, months, tox], i) => ({ n: i + 1, g, la, fr,
 const REF_BY_LA = new Map(REF.map(t => [norm(t.la), t]));
 const REF_BY_FR = new Map(REF.map(t => [norm(t.fr), t]));
 const num3 = n => String(n).padStart(3, '0');
+
+/* ---------- liste Charente étendue (export GBIF, lichens et micro-champignons écartés) ---------- */
+const CH_SRC = { label: "GBIF.org, téléchargement du 24 octobre 2026", url: "https://www.gbif.org/occurrence/download/0001742-261023074918325" };
+const CH_GB_REF = {"Boletus edulis": 1, "Boletus aereus": 5, "Boletus reticulatus": 3, "Boletus pinophilus": 1, "Imleria badia": 2, "Neoboletus luridiformis": 1, "Suillellus luridus": 2, "Rubroboletus satanas": 4, "Xerocomellus chrysenteron": 2, "Leccinum scabrum": 1, "Suillus luteus": 2, "Cantharellus cibarius": 2, "Craterellus cornucopioides": 5, "Craterellus tubaeformis": 1, "Craterellus lutescens": 2, "Hydnum repandum": 2, "Amanita caesarea": 4, "Amanita phalloides": 5, "Amanita muscaria": 5, "Amanita pantherina": 7, "Amanita rubescens": 9, "Amanita citrina": 2, "Amanita crocea": 1, "Russula virescens": 1, "Russula nigricans": 1, "Lactarius deliciosus": 2, "Lactarius piperatus": 1, "Lactarius torminosus": 1, "Lepista nuda": 3, "Clitocybe nebularis": 3, "Calocybe gambosa": 3, "Infundibulicybe geotropa": 3, "Laccaria amethystina": 2, "Marasmius oreades": 2, "Entoloma sinuatum": 1, "Galerina marginata": 1, "Agaricus campestris": 1, "Agaricus xanthodermus": 2, "Macrolepiota procera": 5, "Chlorophyllum rhacodes": 3, "Coprinus comatus": 5, "Lycoperdon perlatum": 4, "Laetiporus sulphureus": 8, "Fistulina hepatica": 11, "Armillaria mellea": 2, "Hypholoma fasciculare": 5, "Sparassis crispa": 2, "Trametes versicolor": 7, "Fomes fomentarius": 6, "Auricularia auricula-judae": 6, "Morchella esculenta": 1, "Helvella crispa": 1, "Aleuria aurantia": 3, "Phallus impudicus": 2, "Clathrus ruber": 7};
+const CH_ALIAS = {"Boletus luridus": "Suillellus luridus", "Phellinus tuberculosus": "Phellinus pomaceus", "Calvatia excipuliformis": "Lycoperdon excipuliforme", "Collybia butyracea": "Rhodocollybia butyracea", "Lepiota ventriosospora": "Lepiota magnispora", "Xerocomus chrysenteron": "Xerocomellus chrysenteron", "Lepiota josserandii": "Lepiota subincarnata", "Agaricus variegans": "Agaricus impudicus", "Russula lepida": "Russula rosea", "Boletus pulverulentus": "Cyanoboletus pulverulentus", "Coprinus plicatilis": "Parasola plicatilis", "Xerocomus porosporus": "Xerocomellus porosporus", "Agaricus silvaticus": "Agaricus sylvaticus", "Lepista nebularis": "Clitocybe nebularis", "Entoloma lividum": "Entoloma sinuatum", "Agrocybe cylindracea": "Cyclocybe cylindracea", "Inocybe squamata": "Pseudosperma squamatum", "Collybia odora": "Clitocybe odora", "Daedaleopsis confragosa": "Daedaleopsis tricolor", "Clitocybe geotropa": "Infundibulicybe geotropa", "Exidia truncata": "Exidia glandulosa", "Collybia nuda": "Lepista nuda", "Tricholoma squarrulosum": "Tricholoma atrosquamosum", "Panaeolus foenisecii": "Panaeolina foenisecii", "Hygrocybe psittacina": "Gliophorus psittacinus", "Macrolepiota konradii": "Macrolepiota mastoidea", "Volvariella gloiocephala": "Volvopluteus gloiocephalus", "Psathyrella spadicea": "Homophron spadiceum", "Pycnoporus cinnabarinus": "Trametes cinnabarina", "Psilocybe crobula": "Deconica crobula", "Pluteus tricuspidatus": "Pluteus atromarginatus", "Rugosomyces obscurissimus": "Calocybe obscurissima", "Inocybe bongardii": "Inosperma bongardii", "Boletus impolitus": "Hemileccinum impolitum", "Boletus legaliae": "Rubroboletus legaliae", "Lepista sordida": "Lepista nuda", "Craterellus cinereus": "Cantharellus cinereus", "Amanita junquillea": "Amanita gemmata", "Vascellum pratense": "Lycoperdon pratense", "Marasmiellus foetidus": "Gymnopus foetidus", "Lepiota pseudohelveola": "Lepiota pseudolilacea", "Collybia confluens": "Collybiopsis confluens", "Pluteus boudieri": "Pluteus plautus", "Hymenochaete tabacina": "Hydnoporia tabacina", "Boletus erythropus": "Neoboletus erythropus", "Clavicorona pyxidata": "Artomyces pyxidatus", "Peziza succosa": "Paragalactinia succosa", "Russula amara": "Russula caerulea", "Macrolepiota rickenii": "Macrolepiota mastoidea", "Psathyrella multipedata": "Britzelmayria multipedata", "Phellinus ferruginosus": "Fuscoporia ferruginosa", "Mycena flavoalba": "Atheniella flavoalba", "Polyporus squamosus": "Cerioporus squamosus", "Hygrocybe laeta": "Gliophorus laetus", "Ganoderma lipsiense": "Polyporus lipsiensis", "Leccinum quercinum": "Leccinum aurantiacum", "Xerocomus pruinatus": "Xerocomellus pruinatus", "Marasmiellus tricolor": "Metacampanella tricolor", "Pluteus luteovirens": "Pluteus chrysophaeus", "Boletus radicans": "Caloboletus radicans", "Piptoporus betulinus": "Fomitopsis betulina", "Hygrocybe fornicata": "Cuphophyllus fornicatus", "Polyporus leptocephalus": "Cerioporus leptocephalus", "Boletus satanas": "Rubroboletus satanas", "Helvella leucomelaena": "Dissingia leucomelaena", "Rozites caperatus": "Cortinarius caperatus", "Russula nigricans": "Russula adusta", "Galerina autumnalis": "Galerina marginata", "Polyporus ciliatus": "Lentinus substrictus", "Clitocybe gibba": "Infundibulicybe gibba", "Hexagonia nitida": "Daedaleopsis nitida", "Postia subcaesia": "Cyanosporus subcaesius", "Hygrocybe reae": "Hygrocybe mucronella", "Cystoderma cinnabarinum": "Cystodermella cinnabarina", "Coprinus disseminatus": "Coprinellus disseminatus", "Polyporus durus": "Picipes badius", "Lactarius volemus": "Lactifluus volemus", "Tremella foliacea": "Phaeotremella foliacea", "Lepista inversa": "Paralepista flaccida", "Collybia erythropus": "Gymnopus erythropus", "Inonotus radiatus": "Xanthoporia radiata", "Agaricus essettei": "Agaricus sylvicola", "Oudemansiella mucida": "Mucidula mucida", "Panaeolus sphinctrinus": "Panaeolus papilionaceus", "Coprinus lagopus": "Coprinopsis lagopus", "Lycoperdon foetidum": "Lycoperdon nigrescens", "Pulcherricium caeruleum": "Terana coerulea", "Morganella pyriformis": "Apioperdon pyriforme", "Polyporus brumalis": "Lentinus brumalis", "Mycena speirea": "Phloeomana speirea", "Scleroderma geaster": "Scleroderma polyrhizum", "Psathyrella candolleana": "Candolleomyces candolleanus", "Boletus torosus": "Imperator torosus", "Phlebia merismoides": "Phlebia radiata", "Hygrocybe cinereifolia": "Hygrocybe conica", "Terana caerulea": "Terana coerulea", "Boletus queletii": "Suillellus queletii", "Pholiota tuberculosa": "Pleuroflammula tuberculosa", "Tremella aurantia": "Naematelia aurantia", "Neoboletus erythropus": "Neoboletus luridiformis", "Russula adusta": "Russula nigricans", "Lactifluus piperatus": "Lactarius piperatus"};
+const CH_RAW = [["Coprinopsis picacea","lames",13,"toxique"],["Volvopluteus gloiocephalus","lames",9],["Lentinus tigrinus","lignicoles",8],["Amanita excelsa","amanites",6],["Clathrus archeri","curiosites",6],["Tremella mesenterica","lignicoles",6],["Suillellus queletii","bolets",5],["Terana coerulea","lignicoles",5],["Auricularia mesenterica","lignicoles",4],["Bolbitius titubans","lames",4],["Cortinarius violaceus","lames",4],["Phellinus pomaceus","lignicoles",4],["Caloboletus radicans","bolets",3],["Cyclocybe cylindracea","lignicoles",3],["Daedaleopsis confragosa","lignicoles",3],["Geopora sumneriana","ascos",3],["Gliophorus psittacinus","lames",3],["Helvella lacunosa","ascos",3],["Leccinum aurantiacum","bolets",3],["Macrolepiota mastoidea","agarics",3],["Mycena rosea","lames",3],["Russula violeipes","russules",3],["Sarcoscypha coccinea","ascos",3],["Schizophyllum commune","lignicoles",3],["Scleroderma citrinum","agarics",3,"toxique"],["Tricholoma atrosquamosum","lames",3],["Xylaria polymorpha","ascos",3],["Amanita subnudipes","amanites",2],["Apioperdon pyriforme","agarics",2],["Artomyces pyxidatus","chanterelles",2],["Calocera cornea","lignicoles",2],["Calocera viscosa","lignicoles",2],["Candolleomyces candolleanus","lames",2],["Cantharellus pallens","chanterelles",2],["Clavulina rugosa","chanterelles",2],["Clitocybe odora","lames",2],["Coprinellus disseminatus","lames",2],["Coprinopsis lagopus","lames",2],["Cuphophyllus virgineus","lames",2],["Cyathus striatus","agarics",2],["Daedaleopsis tricolor","lignicoles",2],["Echinoderma asperum","agarics",2],["Heterobasidion annosum","lignicoles",2],["Hygrocybe coccinea","lames",2],["Hygrocybe conica","lames",2],["Hygrocybe punicea","lames",2],["Hygrophoropsis aurantiaca","lames",2],["Imperator rhodopurpureus","bolets",2],["Infundibulicybe gibba","lames",2],["Leotia lubrica","ascos",2],["Lycoperdon pratense","agarics",2],["Meripilus giganteus","lignicoles",2],["Mitrula paludosa","ascos",2],["Nemania confluens","ascos",2],["Pisolithus arhizus","agarics",2],["Pluteus chrysophaeus","lignicoles",2],["Pseudoclitocybe cyathiformis","lames",2],["Ramaria stricta","chanterelles",2],["Rubroboletus lupinus","bolets",2],["Russula rosea","russules",2],["Scleroderma polyrhizum","agarics",2,"toxique"],["Stereum hirsutum","lignicoles",2],["Stereum subtomentosum","lignicoles",2],["Suillus bovinus","bolets",2],["Tricholoma acerbum","lames",2],["Tricholomopsis sulphureoides","lignicoles",2],["Tulostoma brumale","agarics",2],["Abortiporus biennis","lignicoles",1],["Agaricus arvensis","agarics",1],["Agaricus augustus","agarics",1],["Agaricus devoniensis","agarics",1],["Agaricus impudicus","agarics",1],["Agaricus sylvaticus","agarics",1],["Agaricus sylvicola","agarics",1],["Amanita ceciliae","amanites",1],["Amanita echinocephala","amanites",1],["Amanita franchetii","amanites",1],["Amanita fulva","amanites",1],["Amanita gemmata","amanites",1,"toxique"],["Amanita lividopallescens","amanites",1],["Amanita mairei","amanites",1],["Amanita porphyria","amanites",1],["Amanita submembranacea","amanites",1],["Ampulloclitocybe clavipes","lames",1],["Anthracobia melaloma","ascos",1],["Anthracobia tristis","ascos",1],["Antrodiella serpula","lignicoles",1],["Armillaria cepistipes","lignicoles",1],["Astraeus hygrometricus","agarics",1],["Atheniella flavoalba","lames",1],["Aureoboletus gentilis","bolets",1],["Balsamia vulgaris","ascos",1],["Bjerkandera adusta","lignicoles",1],["Bovista plumbea","agarics",1],["Britzelmayria multipedata","lames",1],["Bulgaria inquinans","ascos",1],["Calocybe obscurissima","lames",1],["Cantharellus cinereus","chanterelles",1],["Cerioporus leptocephalus","lignicoles",1],["Cerioporus squamosus","lignicoles",1],["Chlorociboria aeruginascens","ascos",1],["Choiromyces venosus","ascos",1],["Chroogomphus rutilus","lames",1],["Clavaria acuta","chanterelles",1],["Clavariadelphus pistillaris","chanterelles",1],["Clavulina coralloides","chanterelles",1],["Clavulinopsis corniculata","chanterelles",1],["Clitocybe costata","lames",1],["Clitocybe fragrans","lames",1],["Clitocybe phaeophthalma","lames",1],["Collybia tuberosa","lames",1],["Collybiopsis confluens","lames",1],["Coltricia perennis","lignicoles",1],["Coprinellus micaceus","lames",1],["Cordyceps militaris","ascos",1],["Cortinarius aleuriosmus","lames",1],["Cortinarius caperatus","lames",1],["Cortinarius infractus","lames",1],["Cortinarius mucifluoides","lames",1],["Cortinarius uliginosus","lames",1],["Crepidotus cesatii","lignicoles",1],["Crepidotus epibryus","lignicoles",1],["Crucibulum laeve","agarics",1],["Cudoniella clavus","ascos",1],["Cuphophyllus fornicatus","lames",1],["Cuphophyllus russocoriaceus","lames",1],["Cyanoboletus pulverulentus","bolets",1],["Cyanosporus subcaesius","lignicoles",1],["Cystoderma amianthinum","agarics",1],["Cystodermella cinnabarina","agarics",1],["Cystolepiota seminuda","agarics",1],["Daedalea quercina","lignicoles",1],["Daedaleopsis nitida","lignicoles",1],["Daldinia concentrica","ascos",1],["Deconica crobula","lames",1],["Delicatula integrella","lames",1],["Dermoloma pseudocuneifolium","lames",1],["Dissingia leucomelaena","ascos",1],["Entoloma aprile","lames",1],["Entoloma araneosum","lames",1],["Entoloma bloxamii","lames",1],["Entoloma chalybeum","lames",1],["Entoloma clandestinum","lames",1],["Entoloma lividoalbum","lames",1],["Entoloma mutabilipes","lames",1],["Entoloma rhodocylix","lames",1],["Entoloma sepium","lames",1],["Exidia glandulosa","lignicoles",1],["Fomitopsis betulina","lignicoles",1],["Fomitopsis pinicola","lignicoles",1],["Fuscoporia ferruginosa","lignicoles",1],["Galerina graminea","lames",1],["Galerina vittiformis","lames",1],["Ganoderma applanatum","lignicoles",1],["Ganoderma lucidum","lignicoles",1],["Gliophorus laetus","lames",1],["Gloeophyllum sepiarium","lignicoles",1],["Grifola frondosa","lignicoles",1],["Gymnopilus junonius","lignicoles",1,"toxique"],["Gymnopilus penetrans","lignicoles",1],["Gymnopus erythropus","lames",1],["Gymnopus foetidus","lames",1],["Gymnopus fusipes","lames",1],["Gyrodon lividus","bolets",1],["Gyroporus castaneus","bolets",1],["Hapalopilus rutilans","lignicoles",1],["Hebeloma radicosum","lames",1,"toxique"],["Hebeloma sinapizans","lames",1,"toxique"],["Helvella solitaria","ascos",1],["Hemileccinum impolitum","bolets",1],["Homophron spadiceum","lames",1],["Hortiboletus bubalinus","bolets",1],["Hydnellum cristatum","chanterelles",1],["Hydnellum ioeides","chanterelles",1],["Hydnoporia tabacina","lignicoles",1],["Hydnum magnorufescens","chanterelles",1],["Hygrocybe acutoconica","lames",1],["Hygrocybe chlorophana","lames",1],["Hygrocybe citrinovirens","lames",1],["Hygrocybe intermedia","lames",1],["Hygrocybe mucronella","lames",1],["Hygrocybe quieta","lames",1],["Hygrocybe reidii","lames",1],["Hygrophorus discoxanthus","lames",1],["Hygrophorus eburneus","lames",1],["Hygrophorus persoonii","lames",1],["Hygrophorus russula","lames",1],["Imperator luteocupreus","bolets",1],["Imperator torosus","bolets",1],["Inocybe dryadiana","lames",1,"toxique"],["Inocybe geophylla","lames",1,"toxique"],["Inocybe griseolilacina","lames",1,"toxique"],["Inocybe haemacta","lames",1,"toxique"],["Inocybe jacobssonii","lames",1,"toxique"],["Inocybe mixtilis","lames",1,"toxique"],["Inocybe pyriodora","lames",1,"toxique"],["Inocybe terrifera","lames",1,"toxique"],["Inonotus hispidus","lignicoles",1],["Inosperma bongardii","lames",1,"toxique"],["Laccaria laccata","lames",1],["Laccaria proxima","lames",1],["Laccaria tortilis","lames",1],["Lacrymaria lacrymabunda","lames",1],["Lactarius acerrimus","russules",1],["Lactarius camphoratus","russules",1],["Lactarius circellatus","russules",1],["Lactarius controversus","russules",1],["Lactarius flavidus","russules",1],["Lactarius fluens","russules",1],["Lactarius fulvissimus","russules",1],["Lactarius pubescens","russules",1],["Lactarius quieticolor","russules",1],["Lactarius ruginosus","russules",1],["Lactarius semisanguifluus","russules",1],["Lactarius uvidus","russules",1],["Lactarius zonarius","russules",1],["Lactifluus volemus","russules",1],["Laxitextum bicolor","lignicoles",1],["Leccinellum crocipodium","bolets",1],["Leccinellum pseudoscabrum","bolets",1],["Leccinum floccopus","bolets",1],["Lentinus brumalis","lignicoles",1],["Lentinus substrictus","lignicoles",1],["Lenzites betulinus","lignicoles",1],["Lepiota clypeolaria","agarics",1,"toxique"],["Lepiota magnispora","agarics",1,"toxique"],["Lepiota ochraceodisca","agarics",1,"toxique"],["Lepiota pseudolilacea","agarics",1,"toxique"],["Lepiota subincarnata","agarics",1,"mortelle"],["Lepista personata","lames",1],["Leucocoprinus leucothites","agarics",1],["Leucocortinarius bulbiger","lames",1],["Lycoperdon echinatum","agarics",1],["Lycoperdon excipuliforme","agarics",1],["Lycoperdon mammaeforme","agarics",1],["Lycoperdon nigrescens","agarics",1],["Lyophyllum helvella","lames",1],["Macrolepiota excoriata","agarics",1],["Macrolepiota fuliginosa","agarics",1],["Marasmiellus candidus","lames",1],["Marasmius bulliardii","lames",1],["Marasmius curreyi","lames",1],["Meottomyces dissimulans","lames",1],["Metacampanella tricolor","lames",1],["Morchella semilibera","ascos",1],["Mucidula mucida","lignicoles",1],["Mycena capillaripes","lames",1],["Mycena galericulata","lames",1],["Mycena inclinata","lames",1],["Mycena leptocephala","lames",1],["Mycena renati","lames",1],["Mycena sanguinolenta","lames",1],["Mycena seynesii","lames",1],["Naematelia aurantia","lignicoles",1],["Nectria cinnabarina","ascos",1],["Ophiocordyceps larvicola","ascos",1],["Otidea alutacea","ascos",1],["Panaeolina foenisecii","lames",1],["Panaeolus papilionaceus","lames",1],["Panellus stipticus","lignicoles",1],["Paragalactinia succosa","ascos",1],["Paralepista flaccida","lames",1],["Parasola plicatilis","lames",1],["Phaeolus schweinitzii","lignicoles",1],["Phaeotremella foliacea","lignicoles",1],["Phlebia radiata","lignicoles",1],["Phloeomana speirea","lames",1],["Pholiota gummosa","lignicoles",1],["Picipes badius","lignicoles",1],["Pisolithus capsulifer","agarics",1],["Pleuroflammula tuberculosa","lames",1],["Pleurotus cornucopiae","lignicoles",1],["Pleurotus pulmonarius","lignicoles",1],["Plicaturopsis crispa","lignicoles",1],["Pluteus atromarginatus","lignicoles",1],["Pluteus aurantiorugosus","lignicoles",1],["Pluteus leoninus","lignicoles",1],["Pluteus nanus","lignicoles",1],["Pluteus plautus","lignicoles",1],["Pluteus romellii","lignicoles",1],["Polyporus lipsiensis","lignicoles",1],["Postia tephroleuca","lignicoles",1],["Psathyrella cotonea","lames",1],["Psathyrella spadiceogrisea","lames",1],["Pseudoboletus parasiticus","bolets",1],["Pseudosperma squamatum","lames",1,"toxique"],["Rhodocollybia butyracea","lames",1],["Rhodocybe gemina","lames",1],["Rickenella swartzii","lignicoles",1],["Rigidoporus ulmarius","lignicoles",1],["Roridomyces roridus","lames",1],["Rubroboletus dupainii","bolets",1],["Rubroboletus legaliae","bolets",1],["Russula acrifolia","russules",1],["Russula aeruginea","russules",1],["Russula albonigra","russules",1],["Russula alutacea","russules",1],["Russula amoena","russules",1],["Russula amoenicolor","russules",1],["Russula amoenolens","russules",1],["Russula anthracina","russules",1],["Russula atropurpurea","russules",1],["Russula aurea","russules",1],["Russula brunneoviolacea","russules",1],["Russula caerulea","russules",1],["Russula cuprea","russules",1],["Russula decipiens","russules",1],["Russula exalbicans","russules",1],["Russula foetens","russules",1],["Russula fragilis","russules",1],["Russula lilacea","russules",1],["Russula luteotacta","russules",1],["Russula olivacea","russules",1],["Russula pseudointegra","russules",1],["Russula risigallina","russules",1],["Russula solaris","russules",1],["Russula turci","russules",1],["Russula xerampelina","russules",1],["Scleroderma bovista","agarics",1,"toxique"],["Scutellinia peloponnesiaca","ascos",1],["Stereum gausapatum","lignicoles",1],["Stereum insignitum","lignicoles",1],["Strobilomyces strobilaceus","bolets",1],["Stropharia caerulea","lames",1],["Stropharia inuncta","lames",1],["Suillus collinitus","bolets",1],["Suillus grevillei","bolets",1],["Thecotheus pelletieri","ascos",1],["Tomentella lapida","chanterelles",1],["Trametes cinnabarina","lignicoles",1],["Trametes gibbosa","lignicoles",1],["Trametes ochracea","lignicoles",1],["Trichaptum abietinum","lignicoles",1],["Tricholoma batschii","lames",1],["Tricholoma columbetta","lames",1],["Tricholoma scalpturatum","lames",1],["Tricholoma sejunctum","lames",1],["Tricholomopsis rutilans","lignicoles",1],["Tuber melanosporum","ascos",1],["Verpa conica","ascos",1],["Volvariella murinella","lignicoles",1],["Xanthoporia radiata","lignicoles",1],["Xerocomellus porosporus","bolets",1],["Xerocomellus pruinatus","bolets",1],["Xerocomus subtomentosus","bolets",1],["Xerophorus donadinii","lames",1]];
+REF.forEach(t => { t.gb = CH_GB_REF[t.la] || 0; });
+const CH = CH_RAW.map(([la, g, gb, tox], i) => ({ n: REF.length + i + 1, g, la, fr: '', months: null, tox: tox || '', gb, ext: true }));
+const ALL = [...REF, ...CH];
+const ALL_BY_LA = new Map(ALL.map(t => [norm(t.la), t]));
+Object.entries(CH_ALIAS).forEach(([a, acc]) => { const t = ALL_BY_LA.get(norm(acc)); if (t && !ALL_BY_LA.has(norm(a))) ALL_BY_LA.set(norm(a), t); });
 
 const FOREST = ['Chênaie', 'Hêtraie', 'Châtaigneraie', 'Charmaie', 'Chênaie-charmaie', 'Pinède', 'Sapinière', 'Pessière', 'Forêt mixte', 'Bois humide', 'Lisière', 'Prairie', 'Pelouse calcaire', 'Parc ou jardin', 'Autre'];
 const SOL = ['Sec', 'Frais', 'Humide', 'Détrempé'];
@@ -578,7 +590,7 @@ function nearestSpot(pos, max = 250) {
 }
 /** Retrouve le taxon de référence d'une observation (latin d'abord, nom français ensuite). */
 function taxonOf(o) {
-  return REF_BY_LA.get(norm(o.latin)) || REF_BY_FR.get(norm(o.species)) || REF_BY_LA.get(norm(o.species)) || null;
+  return ALL_BY_LA.get(norm(o.latin)) || REF_BY_FR.get(norm(o.species)) || ALL_BY_LA.get(norm(o.species)) || null;
 }
 const keyOf = o => { const t = taxonOf(o); return t ? norm(t.la) : norm(o.latin || o.species); };
 function allObs() {
@@ -606,13 +618,14 @@ function speciesHistory() {
   const m = new Map();
   allObs().forEach(({ o }) => { if (o.species) m.set(o.species.trim(), o.latin || ''); });
   REF.forEach(t => { if (!m.has(t.fr)) m.set(t.fr, t.la); });
+  CH.forEach(t => { if (!m.has(t.la)) m.set(t.la, 'Charente'); });
   return m;
 }
 function matchLatin(name) {
   const k = norm(name);
   if (!k) return null;
-  const t = REF_BY_FR.get(k) || REF_BY_LA.get(k);
-  if (t) return { fr: t.fr, la: t.la, viaLatin: REF_BY_LA.has(k) };
+  const t = REF_BY_FR.get(k) || ALL_BY_LA.get(k);
+  if (t) return { fr: t.fr, la: t.la, viaLatin: ALL_BY_LA.has(k) };
   for (const { o } of allObs()) if (norm(o.species) === k && o.latin) return { fr: name.trim(), la: o.latin };
   return null;
 }
@@ -1028,16 +1041,18 @@ function sortieLine(so, withSpot = true) {
 
 /* ----- Mycodex ----- */
 VIEWS.codex = () => {
-  const f = S.codexF || (S.codexF = { mode: 'tout', q: '' });
+  const f = S.codexF || (S.codexF = { mode: 'tout', q: '', list: 'depart' });
   const idx = codexIndex();
-  const got = REF.filter(t => idx.has(norm(t.la))).length;
+  const base = f.list === 'charente' ? ALL : REF;
+  const got = base.filter(t => idx.has(norm(t.la))).length;
   const html = `${TOPO}
   <div class="head">
-    <div class="head-top"><span class="kicker">Mycodex · Charente (16)</span><span class="kicker">${REF.length} espèces</span></div>
+    <div class="head-top"><span class="kicker">Mycodex · Charente (16)</span><span class="kicker">${base.length} espèces</span></div>
     <h1 class="display">Mycodex</h1>
-    <div class="row" style="align-items:baseline"><span class="mono" style="font-size:34px;font-weight:600;line-height:1;letter-spacing:-0.03em">${num3(got)}</span><span class="muted" style="font-size:14px">espèces observées sur ${REF.length}</span></div>
-    <div class="tapebar"><i style="width:${Math.round(got / REF.length * 100)}%"></i></div>
-    <div class="row mono" style="font-size:11px;color:var(--ink-2)"><span class="grow">${Math.round(got / REF.length * 100)} % de la liste de départ</span><button class="link" data-act="go" data-v="rubans" style="padding:0;font-family:var(--f-ui)">Rubans</button></div>
+    <div class="row" style="align-items:baseline"><span class="mono" style="font-size:34px;font-weight:600;line-height:1;letter-spacing:-0.03em">${num3(got)}</span><span class="muted" style="font-size:14px">espèces observées sur ${base.length}</span></div>
+    <div class="tapebar"><i style="width:${Math.round(got / base.length * 100)}%"></i></div>
+    <div class="row mono" style="font-size:11px;color:var(--ink-2)"><span class="grow">${Math.round(got / base.length * 100)} % ${f.list === 'charente' ? 'de la liste Charente' : 'de la liste de départ'}</span><button class="link" data-act="go" data-v="rubans" style="padding:0;font-family:var(--f-ui)">Rubans</button></div>
+    <div class="chips">${[['depart', `Départ · ${REF.length}`], ['charente', `Charente · ${ALL.length}`]].map(([k, l]) => `<button class="chip sq" data-act="dexList" data-val="${k}" aria-pressed="${f.list === k}">${l}</button>`).join('')}</div>
     <input class="in" id="dex-q" type="search" placeholder="Chercher une espèce" value="${esc(f.q)}" aria-label="Chercher une espèce">
     <div class="scroll-x">${['tout', 'observées', 'à trouver', 'de saison'].map(m => `<button class="chip" data-act="dexMode" data-val="${m}" aria-pressed="${f.mode === m}">${m[0].toUpperCase() + m.slice(1)}</button>`).join('')}</div>
   </div>
@@ -1050,24 +1065,24 @@ function dexCell(t, e) {
   const flag = t.tox === 'mortelle' ? '<span class="pill danger">mortelle</span>' : seen && daysBetween(new Date(e.first), new Date()) < 30 ? '<span class="pill tape">nouveau</span>' : '';
   return `<button class="cell ${seen ? '' : 'no'}" data-act="taxon" data-key="${esc(t.key || norm(t.la))}" aria-label="${esc(`${num3(t.n || 0)} ${t.fr}, ${seen ? 'observée' : 'pas encore observée'}`)}">
     <div class="cell-top"><span class="cell-n">${t.n ? num3(t.n) : 'hors'}</span>${flag}</div>
-    <div class="cell-art">${art}</div><div class="cell-fr">${esc(t.fr || t.la)}</div><div class="cell-la">${esc(t.la)}</div></button>`;
+    <div class="cell-art">${art}</div>${t.fr ? `<div class="cell-fr">${esc(t.fr)}</div><div class="cell-la">${esc(t.la)}</div>` : `<div class="cell-fr la">${esc(t.la)}</div>`}${t.gb ? `<div class="cell-gb">Charente ×${t.gb}</div>` : ''}</button>`;
 }
 function renderDex() {
   const box = $('#dex-list'); if (!box) return;
   const f = S.codexF, idx = codexIndex(), q = norm(f.q), m = new Date().getMonth() + 1;
   const keep = t => { const e = idx.get(norm(t.la));
-    if (f.mode === 'observées' && !e) return false; if (f.mode === 'à trouver' && e) return false; if (f.mode === 'de saison' && !t.months.includes(m)) return false;
+    if (f.mode === 'observées' && !e) return false; if (f.mode === 'à trouver' && e) return false; if (f.mode === 'de saison' && !t.months?.includes(m)) return false;
     if (q && !norm(t.fr).includes(q) && !norm(t.la).includes(q)) return false; return true; };
   let html = GROUPS.map(([g, name]) => {
-    const all = REF.filter(t => t.g === g), list = all.filter(keep); if (!list.length) return '';
+    const all = (f.list === 'charente' ? ALL : REF).filter(t => t.g === g), list = all.filter(keep); if (!list.length) return '';
     const got = all.filter(t => idx.has(norm(t.la))).length, done = got === all.length;
     return `<section class="sec" style="margin-top:20px"><div class="sec-head"><h2 class="sec-title">${esc(name)}</h2>${done ? '<span class="ribbon">complet</span>' : `<span class="sec-meta" style="font-weight:600">${got} / ${all.length}</span>`}</div>
       <div class="dex">${list.map(t => dexCell(t, idx.get(norm(t.la)))).join('')}</div></section>`;
   }).join('');
-  const extra = [...idx.values()].filter(e => !e.ref && f.mode !== 'à trouver' && f.mode !== 'de saison' && (!q || norm(e.fr).includes(q) || norm(e.la).includes(q)));
+  const extra = [...idx.values()].filter(e => (!e.ref || (e.ref.ext && f.list !== 'charente')) && f.mode !== 'à trouver' && f.mode !== 'de saison' && (!q || norm(e.fr).includes(q) || norm(e.la).includes(q)));
   if (extra.length) html += `<section class="sec" style="margin-top:20px"><div class="sec-head"><h2 class="sec-title">Hors liste</h2><span class="sec-meta">${extra.length}</span></div>
-    <div class="dex">${extra.map(e => dexCell({ n: 0, key: e.key, fr: e.fr, la: e.la || e.fr }, e)).join('')}</div>
-    <p class="faint" style="font-size:12px;margin:8px 0 0">Tes observations d'espèces absentes de la liste de départ. Elles s'ajoutent ici d'elles-mêmes.</p></section>`;
+    <div class="dex">${extra.map(e => dexCell(e.ref ? { ...e.ref, fr: e.fr } : { n: 0, key: e.key, fr: e.fr, la: e.la || e.fr }, e)).join('')}</div>
+    <p class="faint" style="font-size:12px;margin:8px 0 0">Tes observations d'espèces absentes ${f.list === 'charente' ? 'des listes' : 'de la liste de départ'}. Elles s'ajoutent ici d'elles-mêmes.</p></section>`;
   box.innerHTML = html || '<p class="muted" style="margin-top:20px">Aucune espèce ne correspond.</p>';
   hydratePhotos(box);
 }
@@ -1075,7 +1090,7 @@ function renderDex() {
 /* ----- Fiche espèce ----- */
 VIEWS.taxon = ({ key }) => {
   const idx = codexIndex(); const e = idx.get(key);
-  const t = REF_BY_LA.get(key) || e?.ref || null;
+  const t = ALL_BY_LA.get(key) || e?.ref || null;
   const la = t?.la || e?.la || key, fr = t?.fr || e?.fr || '';
   const m = new Date().getMonth();
   const mine = Array(12).fill(0); e?.list.forEach(x => { mine[new Date(x.so.date).getMonth()]++; });
@@ -1097,10 +1112,11 @@ VIEWS.taxon = ({ key }) => {
   <section class="sec"><div class="sec-head"><h2 class="sec-title">Calendrier</h2><span class="sec-meta">mois en cours souligné</span></div>
     <div class="months">
       <span class="ml">Toi</span>${mine.map((v, i) => `<span class="${v ? 'on' : ''} ${i === m ? 'now' : ''}" title="${MONTHS[i]} : ${v}"></span>`).join('')}
-      ${t ? `<span class="ml">Période</span>${MONTHS_S.map((_, i) => `<span class="${t.months.includes(i + 1) ? 'ref' : ''} ${i === m ? 'now' : ''}"></span>`).join('')}` : ''}
+      ${t?.months ? `<span class="ml">Période</span>${MONTHS_S.map((_, i) => `<span class="${t.months.includes(i + 1) ? 'ref' : ''} ${i === m ? 'now' : ''}"></span>`).join('')}` : ''}
       <span class="ml"></span>${MONTHS_S.map(l => `<span class="mm">${l}</span>`).join('')}
     </div>
-    ${t ? '<p class="faint" style="font-size:12px;margin:8px 0 0">Période indicative en France, à affiner avec tes propres relevés.</p>' : ''}
+    ${t?.months ? '<p class="faint" style="font-size:12px;margin:8px 0 0">Période indicative en France, à affiner avec tes propres relevés.</p>' : ''}
+    ${t?.gb ? `<p class="faint mono" style="font-size:11.5px;margin:6px 0 0">Charente : ${plural(t.gb, 'mention', 'mentions')} sur GBIF</p>` : t ? '<p class="faint mono" style="font-size:11.5px;margin:6px 0 0">Aucune mention sur GBIF en Charente pour l\u2019instant</p>' : ''}
   </section>
   ${e && (hotes.size || sols.size || subs.size || forests.size) ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Habitat d'après tes fiches</h2></div>
     <div class="lines">${[['Milieu', fmtMap(forests)], ['Hôte', fmtMap(hotes)], ['Substrat', fmtMap(subs)], ['Sol', fmtMap(sols)]].filter(r => r[1]).map(([k, v]) => `<div class="kv"><span>${k}</span><span>${esc(v)}</span></div>`).join('')}</div></section>` : ''}
@@ -1480,7 +1496,8 @@ VIEWS.reglages = () => {
     <div class="row"><span class="grow muted" style="font-size:14px">${plural(S.spots.length, 'spot', 'spots')}, ${plural(S.sorties.length, 'sortie', 'sorties')}, ${plural(S.specimens.length, 'spécimen', 'spécimens')}</span>
       ${S.spots.some(s => s.demo) ? '<button class="btn" data-act="clearDemo">Retirer les exemples</button>' : '<button class="btn" data-act="loadDemo">Exemples</button>'}</div>
     <button class="btn danger block" data-act="wipe">Tout effacer sur ce téléphone</button></div></section>
-  <p class="faint mono" style="text-align:center;font-size:11px;margin:22px 0 0">Mycota ${APP_VERSION} · météo Open-Meteo · fond © OpenStreetMap</p>`;
+  <p class="faint mono" style="text-align:center;font-size:11px;margin:22px 0 0">Mycota ${APP_VERSION} · météo Open-Meteo · fond © OpenStreetMap</p>
+  <p class="faint mono" style="text-align:center;font-size:11px;margin:6px 0 0">Liste Charente : <a href="${CH_SRC.url}" target="_blank" rel="noopener" style="color:inherit">${esc(CH_SRC.label)}</a></p>`;
   return { html, async mount() { try { const est = await navigator.storage?.estimate?.(); const per = await navigator.storage?.persisted?.(); const el = $('#storage-info'); if (el && est) el.textContent = `${nf.format((est.usage || 0) / 1048576)} Mo utilisés · stockage ${per ? 'protégé' : 'non protégé : installe l’app et exporte régulièrement'}`; } catch { /* rien */ } } };
 };
 
@@ -1500,6 +1517,7 @@ const ACT = {
   taxon(t) { S.draft = null; go('taxon', { key: t.dataset.key }); },
   obs(t) { S.draft = null; go('obs', { sid: t.dataset.sid, i: Number(t.dataset.i) }); },
   photo(t) { viewPhoto(t.dataset.id); },
+  dexList(t) { S.codexF.list = t.dataset.val; render(); },
   dexMode(t) { S.codexF.mode = t.dataset.val; $$('[data-act="dexMode"]').forEach(b => b.setAttribute('aria-pressed', b === t)); renderDex(); },
   async note() {
     const s = openSheet(`<div class="stack"><div><span class="kicker">Sur le terrain</span><h2 class="title" style="font-size:28px;margin-top:4px">Que veux-tu noter ?</h2><div class="mono faint" id="note-pos" style="font-size:12px;margin-top:6px">recherche de ta position…</div></div>
@@ -1706,7 +1724,7 @@ document.addEventListener('change', async e => {
   if (t.dataset.sp !== undefined || t.id === 'o-fr' || t.id === 'f-hyp') {
     const m = matchLatin(t.value);
     const la = t.dataset.sp !== undefined ? $(`#la-${t.dataset.sp}`) : t.id === 'o-fr' ? $('#o-la') : $('#f-latin');
-    if (m && la) { if (!la.value) la.value = m.la; if (m.viaLatin) { t.value = m.fr; la.value = m.la; } }
+    if (m && la) { if (!la.value) la.value = m.la; if (m.viaLatin) { la.value = m.la; t.value = m.fr || ''; } }
     return;
   }
   if (t.dataset.import) { await importFile(t.files[0]); t.value = ''; return; }

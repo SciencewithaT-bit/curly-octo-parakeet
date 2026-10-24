@@ -1,5 +1,5 @@
 /* Mycota — service worker : l'app s'ouvre sans réseau, les tuiles déjà vues restent consultables. */
-const SHELL_CACHE = 'mycota-shell-2.0.0';
+const SHELL_CACHE = 'mycota-shell-2.1.0';
 const TILE_CACHE = 'mycota-tiles';
 const FONT_CACHE = 'mycota-fonts';
 const MAX_TILES = 900;

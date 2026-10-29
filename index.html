@@ -1097,7 +1097,7 @@ class SlipMap {
     if (navigator.onLine && !IN_CLAUDE) {
       const L = LAYERS[this.layer];
       if (!S.settings.tms?.[this.layer] && this.tmsI < L.tms.length - 1) { this.tmsI++; this.reset(); return; }
-      if (this.cors && this.layer !== 'osm' && !this.noCorsTried) { this.noCorsTried = true; this.cors = false; this.reset(); return; }
+      if (this.cors && this.layer !== 'osm' && !this.noCorsTried) { this.noCorsTried = true; this.cors = false; this.tmsI = 0; this.reset(); return; }
     }
     this.onOffline?.();
   }

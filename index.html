@@ -308,6 +308,37 @@ details summary { cursor: pointer; color: var(--green); font-weight: 600; font-s
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 @media (max-width: 370px) { .display { font-size: 46px; } .dex, .hunt { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ---------- V3 ---------- */
+.chip .sw { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2); }
+.chip svg.i { width: 16px; height: 16px; vertical-align: -3px; margin-right: 4px; }
+.btn svg.i { width: 20px; height: 20px; }
+.pinbtn { display: inline-flex; align-items: center; gap: 4px; min-height: 42px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--line-2); background: var(--card); color: var(--ink-2); font-family: var(--f-mono); font-size: 12px; white-space: nowrap; }
+.pinbtn svg.i { width: 18px; height: 18px; }
+.pinbtn[aria-pressed="true"] { color: var(--green); border-color: var(--green); background: var(--green-soft); font-weight: 600; }
+.pt { position: absolute; left: 0; top: 0; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 4px; background: var(--green); border: 2px solid var(--card); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35); padding: 0; }
+.pt.sel { background: var(--tape); width: 24px; height: 24px; margin: -12px 0 0 -12px; }
+.rng { position: relative; height: 10px; margin-top: 8px; background: var(--sunk); border-radius: 2px; }
+.rng i { position: absolute; top: 0; bottom: 0; background: var(--green-soft); box-shadow: inset 0 0 0 1.5px var(--green); border-radius: 2px; }
+.rng b { position: absolute; top: -4px; width: 3px; height: 18px; background: var(--tape); border-radius: 1px; }
+.mbars { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 4px; align-items: end; height: 96px; border-bottom: 1px solid var(--line); }
+.mbar { display: flex; flex-direction: column-reverse; height: 100%; gap: 1px; }
+.mbar i { display: block; border-radius: 2px 2px 0 0; min-height: 3px; }
+.mbar .f { background: var(--green); }
+.mbar .b { background: var(--tape); }
+.mlab { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 4px; margin-top: 4px; font-family: var(--f-mono); font-size: 10px; color: var(--ink-2); text-align: center; }
+.li.multi { display: block; }
+.preview { width: 100%; max-height: 46dvh; object-fit: contain; border-radius: 8px; border: 1px solid var(--line); background: var(--card); }
+.map-full { height: calc(100dvh - var(--tabbar-h) - 214px - env(safe-area-inset-bottom, 0px) - env(safe-area-inset-top, 0px)); }
+.map-note .link { font-size: 12.5px; }
+.backup { display: flex; align-items: center; gap: 10px; }
+.months > span.on { background: var(--green); }
+.months > span.ref { background: repeating-linear-gradient(135deg, var(--tape) 0 3px, transparent 3px 6px); box-shadow: inset 0 0 0 1px var(--tape); }
+.months > span.now { box-shadow: inset 0 -3px 0 var(--ink); }
+.months > span.ref.now { box-shadow: inset 0 0 0 1px var(--tape), inset 0 -3px 0 var(--ink); }
+.months > span.mm { height: auto; background: none; }
+.legend-sq { display: flex; gap: 14px; margin-top: 8px; font-size: 12px; color: var(--ink-2); }
+.legend-sq i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
 </style>
 
 <div id="app" aria-live="polite"></div>
@@ -325,11 +356,11 @@ details summary { cursor: pointer; color: var(--green); font-weight: 600; font-s
 <script>
 'use strict';
 /* ==========================================================================
-   Mycota 2 — carnet de terrain du mycologue, Mycodex de Charente
+   Mycota 3 — carnet de terrain du mycologue, Mycodex de Charente
    Tout reste sur l'appareil : IndexedDB, photos réencodées (sans EXIF),
-   positions chiffrées si un code est défini.
+   positions chiffrées si un code est défini. Aucune identification automatique.
    ========================================================================== */
-const APP_VERSION = '2.1';
+const APP_VERSION = '3.0';
 const IN_CLAUDE = typeof window.claude === 'object' && window.claude !== null;
 const PREFERS_TOUCH = matchMedia('(pointer: coarse)').matches;
 
@@ -347,10 +378,12 @@ const DAYS_S = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
 const nf = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 });
 const startOfDay = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
 const daysBetween = (a, b) => Math.round((startOfDay(b) - startOfDay(a)) / 864e5);
+const doy = d => { const x = new Date(d); return Math.round((startOfDay(x) - new Date(x.getFullYear(), 0, 1)) / 864e5); };
 const fmtDay = iso => { const d = new Date(iso); return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`; };
 const fmtDayNoYear = iso => { const d = new Date(iso); return `${d.getDate()} ${MONTHS[d.getMonth()]}`; };
 const fmtDots = iso => { const d = new Date(iso); return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${String(d.getFullYear()).slice(2)}`; };
 const fmtTime = iso => { const d = new Date(iso); return `${pad(d.getHours())} h ${pad(d.getMinutes())}`; };
+const fmtSize = b => b < 1048576 ? `${Math.max(1, Math.round(b / 1024))} Ko` : `${nf.format(b / 1048576)} Mo`;
 function ago(iso) {
   const n = daysBetween(new Date(iso), new Date());
   if (n < 0) return 'à venir';
@@ -363,6 +396,8 @@ function ago(iso) {
   return `il y a ${y} an${y > 1 ? 's' : ''}`;
 }
 const plural = (n, one, many) => `${nf.format(n)} ${n > 1 ? many : one}`;
+const median = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const slug = s => norm(s).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'fiche';
 const R = 6371000, rad = x => x * Math.PI / 180, deg = x => x * 180 / Math.PI;
 function distance(a, b) {
   const dLat = rad(b.lat - a.lat), dLng = rad(b.lng - a.lng);
@@ -378,7 +413,11 @@ const CARDS = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
 const cardinal = d => CARDS[Math.round(d / 45) % 8];
 const fmtDist = m => m < 1000 ? `${Math.round(m)} m` : `${nf.format(m / 1000)} km`;
 const hasPos = o => !!o && typeof o.lat === 'number' && typeof o.lng === 'number';
+const hasAlt = o => !!o && typeof o.alt === 'number';
 const fmtCoords = o => S.settings.mask ? 'coordonnées masquées' : `${o.lat.toFixed(5)}, ${o.lng.toFixed(5)}`;
+const fmtPosLine = o => hasPos(o) ? [fmtCoords(o), o.acc ? `±${Math.round(o.acc)} m` : '', hasAlt(o) ? `alt. ${Math.round(o.alt)} m` : ''].filter(Boolean).join(' · ') : '';
+const posFields = p => { const o = { lat: p.lat, lng: p.lng, acc: p.acc }; if (hasAlt(p)) o.alt = p.alt; return o; };
+const freshPos = (ms = 10 * 60e3) => hasPos(S.lastPos) && Date.now() - (S.lastPos.at || 0) < ms ? S.lastPos : null;
 const getPath = (o, p) => p.split('.').reduce((a, k) => (a == null ? a : a[k]), o);
 function setPath(o, p, v) { const ks = p.split('.'); const last = ks.pop(); let t = o; for (const k of ks) { if (t[k] == null) t[k] = {}; t = t[k]; } t[last] = v; }
 const norm = s => (s || '').trim().toLowerCase();
@@ -401,6 +440,9 @@ const I = {
   ribbon: ic('<path d="M4 6h16l-3 4 3 4H4z"/><path d="M4 6v15"/>'),
   list: ic('<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>'),
   chev: ic('<path d="M9 5l7 7-7 7"/>'),
+  share: ic('<path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 13v7h14v-7"/>'),
+  layers: ic('<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>'),
+  download: ic('<path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 20h14"/>'),
 };
 const TOPO = `<div class="topo" aria-hidden="true"><svg viewBox="0 0 400 240" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="1.3">
   <path d="M-10 60 C60 30 120 90 200 60 S330 20 410 50"/><path d="M-10 86 C70 58 130 118 210 88 S330 48 410 78"/><path d="M-10 114 C80 88 140 146 220 116 S330 78 410 108"/>
@@ -472,6 +514,7 @@ const FOREST = ['Chênaie', 'Hêtraie', 'Châtaigneraie', 'Charmaie', 'Chênaie-
 const SOL = ['Sec', 'Frais', 'Humide', 'Détrempé'];
 const CIEL = ['Soleil', 'Nuageux', 'Pluie', 'Brouillard', 'Gelée', 'Vent'];
 const SPOREE = ['Blanche', 'Crème', 'Jaune', 'Rose', 'Ocre', 'Brun rouille', 'Brun olive', 'Brun pourpre', 'Noire'];
+const SPOREE_C = { 'Blanche': '#F7F5EE', 'Crème': '#EDE0BE', 'Jaune': '#E5C65C', 'Rose': '#E5ABA2', 'Ocre': '#C98B3E', 'Brun rouille': '#9B4F23', 'Brun olive': '#6F6A3B', 'Brun pourpre': '#5A3341', 'Noire': '#1D1A19' };
 const ODEURS = ['Aucune', 'Fongique', 'Farine', 'Anis', 'Radis', 'Fruitée', 'Iode', 'Désagréable'];
 const CERT = ['Certaine', 'Probable', 'À confirmer'];
 const METH = ['Macroscopie', 'Sporée', 'Réactifs', 'Microscopie'];
@@ -479,6 +522,7 @@ const SUBSTRAT = ['Sol', 'Litière', 'Bois mort', 'Bois vivant', 'Mousse', 'Herb
 const SOLTYPE = ['Calcaire', 'Neutre', 'Acide'];
 const STADE = ['Primordia', 'Jeunes', 'Matures', 'Âgés'];
 const REPART = ['Isolés', 'Dispersés', 'Groupés', 'Cespiteux', 'En rond'];
+const PRELEV = ['Laissé en place', 'Photographié', 'Prélevé pour détermination', 'Récolté'];
 const HOTES = ['Quercus robur', 'Quercus petraea', 'Quercus pubescens', 'Fagus sylvatica', 'Castanea sativa', 'Carpinus betulus', 'Pinus sylvestris', 'Pinus pinaster', 'Betula pendula', 'Corylus avellana', 'Picea abies', 'Abies alba'];
 const PLANS = [['chapeau', 'chapeau'], ['lames', 'hyméno.'], ['pied', 'pied'], ['base', 'base'], ['coupe', 'coupe']];
 const STEPS = [
@@ -521,7 +565,7 @@ const DB = {
   clear(s) { return this.run(s, 'readwrite', st => st.clear()); },
 };
 
-/* ---------- coffre ---------- */
+/* ---------- coffre : positions des spots, sorties, spécimens et observations ---------- */
 const b64 = u8 => { let s = ''; u8.forEach(c => { s += String.fromCharCode(c); }); return btoa(s); };
 const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 const Vault = {
@@ -533,11 +577,38 @@ const Vault = {
   async enc(obj) { const iv = crypto.getRandomValues(new Uint8Array(12)); const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, this.key, new TextEncoder().encode(JSON.stringify(obj))); return { iv: b64(iv), ct: b64(new Uint8Array(ct)) }; },
   async dec(e) { const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(e.iv) }, this.key, unb64(e.ct)); return JSON.parse(new TextDecoder().decode(pt)); },
 };
-async function pack(rec) { if (!Vault.key || !hasPos(rec)) return rec; const { lat, lng, acc, ...rest } = rec; return { ...rest, enc: await Vault.enc({ lat, lng, acc }) }; }
-async function unpack(rec) { if (!rec || !rec.enc) return rec; const { enc, ...rest } = rec; if (!Vault.key) return rest; try { return { ...rest, ...(await Vault.dec(enc)) }; } catch { return rest; } }
+const POS_KEYS = ['lat', 'lng', 'acc', 'alt'];
+const pick = (o, keys) => Object.fromEntries(keys.filter(k => o[k] !== undefined && o[k] !== null).map(k => [k, o[k]]));
+const omit = (o, keys) => Object.fromEntries(Object.entries(o).filter(([k]) => !keys.includes(k)));
+async function pack(rec) {
+  if (!Vault.key) return rec;
+  const payload = hasPos(rec) ? pick(rec, POS_KEYS) : {};
+  const op = (rec.obs || []).map((o, i) => hasPos(o) ? { i, ...pick(o, POS_KEYS) } : null).filter(Boolean);
+  if (op.length) payload.obs = op;
+  if (!Object.keys(payload).length) return rec;
+  const out = omit(rec, POS_KEYS);
+  if (out.obs) out.obs = out.obs.map(o => omit(o, POS_KEYS));
+  out.enc = await Vault.enc(payload);
+  return out;
+}
+async function unpack(rec) {
+  if (!rec || !rec.enc) return rec;
+  const { enc, ...rest } = rec;
+  if (!Vault.key) return rest;
+  try {
+    const { obs: op, ...top } = await Vault.dec(enc);
+    const out = { ...rest, ...top };
+    if (op && out.obs) { out.obs = out.obs.map(o => ({ ...o })); op.forEach(({ i, ...p }) => { if (out.obs[i]) Object.assign(out.obs[i], p); }); }
+    return out;
+  } catch { return rest; }
+}
 
 /* ---------- état ---------- */
-const S = { spots: [], sorties: [], specimens: [], settings: { mask: false }, climate: null, lastPos: null, vault: null, seen: {}, view: 'carnet', params: {}, draft: null, unmount: null };
+const S = {
+  spots: [], sorties: [], specimens: [], settings: { mask: false, layer: 'plan', observer: '', tms: {}, mapObs: true },
+  climate: null, lastPos: null, vault: null, seen: {}, taxnotes: {}, backup: null, offline: null, spotwx: {},
+  view: 'carnet', params: {}, draft: null, unmount: null,
+};
 const STORE_OF = { spot: 'spots', sortie: 'sorties', specimen: 'specimens' };
 async function saveRec(kind, rec) {
   const store = STORE_OF[kind];
@@ -560,15 +631,21 @@ async function deleteRec(kind, id) {
   for (const p of photosOfRec(rec)) await DB.del('photos', p).catch(() => {});
 }
 const metaPut = (id, value) => DB.put('meta', { id, value }).catch(() => {});
+const saveSettings = () => metaPut('settings', S.settings);
 async function loadAll() {
   const [sp, so, sm, meta] = await Promise.all(['spots', 'sorties', 'specimens', 'meta'].map(s => DB.all(s).catch(() => [])));
   S.spots = await Promise.all(sp.map(unpack));
   S.sorties = await Promise.all(so.map(unpack));
   S.specimens = await Promise.all(sm.map(unpack));
   const m = Object.fromEntries(meta.map(x => [x.id, x.value]));
-  S.settings = { mask: false, ...(m.settings || {}) };
+  S.settings = { mask: false, layer: 'plan', observer: '', tms: {}, mapObs: true, ...(m.settings || {}) };
+  if (!LAYERS[S.settings.layer]) S.settings.layer = 'plan';
   S.climate = m.climate || null;
   S.seen = m.seen || {};
+  S.taxnotes = m.taxnotes || {};
+  S.backup = m.backup || null;
+  S.offline = m.offline || null;
+  S.spotwx = m.spotwx || {};
 }
 
 /* ---------- requêtes dérivées ---------- */
@@ -577,6 +654,7 @@ const sortiesOf = spotId => S.sorties.filter(s => s.spotId === spotId).sort((a, 
 const countOf = so => (so.obs || []).reduce((n, o) => n + (Number(o.count) || 0), 0);
 const fruitful = so => (so.obs || []).some(o => (o.species || o.latin || '').trim());
 const posOfSortie = so => hasPos(so) ? so : spotById(so.spotId);
+const posOfObs = (so, o) => hasPos(o) ? o : posOfSortie(so);
 function markOfSpot(spot) {
   const last = sortiesOf(spot.id)[0];
   if (!last || daysBetween(new Date(last.date), new Date()) > 300) return '';
@@ -593,6 +671,7 @@ function taxonOf(o) {
   return ALL_BY_LA.get(norm(o.latin)) || REF_BY_FR.get(norm(o.species)) || ALL_BY_LA.get(norm(o.species)) || null;
 }
 const keyOf = o => { const t = taxonOf(o); return t ? norm(t.la) : norm(o.latin || o.species); };
+const nameOf = o => { const t = taxonOf(o); return t?.fr || o.species || o.latin || ''; };
 function allObs() {
   const out = [];
   S.sorties.forEach(so => (so.obs || []).forEach((o, i) => { if ((o.species || o.latin || '').trim()) out.push({ so, o, i }); }));
@@ -629,6 +708,57 @@ function matchLatin(name) {
   for (const { o } of allObs()) if (norm(o.species) === k && o.latin) return { fr: name.trim(), la: o.latin };
   return null;
 }
+const uniqSorties = list => [...new Map(list.map(x => [x.so.id, x.so])).values()];
+
+/* ---------- repères : pluie et température avant tes sorties ---------- */
+function rainStats(sorties) {
+  const v = sorties.filter(s => s.wx && typeof s.wx.mm === 'number');
+  if (!v.length) return null;
+  const mm = v.map(s => s.wx.mm), t = v.map(s => s.wx.t).filter(x => typeof x === 'number');
+  return { n: v.length, min: Math.min(...mm), max: Math.max(...mm), med: median(mm), tmin: t.length ? Math.min(...t) : null, tmax: t.length ? Math.max(...t) : null };
+}
+const rangeTxt = st => st.min === st.max ? `${nf.format(st.min)} mm` : `${nf.format(st.min)} à ${nf.format(st.max)} mm`;
+function rangeBar(st, now) {
+  const top = Math.max(40, st.max * 1.3, typeof now === 'number' ? now * 1.15 : 0);
+  const L = st.min / top * 100, W = Math.max(1.5, (st.max - st.min) / top * 100);
+  return `<div class="rng" aria-hidden="true"><i style="left:${L}%;width:${W}%"></i>${typeof now === 'number' ? `<b style="left:calc(${Math.min(100, now / top * 100)}% - 1px)"></b>` : ''}</div>`;
+}
+const vsTxt = (st, now) => typeof now !== 'number' ? '' : now < st.min ? 'en dessous' : now > st.max ? 'au-dessus' : 'dans ta fourchette';
+const rainNow = () => { const rs = rainSummary(); return rs && Date.now() - S.climate.at < 36 * 3600e3 ? rs.r10 : null; };
+function speciesWindows() {
+  return [...codexIndex().values()].map(e => { const st = rainStats(uniqSorties(e.list)); return st ? { e, st } : null; }).filter(Boolean).sort((a, b) => b.st.n - a.st.n || b.e.n - a.e.n);
+}
+function phenology(e) {
+  const by = new Map();
+  e.list.forEach(({ so, o }) => { const y = new Date(so.date).getFullYear(); const r = by.get(y) || { y, first: so.date, last: so.date, n: 0, visits: 0 }; if (so.date < r.first) r.first = so.date; if (so.date > r.last) r.last = so.date; r.n += Number(o.count) || 0; r.visits++; by.set(y, r); });
+  return [...by.values()].sort((a, b) => b.y - a.y);
+}
+/** Ce que tu notais à la même époque les années passées, et les spots qui donnaient ce mois-ci. */
+function memories() {
+  const now = new Date(), y = now.getFullYear(), today = doy(now), m = now.getMonth();
+  const same = S.sorties.filter(so => { const d = new Date(so.date); return d.getFullYear() < y && Math.abs(doy(d) - today) <= 10; }).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
+  const revisit = S.spots.map(sp => {
+    const so = sortiesOf(sp.id);
+    const good = so.filter(s => fruitful(s) && new Date(s.date).getMonth() === m && new Date(s.date).getFullYear() < y);
+    if (!good.length) return null;
+    const since = so[0] ? daysBetween(new Date(so[0].date), now) : null;
+    if (since !== null && since < 10) return null;
+    return { sp, years: [...new Set(good.map(s => new Date(s.date).getFullYear()))].sort((a, b) => b - a), since };
+  }).filter(Boolean).slice(0, 3);
+  return { same, revisit };
+}
+/** Sauvegarde : les données ne vivent que sur ce téléphone. */
+function backupState() {
+  const recs = [...S.spots, ...S.sorties, ...S.specimens].filter(r => !r.demo);
+  if (!recs.length) return null;
+  const last = recs.reduce((a, r) => (r.updatedAt || '') > a ? r.updatedAt : a, '');
+  const at = S.backup?.at || null;
+  if (at && at >= last) return { ok: true, at };
+  const first = recs.reduce((a, r) => (r.createdAt || last) < a ? r.createdAt : a, last);
+  const days = daysBetween(new Date(at || first), new Date());
+  const real = S.sorties.filter(s => !s.demo).length;
+  return { ok: false, at, days, due: at ? days >= 7 : (real >= 2 || days >= 3) };
+}
 
 /* ---------- complétude d'une fiche d'observation ---------- */
 const CHECKS = [
@@ -662,6 +792,9 @@ function progress() {
     sporees: obs.filter(x => x.o.sporee).length + S.specimens.filter(s => s.sporee).length,
     mesures: obs.filter(x => x.o.capMin || x.o.capMax).length,
     verif: obs.filter(x => (x.o.verif || '').trim()).length,
+    points: obs.filter(x => hasPos(x.o)).length,
+    herbier: obs.filter(x => (x.o.recnum || '').trim()).length,
+    pheno: [...idx.values()].filter(e => new Set(e.list.map(x => new Date(x.so.date).getFullYear())).size >= 2).length,
     milieux, saisons, spots: S.spots.length, groupsDone,
     especes: [...idx.values()].filter(e => e.ref).length,
   };
@@ -674,7 +807,10 @@ const RIBBONS = [
   ['cinq', 'Cinq plans', 'La série photo complète sur une observation.', p => p.cinq, 1],
   ['sporee', 'Sporée', 'Dix sporées notées.', p => p.sporees, 10],
   ['mesure', 'Pied à coulisse', 'Dix observations mesurées.', p => p.mesures, 10],
+  ['point', 'Point précis', 'Dix observations avec leur propre point GPS.', p => p.points, 10],
   ['avis', 'Deuxième avis', 'Une détermination vérifiée par quelqu’un d’autre.', p => p.verif, 1],
+  ['herbier', 'Herbier', 'Une récolte numérotée pour ton herbier.', p => p.herbier, 1],
+  ['pheno', 'Phénologue', 'Une même espèce notée deux années différentes.', p => p.pheno, 1],
   ['milieux', 'Nouveaux milieux', 'Trois types de milieux prospectés.', p => p.milieux, 3],
   ['saisons', 'Quatre saisons', 'Une observation à chaque saison.', p => p.saisons, 4],
   ['spots', 'Défricheur', 'Cinq spots marqués.', p => p.spots, 5],
@@ -732,6 +868,10 @@ async function photoURL(id, full = false) {
   if (!p) return null;
   const u = URL.createObjectURL(full ? p.blob : (p.thumb || p.blob)); urlCache.set(k, u); return u;
 }
+async function photoImg(id) {
+  const u = id ? await photoURL(id, true) : null; if (!u) return null;
+  return new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = u; });
+}
 function hydratePhotos(root) { $$('img[data-photo]', root).forEach(async img => { const u = await photoURL(img.dataset.photo); if (u) img.src = u; }); }
 async function viewPhoto(id) {
   const u = await photoURL(id, true); if (!u) return;
@@ -740,13 +880,17 @@ async function viewPhoto(id) {
   v.addEventListener('click', () => v.remove()); document.body.appendChild(v);
 }
 
-/* ---------- position ---------- */
+/* ---------- position (et altitude quand le GPS la donne) ---------- */
 function getPos(timeout = 15000) {
   return new Promise(res => {
     if (!('geolocation' in navigator)) return res({ error: 'unsupported' });
     try {
       navigator.geolocation.getCurrentPosition(
-        p => { const v = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy, at: Date.now() }; S.lastPos = v; res(v); },
+        p => {
+          const c = p.coords; const v = { lat: c.latitude, lng: c.longitude, acc: c.accuracy, at: Date.now() };
+          if (typeof c.altitude === 'number' && Number.isFinite(c.altitude)) v.alt = Math.round(c.altitude);
+          S.lastPos = v; res(v);
+        },
         e => res({ error: e.code === 1 ? 'denied' : 'unavailable' }),
         { enableHighAccuracy: true, timeout, maximumAge: 20000 });
     } catch { res({ error: 'unavailable' }); }
@@ -756,7 +900,7 @@ const posError = e => e === 'denied' ? 'Position refusée. Autorise la localisat
   : IN_CLAUDE ? "La position n'est pas accessible dans l'aperçu claude.ai. Elle fonctionne dans la version installée."
   : 'Position introuvable pour le moment. Réessaie à découvert.';
 
-/* ---------- météo ---------- */
+/* ---------- météo (Open-Meteo, coordonnées arrondies à ~1 km) ---------- */
 async function getJSON(url, ms = 12000) {
   const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), ms);
   try { const r = await fetch(url, { signal: ctl.signal }); if (!r.ok) throw new Error('http ' + r.status); return await r.json(); } finally { clearTimeout(t); }
@@ -764,23 +908,27 @@ async function getJSON(url, ms = 12000) {
 async function fetchClimate(pos) {
   const j = await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${pos.lat.toFixed(2)}&longitude=${pos.lng.toFixed(2)}&daily=precipitation_sum,temperature_2m_max,temperature_2m_min&past_days=30&forecast_days=7&timezone=auto`);
   const d = j.daily;
-  const c = { at: Date.now(), place: pos.place || 'Autour de toi', days: d.time.map((t, i) => ({ d: t, mm: d.precipitation_sum[i], tmax: d.temperature_2m_max[i], tmin: d.temperature_2m_min[i] })) };
+  const c = { at: Date.now(), place: pos.place || 'Autour de toi', lat: +pos.lat.toFixed(2), lng: +pos.lng.toFixed(2), days: d.time.map((t, i) => ({ d: t, mm: d.precipitation_sum[i], tmax: d.temperature_2m_max[i], tmin: d.temperature_2m_min[i] })) };
   S.climate = c; metaPut('climate', c); return c;
 }
 async function rainBefore(pos, dateStr) {
   const end = new Date(dateStr); const start = new Date(end); start.setDate(start.getDate() - 9);
   const age = daysBetween(end, new Date()); if (age < 0) return null;
   const host = age > 80 ? 'https://archive-api.open-meteo.com/v1/archive' : 'https://api.open-meteo.com/v1/forecast';
-  const j = await getJSON(`${host}?latitude=${pos.lat.toFixed(2)}&longitude=${pos.lng.toFixed(2)}&daily=precipitation_sum&start_date=${dayISO(start)}&end_date=${dayISO(end)}&timezone=auto`);
-  const vals = (j.daily?.precipitation_sum || []).filter(v => typeof v === 'number');
+  const j = await getJSON(`${host}?latitude=${pos.lat.toFixed(2)}&longitude=${pos.lng.toFixed(2)}&daily=precipitation_sum,temperature_2m_max,temperature_2m_min&start_date=${dayISO(start)}&end_date=${dayISO(end)}&timezone=auto`);
+  const d = j.daily || {};
+  const vals = (d.precipitation_sum || []).filter(v => typeof v === 'number');
   if (!vals.length) return null;
-  return { mm: Math.round(vals.reduce((a, b) => a + b, 0) * 10) / 10, days: 10, at: Date.now() };
+  const temps = (d.temperature_2m_max || []).map((mx, i) => typeof mx === 'number' && typeof d.temperature_2m_min?.[i] === 'number' ? (mx + d.temperature_2m_min[i]) / 2 : null).filter(v => v !== null);
+  const wx = { mm: Math.round(vals.reduce((a, b) => a + b, 0) * 10) / 10, days: 10, at: Date.now(), v: 2 };
+  if (temps.length) wx.t = Math.round(temps.reduce((a, b) => a + b, 0) / temps.length * 10) / 10;
+  return wx;
 }
 let syncing = false;
 async function syncWeather() {
   if (syncing || !navigator.onLine) return; syncing = true;
   try {
-    const todo = S.sorties.filter(so => !so.wx && !so.demo && hasPos(posOfSortie(so)) && daysBetween(new Date(so.date), new Date()) >= 0).slice(0, 8);
+    const todo = S.sorties.filter(so => (!so.wx || so.wx.v !== 2) && !so.demo && hasPos(posOfSortie(so)) && daysBetween(new Date(so.date), new Date()) >= 0).slice(0, 8);
     for (const so of todo) { try { const wx = await rainBefore(posOfSortie(so), so.date); if (wx) { so.wx = wx; await saveRec('sortie', so); } } catch { break; } }
   } finally { syncing = false; }
 }
@@ -790,6 +938,17 @@ function rainSummary(c = S.climate) {
   const sum = n => Math.round(past.slice(-n).reduce((a, x) => a + (x.mm || 0), 0) * 10) / 10;
   let lastWet = null; for (let i = past.length - 1; i >= 0; i--) if ((past[i].mm || 0) >= 5) { lastWet = past[i]; break; }
   return { r10: sum(10), r30: sum(30), lastWet, next: c.days.find(x => x.d > today && (x.mm || 0) >= 2) };
+}
+async function refreshClimateQuiet() {
+  if (!navigator.onLine || IN_CLAUDE || !S.climate || typeof S.climate.lat !== 'number' || Date.now() - S.climate.at < 3 * 3600e3) return;
+  try { await fetchClimate({ lat: S.climate.lat, lng: S.climate.lng, place: S.climate.place }); if (S.view === 'carnet' || S.view === 'climat') render(); } catch { /* hors réseau */ }
+}
+async function spotRainNow(sp) {
+  const c = S.spotwx[sp.id];
+  if (c && Date.now() - c.at < 3 * 3600e3) return c;
+  if (!navigator.onLine || IN_CLAUDE || !hasPos(sp)) return c || null;
+  try { const wx = await rainBefore(sp, localISO()); if (wx) { S.spotwx[sp.id] = { mm: wx.mm, t: wx.t, at: Date.now() }; metaPut('spotwx', S.spotwx); } } catch { /* hors réseau */ }
+  return S.spotwx[sp.id] || null;
 }
 
 /* ---------- fichiers ---------- */
@@ -810,6 +969,25 @@ async function saveFile(name, blob) {
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
   return true;
 }
+async function shareFile(name, blob, text) {
+  if (!IN_CLAUDE && text && navigator.canShare) {
+    const file = new File([blob], name, { type: blob.type });
+    if (navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], text }); return true; } catch (e) { if (e && e.name === 'AbortError') return false; }
+    }
+  }
+  return saveFile(name, blob);
+}
+/** Prépare un fichier puis le propose d'un geste : iOS exige un toucher frais pour partager. */
+function offerFile(name, blob, { title = 'Fichier prêt', text = '', preview = false, onDone } = {}) {
+  const url = preview ? URL.createObjectURL(blob) : null;
+  const s = openSheet(`<div class="stack"><h2 class="title" style="font-size:28px">${esc(title)}</h2>
+    ${url ? `<img class="preview" src="${url}" alt="Aperçu de l'image">` : ''}
+    <div class="mono faint" style="font-size:12px">${esc(name)} · ${fmtSize(blob.size)}</div>
+    <button class="btn ink big block" id="of-go">${I.share} Envoyer ou enregistrer</button></div>`);
+  $('#of-go', s).onclick = async () => { const ok = await shareFile(name, blob, text); if (ok) { closeSheet(); onDone?.(); } };
+  return s;
+}
 
 /* ---------- interface commune ---------- */
 let toastT = null;
@@ -826,17 +1004,19 @@ function openSheet(html) {
   s.addEventListener('click', e => { if (e.target === s) closeSheet(); });
   document.body.appendChild(s); return s;
 }
-const closeSheet = () => $('#scrim')?.remove();
+const closeSheet = () => { const s = $('#scrim'); if (!s) return; $$('img.preview', s).forEach(i => URL.revokeObjectURL(i.src)); s.remove(); };
 function confirmSheet({ title, text, ok, danger = true, onOk }) {
   const s = openSheet(`<div class="stack"><h2 class="title" style="font-size:28px">${esc(title)}</h2>${text ? `<p class="muted" style="margin:0">${esc(text)}</p>` : ''}
     <div class="btn-row"><button class="btn" data-x="no">Annuler</button><button class="btn ${danger ? 'danger' : 'ink'}" data-x="ok">${esc(ok)}</button></div></div>`);
   $('[data-x="no"]', s).onclick = closeSheet;
   $('[data-x="ok"]', s).onclick = async () => { closeSheet(); await onOk(); };
 }
+const toggleChip = el => { el.onclick = () => el.setAttribute('aria-pressed', el.getAttribute('aria-pressed') !== 'true'); };
+const pressed = el => el?.getAttribute('aria-pressed') === 'true';
 const topbar = (title, right = '') => `<header class="bar"><button class="icon-btn" data-act="back" aria-label="Retour">${I.back}</button><div class="bar-title">${esc(title)}</div>${right || '<span style="width:44px"></span>'}</header>`;
-const chips = (path, items, value, multi = false, sq = false) => `<div class="chips" role="group">${items.map(v => {
+const chips = (path, items, value, multi = false, sq = false, sw = null) => `<div class="chips" role="group">${items.map(v => {
   const on = multi ? (value || []).includes(v) : value === v;
-  return `<button type="button" class="chip${sq ? ' sq' : ''}" data-act="fchip" data-path="${path}" data-val="${esc(v)}" data-multi="${multi ? 1 : 0}" aria-pressed="${on}">${esc(v)}</button>`;
+  return `<button type="button" class="chip${sq ? ' sq' : ''}" data-act="fchip" data-path="${path}" data-val="${esc(v)}" data-multi="${multi ? 1 : 0}" aria-pressed="${on}">${sw ? `<span class="sw" style="background:${sw[v]}"></span>` : ''}${esc(v)}</button>`;
 }).join('')}</div>`;
 const photoGrid = (ids, editable, target = 'draft') => `<div class="photos">${ids.map(id => `<div style="position:relative"><button class="ph" data-act="photo" data-id="${id}" aria-label="Voir la photo"><img data-photo="${id}" alt=""></button>${editable ? `<button class="ph-x x" style="position:absolute;top:4px;right:4px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(17,24,20,.65);color:#F3F4EE" data-act="photoDel" data-id="${id}" data-target="${target}" aria-label="Retirer la photo">✕</button>` : ''}</div>`).join('')}
   ${editable ? `<label class="ph ph-add">${I.camera}<span>photo</span><input type="file" class="vh" accept="image/*" capture="environment" data-photo-in="${target}"></label>
@@ -861,6 +1041,7 @@ const TABS = ['carnet', 'codex', 'carte', 'climat'];
 function render() {
   const app = $('#app');
   const V = VIEWS[S.view] || VIEWS.carnet;
+  S.unmount?.(); S.unmount = null;
   const out = V(S.params) || { html: '' };
   app.innerHTML = out.html;
   const tabbed = TABS.includes(S.view);
@@ -870,30 +1051,62 @@ function render() {
   S.unmount = out.unmount || null; out.mount?.(); hydratePhotos(app);
 }
 
-/* ---------- carte glissante (tuiles OpenStreetMap) ---------- */
+/* ---------- fonds de carte : Plan IGN, photographies aériennes IGN, OpenStreetMap ---------- */
 const TS = 256;
 const lng2x = (lng, z) => (lng + 180) / 360 * TS * 2 ** z;
 const lat2y = (lat, z) => { const r = rad(Math.max(-85, Math.min(85, lat))); return (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * TS * 2 ** z; };
 const x2lng = (x, z) => x / (TS * 2 ** z) * 360 - 180;
 const y2lat = (y, z) => { const n = Math.PI - 2 * Math.PI * y / (TS * 2 ** z); return deg(Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)))); };
+const IGN = (layer, fmt) => (z, x, y, tms) => `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=${layer}&STYLE=normal&FORMAT=${fmt}&TILEMATRIXSET=${tms}&TILEMATRIX=${z}&TILEROW=${y}&TILECOL=${x}`;
+const LAYERS = {
+  plan: { label: 'Plan IGN', attr: '© IGN · Plan IGN', max: 19, tms: ['PM_0_19', 'PM'], url: IGN('GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2', 'image/png'), kb: 18 },
+  ortho: { label: 'Photo IGN', attr: '© IGN · photographies aériennes', max: 19, tms: ['PM', 'PM_0_19'], url: IGN('ORTHOIMAGERY.ORTHOPHOTOS', 'image/jpeg'), kb: 30 },
+  osm: { label: 'OSM', attr: '© OpenStreetMap', max: 19, tms: [''], url: (z, x, y) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`, kb: 14 },
+};
+const OFFLINE_LAYERS = ['plan', 'ortho'];
+const tmsOf = k => S.settings.tms?.[k] || LAYERS[k].tms[0];
+const tileURL = (k, z, x, y, tms = tmsOf(k)) => LAYERS[k].url(z, x, y, tms);
 class SlipMap {
-  constructor(el, { center, zoom = 13, onMove, onTap } = {}) {
+  constructor(el, { center, zoom = 13, onMove, onTap, layer } = {}) {
     this.el = el; this.c = center || { lat: 46.6, lng: 2.4 }; this.z = zoom; this.onMove = onMove; this.onTap = onTap;
+    this.layer = LAYERS[layer] ? layer : 'plan'; this.tmsI = 0; this.gen = 0; this.cors = !IN_CLAUDE;
     this.tiles = new Map(); this.marks = []; this.ptr = new Map(); this.miss = 0; this.ok = 0;
     el.classList.add('map');
-    el.insertAdjacentHTML('afterbegin', '<div class="map-tiles"></div><div class="map-marks"></div><div class="map-attr">© OpenStreetMap</div>');
-    this.tl = $('.map-tiles', el); this.ml = $('.map-marks', el);
+    el.insertAdjacentHTML('afterbegin', '<div class="map-tiles"></div><div class="map-marks"></div><div class="map-attr"></div>');
+    this.tl = $('.map-tiles', el); this.ml = $('.map-marks', el); this.at = $('.map-attr', el); this.at.textContent = LAYERS[this.layer].attr;
     this.down = this.down.bind(this); this.move = this.move.bind(this); this.up = this.up.bind(this); this.wheel = this.wheel.bind(this);
     el.addEventListener('pointerdown', this.down); el.addEventListener('wheel', this.wheel, { passive: false });
     el.addEventListener('dblclick', e => { const r = el.getBoundingClientRect(); this.zoomAbout(this.z + 1, e.clientX - r.left, e.clientY - r.top); });
     this.ro = new ResizeObserver(() => this.draw()); this.ro.observe(el); this.draw();
   }
   get W() { return this.el.clientWidth; } get H() { return this.el.clientHeight; }
+  setLayer(k) { if (!LAYERS[k] || k === this.layer) return; this.layer = k; this.tmsI = 0; this.cors = !IN_CLAUDE; this.noCorsTried = false; this.at.textContent = LAYERS[k].attr; this.reset(); }
+  reset() { this.gen++; this.ok = 0; this.miss = 0; for (const img of this.tiles.values()) img.remove(); this.tiles.clear(); this.draw(); }
+  curTms() { const L = LAYERS[this.layer]; return S.settings.tms?.[this.layer] || L.tms[Math.min(this.tmsI, L.tms.length - 1)]; }
+  tileOk(img) {
+    if (img.gen !== this.gen) return;
+    this.ok++;
+    const k = this.layer;
+    if (LAYERS[k].tms.length > 1 && !S.settings.tms?.[k]) { S.settings.tms = { ...(S.settings.tms || {}), [k]: this.curTms() }; saveSettings(); }
+  }
+  /** Erreurs de tuiles : on essaie l'autre grille IGN tant qu'aucune n'a été validée, puis sans CORS, puis on prévient. */
+  tileErr(img) {
+    if (img.gen !== this.gen) return;
+    img.classList.add('miss'); this.miss++;
+    if (this.ok || this.miss < 3) return;
+    if (navigator.onLine && !IN_CLAUDE) {
+      const L = LAYERS[this.layer];
+      if (!S.settings.tms?.[this.layer] && this.tmsI < L.tms.length - 1) { this.tmsI++; this.reset(); return; }
+      if (this.cors && this.layer !== 'osm' && !this.noCorsTried) { this.noCorsTried = true; this.cors = false; this.reset(); return; }
+    }
+    this.onOffline?.();
+  }
   screenOf(p) { return { x: this.W / 2 + lng2x(p.lng, this.z) - lng2x(this.c.lng, this.z), y: this.H / 2 + lat2y(p.lat, this.z) - lat2y(this.c.lat, this.z) }; }
   draw() { if (this.raf) return; this.raf = requestAnimationFrame(() => { this.raf = 0; this.paint(); }); }
   paint() {
     const W = this.W, H = this.H; if (!W || !H) return;
-    const zi = Math.max(0, Math.min(19, Math.round(this.z))), s = 2 ** (this.z - zi), ts = TS * s, n = 2 ** zi;
+    const L = LAYERS[this.layer], tms = this.curTms();
+    const zi = Math.max(0, Math.min(L.max, Math.round(this.z))), s = 2 ** (this.z - zi), ts = TS * s, n = 2 ** zi;
     const left = W / 2 - lng2x(this.c.lng, zi) * s, top = H / 2 - lat2y(this.c.lat, zi) * s;
     const keep = new Set();
     for (let x = Math.floor(-left / ts); x <= Math.floor((W - left) / ts); x++) for (let y = Math.floor(-top / ts); y <= Math.floor((H - top) / ts); y++) {
@@ -901,11 +1114,11 @@ class SlipMap {
       const xx = ((x % n) + n) % n, key = `${zi}/${x}/${y}`;
       let img = this.tiles.get(key);
       if (!img) {
-        img = new Image(); img.className = 'tile'; img.alt = ''; img.draggable = false; img.decoding = 'async';
-        if (!IN_CLAUDE) img.crossOrigin = 'anonymous';
-        img.onload = () => { this.ok++; };
-        img.onerror = () => { img.classList.add('miss'); this.miss++; if (this.miss > 3 && !this.ok) this.onOffline?.(); };
-        img.src = `https://tile.openstreetmap.org/${zi}/${xx}/${y}.png`;
+        img = new Image(); img.className = 'tile'; img.alt = ''; img.draggable = false; img.decoding = 'async'; img.gen = this.gen;
+        if (this.cors) img.crossOrigin = 'anonymous';
+        img.onload = () => this.tileOk(img);
+        img.onerror = () => this.tileErr(img);
+        img.src = tileURL(this.layer, zi, xx, y, tms);
         this.tl.appendChild(img); this.tiles.set(key, img);
       }
       img.style.width = img.style.height = (ts + 0.5) + 'px';
@@ -920,7 +1133,7 @@ class SlipMap {
     list.forEach(m => { const el = document.createElement(m.tag || 'button'); el.className = m.cls; if (m.style) el.setAttribute('style', m.style); if (m.html) el.innerHTML = m.html; if (m.id) el.dataset.id = m.id; if (m.label) el.setAttribute('aria-label', m.label); this.ml.appendChild(el); this.marks.push({ el, pos: m.pos }); });
     this.draw();
   }
-  setView(c, z) { this.c = { lat: c.lat, lng: c.lng }; if (z != null) this.z = Math.max(3, Math.min(18, z)); this.draw(); this.onMove?.(this.c); }
+  setView(c, z) { this.c = { lat: c.lat, lng: c.lng }; if (z != null) this.z = Math.max(3, Math.min(18.5, z)); this.draw(); this.onMove?.(this.c); }
   fit(points, maxZ = 15) {
     if (!points.length) return; if (points.length === 1) return this.setView(points[0], maxZ);
     const lats = points.map(p => p.lat), lngs = points.map(p => p.lng);
@@ -929,7 +1142,7 @@ class SlipMap {
     this.setView({ lat: (box.n + box.s) / 2, lng: (box.e + box.w) / 2 }, z);
   }
   zoomAbout(nz, px, py) {
-    nz = Math.max(3, Math.min(18, nz));
+    nz = Math.max(3, Math.min(18.5, nz));
     const wx = lng2x(this.c.lng, this.z) + px - this.W / 2, wy = lat2y(this.c.lat, this.z) + py - this.H / 2;
     const pt = { lng: x2lng(wx, this.z), lat: y2lat(wy, this.z) };
     const cx = lng2x(pt.lng, nz) - (px - this.W / 2), cy = lat2y(pt.lat, nz) - (py - this.H / 2);
@@ -966,6 +1179,171 @@ class SlipMap {
   destroy() { this.ro.disconnect(); window.removeEventListener('pointermove', this.move); window.removeEventListener('pointerup', this.up); }
 }
 
+/* ---------- carte hors ligne : tuiles IGN autour des spots (jamais OpenStreetMap) ---------- */
+const OFFLINE_CACHE = 'mycota-offline';
+function offlineTiles(layers, radius = 1000) {
+  const seen = new Set(), out = [];
+  const pts = S.spots.filter(hasPos);
+  for (const k of layers) for (const sp of pts) for (let z = 13; z <= 17; z++) {
+    const dLat = radius / 111320, dLng = radius / (111320 * Math.cos(rad(sp.lat)));
+    const x0 = Math.floor(lng2x(sp.lng - dLng, z) / TS), x1 = Math.floor(lng2x(sp.lng + dLng, z) / TS);
+    const y0 = Math.floor(lat2y(sp.lat + dLat, z) / TS), y1 = Math.floor(lat2y(sp.lat - dLat, z) / TS);
+    for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) { const key = `${k}/${z}/${x}/${y}`; if (!seen.has(key)) { seen.add(key); out.push({ k, z, x, y }); } }
+  }
+  return out;
+}
+async function validTms(k, probe) {
+  if (S.settings.tms?.[k]) return S.settings.tms[k];
+  for (const tms of LAYERS[k].tms) {
+    try {
+      const r = await fetch(tileURL(k, probe.z, probe.x, probe.y, tms), { mode: 'cors' });
+      if (r.ok && (r.headers.get('content-type') || '').startsWith('image')) { S.settings.tms = { ...(S.settings.tms || {}), [k]: tms }; saveSettings(); return tms; }
+    } catch { /* grille suivante */ }
+  }
+  return null;
+}
+let offlineJob = null;
+async function prepareOffline(layers, onProgress) {
+  if (typeof caches === 'undefined') throw new Error('cache');
+  const cache = await caches.open(OFFLINE_CACHE);
+  const list = offlineTiles(layers);
+  for (const k of layers) { const probe = list.find(t => t.k === k); if (probe && !(await validTms(k, probe))) throw new Error('ign'); }
+  let i = 0, done = 0, fail = 0;
+  const worker = async () => {
+    while (i < list.length) {
+      const t = list[i++]; const url = tileURL(t.k, t.z, t.x, t.y);
+      try {
+        if (!(await cache.match(url, { ignoreVary: true }))) {
+          const r = await fetch(url, { mode: 'cors' });
+          if (!r.ok) throw new Error('http');
+          await cache.put(url, r);
+        }
+      } catch { fail++; }
+      done++; onProgress?.(done, list.length, fail);
+    }
+  };
+  await Promise.all(Array.from({ length: 6 }, worker));
+  S.offline = { at: new Date().toISOString(), n: list.length - fail, fail, layers, spots: S.spots.filter(hasPos).length };
+  metaPut('offline', S.offline);
+  return S.offline;
+}
+
+/* ---------- deuxième avis : une image à envoyer à un mycologue ou à un pharmacien ---------- */
+function wrapText(ctx, s, maxW) {
+  const out = [];
+  String(s ?? '').split(/\n+/).forEach(par => {
+    let cur = '';
+    par.split(/\s+/).filter(Boolean).forEach(w => { const t = cur ? `${cur} ${w}` : w; if (ctx.measureText(t).width > maxW && cur) { out.push(cur); cur = w; } else cur = t; });
+    if (cur) out.push(cur);
+  });
+  return out;
+}
+function drawCover(ctx, img, dx, dy, dw, dh) {
+  const r = Math.max(dw / img.naturalWidth, dh / img.naturalHeight), sw = dw / r, sh = dh / r;
+  ctx.drawImage(img, (img.naturalWidth - sw) / 2, (img.naturalHeight - sh) / 2, sw, sh, dx, dy, dw, dh);
+}
+async function renderAvis(d) {
+  const UI = '"Archivo", "Helvetica Neue", Arial, sans-serif', MONO = '"IBM Plex Mono", "SF Mono", Menlo, monospace';
+  try { await Promise.race([Promise.all([`italic 700 56px ${UI}`, `700 56px ${UI}`, `600 30px ${UI}`, `400 27px ${UI}`, `500 22px ${MONO}`, `600 22px ${MONO}`].map(f => document.fonts.load(f))), new Promise(r => setTimeout(r, 2500))]); } catch { /* polices du système */ }
+  const C = { bg: '#F3F4EE', ink: '#111814', ink2: '#4B5650', line: '#D9DDD3', tape: '#FF5B1F', dash: '#B9BFB2' };
+  const W = 1080, P = 54, G = 14;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = 6000;
+  const x = cv.getContext('2d');
+  x.fillStyle = C.bg; x.fillRect(0, 0, W, cv.height);
+  const txt = (s, px, py, font, color = C.ink, align = 'left') => { x.font = font; x.fillStyle = color; x.textAlign = align; x.fillText(s, px, py); };
+  let y = P;
+  x.font = `600 22px ${MONO}`; const rib = 'DEMANDE DE DEUXIÈME AVIS'; const rw = x.measureText(rib).width + 46;
+  x.fillStyle = C.tape; x.beginPath(); x.moveTo(P, y); x.lineTo(P + rw, y); x.lineTo(P + rw - 14, y + 22); x.lineTo(P + rw, y + 44); x.lineTo(P, y + 44); x.closePath(); x.fill();
+  txt(rib, P + 16, y + 30, `600 22px ${MONO}`, C.ink);
+  txt('MYCOTA', W - P, y + 30, `600 22px ${MONO}`, C.ink2, 'right');
+  y += 44 + 46;
+  x.font = `500 23px ${MONO}`; wrapText(x, d.kicker, W - 2 * P).forEach((l, i) => { txt(l, P, y + i * 32, x.font, C.ink2); }); y += 18;
+  const tf = `${d.italic ? 'italic ' : ''}700 56px ${UI}`; x.font = tf;
+  wrapText(x, d.title, W - 2 * P).forEach(l => { y += 62; txt(l, P, y, tf, C.ink); });
+  if (d.subtitle) { y += 44; txt(d.subtitle, P, y, `600 30px ${UI}`, C.ink); }
+  if (d.badge) {
+    y += 26; x.font = `600 21px ${MONO}`; const bw = x.measureText(d.badge.toUpperCase()).width + 28;
+    x.strokeStyle = C.ink; x.lineWidth = 2; x.strokeRect(P + 1, y, bw, 38); txt(d.badge.toUpperCase(), P + 14, y + 27, `600 21px ${MONO}`, C.ink); y += 38;
+  }
+  y += 34;
+  const cols = 3, cw = (W - 2 * P - (cols - 1) * G) / cols;
+  for (let r = 0; r * cols < d.photos.length; r++) {
+    for (let c = 0; c < cols; c++) {
+      const p = d.photos[r * cols + c]; if (!p) continue;
+      const px = P + c * (cw + G);
+      const img = await photoImg(p.id);
+      if (img) drawCover(x, img, px, y, cw, cw);
+      else { x.save(); x.setLineDash([9, 9]); x.strokeStyle = C.dash; x.lineWidth = 2; x.strokeRect(px + 1, y + 1, cw - 2, cw - 2); x.restore(); txt('pas de photo', px + cw / 2, y + cw / 2 + 8, `500 20px ${MONO}`, C.ink2, 'center'); }
+      txt(p.label, px, y + cw + 30, `500 21px ${MONO}`, C.ink2);
+    }
+    y += cw + 50;
+  }
+  y += 4; x.fillStyle = C.ink; x.fillRect(P, y, W - 2 * P, 3); y += 6;
+  const KW = 236;
+  for (const [k, v] of d.rows) {
+    x.font = `400 27px ${UI}`; const lines = wrapText(x, v, W - 2 * P - KW);
+    txt(k, P, y + 38, `500 21px ${MONO}`, C.ink2);
+    lines.forEach((l, i) => txt(l, P + KW, y + 39 + i * 36, `400 27px ${UI}`, C.ink));
+    y += Math.max(1, lines.length) * 36 + 22; x.fillStyle = C.line; x.fillRect(P, y - 2, W - 2 * P, 2);
+  }
+  if (d.notes) {
+    y += 40; txt('NOTES', P, y, `600 21px ${MONO}`, C.ink2);
+    x.font = `400 27px ${UI}`; wrapText(x, d.notes, W - 2 * P).slice(0, 14).forEach(l => { y += 38; txt(l, P, y, `400 27px ${UI}`, C.ink); });
+  }
+  y += 44; x.fillStyle = C.ink; x.fillRect(P, y, W - 2 * P, 2); y += 40;
+  x.font = `500 21px ${MONO}`;
+  wrapText(x, 'Relevé Mycota. Aucune identification automatique : la détermination ci-dessus est une hypothèse à confirmer.', W - 2 * P).forEach(l => { txt(l, P, y, x.font, C.ink2); y += 30; });
+  y += P - 30;
+  const out = document.createElement('canvas'); out.width = W; out.height = Math.min(cv.height, Math.ceil(y));
+  out.getContext('2d').drawImage(cv, 0, 0);
+  return new Promise(res => out.toBlob(b => res(b), 'image/jpeg', 0.9));
+}
+function placeOf(spot, pos, opts) {
+  return [spot?.forest, opts.spot && spot?.name, opts.gps && hasPos(pos) ? `${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)}` : '', hasAlt(pos) ? `${Math.round(pos.alt)} m` : ''].filter(Boolean).join(' · ');
+}
+function avisFromObs(so, o, opts) {
+  const sp = spotById(so.spotId), place = placeOf(sp, posOfObs(so, o), opts);
+  const rows = [
+    ['Méthode', (o.methodes || []).join(', ').toLowerCase()], ['Ouvrage', o.ouvrage],
+    ['Hôte présumé', o.hote], ['Substrat', (o.substrat || []).join(', ').toLowerCase()], ['Sol', (o.soltype || '').toLowerCase()],
+    ['Population', [o.count ? `${o.count} ex.` : '', (o.stade || []).join(', ').toLowerCase(), (o.repart || '').toLowerCase()].filter(Boolean).join(' · ')],
+    ['Chapeau Ø', o.capMin || o.capMax ? `${o.capMin || '?'} à ${o.capMax || '?'} mm` : ''], ['Pied', o.piedH || o.piedD ? `${o.piedH || '?'} × ${o.piedD || '?'} mm` : ''],
+    ['Odeur', o.odeur], ['Sporée', (o.sporee || '').toLowerCase()], ['Chair', o.chair], ['Réactions', o.reactions],
+    ['Pluie 10 j', so.wx ? `${nf.format(so.wx.mm)} mm${typeof so.wx.t === 'number' ? ` · ${nf.format(so.wx.t)} °C en moyenne` : ''}` : ''],
+  ].filter(r => r[1]);
+  return {
+    kicker: `${fmtDots(so.date)} · ${fmtTime(so.date)}${place ? ` · ${place}` : ''}`, date: so.date,
+    title: o.latin || o.species || 'Espèce à déterminer', italic: !!o.latin, subtitle: o.latin && o.species ? o.species : '',
+    badge: `Mon hypothèse${o.certitude ? ` · certitude : ${o.certitude}` : ''}`,
+    photos: PLANS.map(([k, l]) => ({ id: o.photos?.[k], label: l })), rows, notes: o.notes,
+  };
+}
+function avisFromSpecimen(sp, opts) {
+  const spot = spotById(sp.spotId), place = placeOf(spot, hasPos(sp) ? sp : spot, opts);
+  return {
+    kicker: `${fmtDots(sp.date)} · ${fmtTime(sp.date)}${place ? ` · ${place}` : ''}`, date: sp.date,
+    title: sp.latin || sp.hypothese || 'Spécimen à déterminer', italic: !!sp.latin, subtitle: sp.latin && sp.hypothese ? sp.hypothese : '',
+    badge: sp.latin || sp.hypothese ? 'Mon hypothèse, à confirmer' : 'Sans hypothèse',
+    photos: [...STEPS.map(([k, t]) => ({ id: sp.photos?.[k], label: t.toLowerCase() })), ...(sp.extra || []).slice(0, 4).map((id, n) => ({ id, label: `prise libre ${n + 1}` }))],
+    rows: [['Odeur', sp.odeur], ['Sporée', (sp.sporee || '').toLowerCase()]].filter(r => r[1]), notes: sp.notes,
+  };
+}
+function avisSheet(build) {
+  const s = openSheet(`<div class="stack"><div><span class="kicker">Pour un mycologue ou un pharmacien</span><h2 class="title" style="font-size:28px;margin-top:4px">Deuxième avis</h2></div>
+    <p class="muted" style="margin:0">Mycota prépare une image avec tes photos et tes caractères, à envoyer par message ou par mail. Le lieu précis reste chez toi, sauf si tu l'ajoutes.</p>
+    <div class="chips"><button class="chip sq" id="av-spot" aria-pressed="false">Nom du spot</button><button class="chip sq" id="av-gps" aria-pressed="false">Coordonnées</button></div>
+    <button class="btn ink big block" id="av-go">Créer l'image</button></div>`);
+  toggleChip($('#av-spot', s)); toggleChip($('#av-gps', s));
+  $('#av-go', s).onclick = async () => {
+    const btn = $('#av-go', s); btn.disabled = true; btn.textContent = 'Préparation…';
+    try {
+      const d = build({ spot: pressed($('#av-spot', s)), gps: pressed($('#av-gps', s)) });
+      const blob = await renderAvis(d);
+      offerFile(`mycota-avis-${slug(d.title)}-${dayISO(new Date(d.date))}.jpg`, blob, { title: 'Image prête', text: `${d.title} : j'aimerais ton avis sur cette détermination.`, preview: true });
+    } catch { btn.disabled = false; btn.textContent = 'Réessayer'; toast("L'image n'a pas pu être créée."); }
+  };
+}
+
 /* ==========================================================================
    VUES
    ========================================================================== */
@@ -980,6 +1358,20 @@ function huntHTML(list) {
       <div class="cell-fr">${esc(t.fr)}</div><div class="cell-la">${esc(t.la)}</div></button>`).join('')}</div>
     <p class="faint" style="font-size:12px;margin:8px 0 0">Espèces pas encore dans ton Mycodex, de saison d'après leur période indicative. La liste change chaque semaine.</p></section>`;
 }
+function memoryHTML() {
+  const { same, revisit } = memories();
+  if (!same.length && !revisit.length) return '';
+  const y = new Date().getFullYear();
+  return `<section class="sec"><div class="sec-head"><h2 class="sec-title">Mémoire de terrain</h2><span class="sec-meta">autour du ${fmtDayNoYear(new Date())}</span></div>
+    <div class="lines">${same.map(so => {
+      const obs = (so.obs || []).filter(o => o.species || o.latin); const sp = spotById(so.spotId); const dy = y - new Date(so.date).getFullYear();
+      return `<button class="li" data-act="go" data-v="sortie" data-id="${so.id}"><span class="mark ${fruitful(so) ? 'g' : 'o'}"></span><span class="grow" style="min-width:0">
+        <span class="card-m" style="display:block">${dy === 1 ? 'Il y a un an' : `Il y a ${dy} ans`} · ${fmtDayNoYear(so.date)} · ${esc(sp?.name || '—')}</span>
+        <span style="display:block;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${obs.length ? esc(obs.slice(0, 3).map(o => `${o.count} ${nameOf(o)}`).join(', ')) : 'Sortie blanche'}</span></span>${I.chev}</button>`;
+    }).join('')}${revisit.map(r => `<button class="li" data-act="go" data-v="spot" data-id="${r.sp.id}"><span class="mark g"></span><span class="grow" style="min-width:0">
+        <span style="display:block;font-size:14px;font-weight:600">À revoir : ${esc(r.sp.name)}</span>
+        <span class="card-m" style="display:block">fructueux en ${MONTHS[new Date().getMonth()]} ${r.years.join(', ')} · ${r.since === null ? 'jamais revu' : `pas revu depuis ${r.since} j`}</span></span>${I.chev}</button>`).join('')}</div></section>`;
+}
 
 /* ----- Carnet ----- */
 VIEWS.carnet = () => {
@@ -988,6 +1380,7 @@ VIEWS.carnet = () => {
   const idx = codexIndex();
   const p = progress(); const rk = rankOf(p.full);
   const rs = rainSummary();
+  const bk = backupState();
   const pending = S.specimens.filter(s => s.status !== 'identifie').sort((a, b) => b.date.localeCompare(a.date));
   const spots = [...S.spots].sort((a, b) => ((sortiesOf(b.id)[0]?.date) || b.createdAt || '').localeCompare((sortiesOf(a.id)[0]?.date) || a.createdAt || ''));
   const demo = S.spots.some(s => s.demo);
@@ -995,7 +1388,7 @@ VIEWS.carnet = () => {
   const recent = [...S.sorties].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
   const spotCard = sp => {
     const so = sortiesOf(sp.id), last = so[0], n = so.reduce((a, s) => a + countOf(s), 0);
-    const lastTxt = !last ? 'Jamais visité' : fruitful(last) ? `${esc(last.obs.filter(o => o.species).slice(0, 2).map(o => `${o.species} · ${o.count}`).join(', '))}` : 'Sortie blanche';
+    const lastTxt = !last ? 'Jamais visité' : fruitful(last) ? `${esc(last.obs.filter(o => o.species || o.latin).slice(0, 2).map(o => `${nameOf(o)} · ${o.count}`).join(', '))}` : 'Sortie blanche';
     return `<button class="card" data-act="go" data-v="spot" data-id="${sp.id}"><div class="row" style="align-items:flex-start">
       <span class="mark ${markOfSpot(sp)}" style="margin-top:5px"></span><div class="grow"><div class="card-t">${esc(sp.name)}</div>
       <div class="card-m">${esc(sp.forest || 'milieu non précisé')}${here && hasPos(sp) ? ` · ${fmtDist(distance(here, sp))}` : ''}${last ? ` · ${ago(last.date)}` : ''}</div>
@@ -1010,12 +1403,15 @@ VIEWS.carnet = () => {
       <div class="row"><span class="kicker grow">Titre de terrain</span><span class="ribbon">${esc(rk.name)}</span></div>
       ${rk.next ? `<div class="tapebar"><i style="width:${Math.min(100, rk.next.pct)}%"></i></div><div class="row mono" style="font-size:11.5px;color:var(--ink-2)"><span class="grow">${p.full} relevé${p.full > 1 ? 's' : ''} complet${p.full > 1 ? 's' : ''}</span><span>${rk.next.name} à ${rk.next.need}</span></div>` : `<div class="mono" style="font-size:12px">${p.full} relevés complets</div>`}
     </button>
-    <div class="stats" style="--n:4"><div><b>${season.length}</b><span>sorties</span></div><div><b>${nf.format(season.reduce((n, s) => n + countOf(s), 0))}</b><span>exemplaires</span></div><div><b>${[...idx.values()].filter(e => e.ref).length}</b><span>Mycodex</span></div><div><b>${RIBBONS.filter(([id, , , f, g]) => f(p) >= g).length}</b><span>rubans</span></div></div>
+    <div><div class="stats" style="--n:4"><div><b>${season.length}</b><span>sorties</span></div><div><b>${nf.format(season.reduce((n, s) => n + countOf(s), 0))}</b><span>exemplaires</span></div><div><b>${[...idx.values()].filter(e => e.ref).length}</b><span>Mycodex</span></div><div><b>${RIBBONS.filter(([, , , f, g]) => f(p) >= g).length}</b><span>rubans</span></div></div>
+      ${S.sorties.length ? `<button class="li" data-act="go" data-v="bilan" style="border:0;padding:8px 0 0"><span class="grow" style="font-size:13.5px;font-weight:600;color:var(--green)">Bilan de la saison</span>${I.chev}</button>` : ''}</div>
     <button class="li" data-act="tab" data-v="climat" style="border:0;padding:4px 0"><span class="mono" style="color:var(--rain);font-weight:600">${rs ? nf.format(rs.r10) + ' mm' : '— mm'}</span><span class="muted grow" style="font-size:13.5px">${rs ? `de pluie ces 10 derniers jours autour de toi · ${ago(new Date(S.climate.at).toISOString())}` : 'pluie récente : ouvre Climat pour la relever'}</span>${I.chev}</button>
     ${IN_CLAUDE ? `<div class="notice"><b>Aperçu claude.ai.</b> Position, fond de carte et météo sont bloqués ici. Tout fonctionne dans la version installée.</div>` : ''}
+    ${bk && !bk.ok && bk.due ? `<div class="notice backup"><span class="grow"><b>${bk.at ? `Dernière sauvegarde il y a ${plural(bk.days, 'jour', 'jours')}.` : 'Aucune sauvegarde pour l’instant.'}</b> Tes relevés ne vivent que sur ce téléphone.</span><button class="btn" data-act="exportJSON" style="min-height:40px;flex:none">Sauvegarder</button></div>` : ''}
     ${demo ? `<div class="notice">Ce carnet contient des <b>exemples</b>. <button class="link" data-act="clearDemo">Retirer les exemples</button></div>` : ''}
   </div>
   ${huntHTML(huntList())}
+  ${memoryHTML()}
   ${pending.length ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">À identifier</h2><span class="sec-meta">${pending.length}</span></div>
     <div class="cards">${pending.map(sp => { const done = STEPS.filter(([k]) => sp.photos?.[k]).length; const spot = spotById(sp.spotId);
       return `<button class="card" data-act="go" data-v="specimen" data-id="${sp.id}"><div class="row"><span class="mark o"></span><div class="grow"><div class="card-t">${sp.hypothese ? esc(sp.hypothese) : 'Spécimen sans hypothèse'}</div>
@@ -1034,14 +1430,57 @@ function sortieLine(so, withSpot = true) {
   const sp = spotById(so.spotId);
   return `<button class="li" data-act="go" data-v="sortie" data-id="${so.id}"><span class="mark ${markOfSortie(so)}"></span>
     <span class="mono" style="font-size:12px;width:62px;flex:none">${fmtDots(so.date)}</span>
-    <span class="grow" style="min-width:0"><span style="display:block;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${obs.length ? esc(obs.map(o => o.species || o.latin).join(', ')) : 'Sortie blanche'}</span>
+    <span class="grow" style="min-width:0"><span style="display:block;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${obs.length ? esc(obs.map(nameOf).join(', ')) : 'Sortie blanche'}</span>
     ${withSpot ? `<span class="card-m" style="display:block">${esc(sp?.name || 'spot supprimé')}${so.wx ? ` · ${nf.format(so.wx.mm)} mm/10 j` : ''}</span>` : ''}</span>
     <span class="mono" style="font-size:12px;font-weight:600">${obs.length ? countOf(so) + ' ex.' : ''}</span></button>`;
 }
 
+/* ----- Bilan de saison ----- */
+VIEWS.bilan = ({ y }) => {
+  const years = [...new Set(S.sorties.map(s => new Date(s.date).getFullYear()))].sort((a, b) => b - a);
+  const Y = Number(y) || years[0] || new Date().getFullYear();
+  const so = S.sorties.filter(s => new Date(s.date).getFullYear() === Y);
+  const obs = allObs().filter(x => new Date(x.so.date).getFullYear() === Y);
+  const firstEver = new Map();
+  allObs().forEach(x => { const k = keyOf(x.o); const f = firstEver.get(k); if (!f || x.so.date < f.so.date) firstEver.set(k, x); });
+  const news = [...firstEver.values()].filter(x => new Date(x.so.date).getFullYear() === Y).sort((a, b) => a.so.date.localeCompare(b.so.date));
+  const months = Array.from({ length: 12 }, () => ({ f: 0, b: 0 }));
+  so.forEach(s => { const m = new Date(s.date).getMonth(); if (fruitful(s)) months[m].f++; else months[m].b++; });
+  const maxM = Math.max(1, ...months.map(m => m.f + m.b));
+  const bySp = new Map();
+  obs.forEach(({ o }) => { const k = keyOf(o); const e = bySp.get(k) || { key: k, name: nameOf(o), n: 0, v: 0 }; e.n += Number(o.count) || 0; e.v++; bySp.set(k, e); });
+  const top = [...bySp.values()].sort((a, b) => b.n - a.n).slice(0, 8);
+  const bySpot = new Map();
+  so.forEach(s => { const e = bySpot.get(s.spotId) || { sp: spotById(s.spotId), n: 0, f: 0 }; e.n++; if (fruitful(s)) e.f++; bySpot.set(s.spotId, e); });
+  const spotsL = [...bySpot.values()].sort((a, b) => b.f - a.f || b.n - a.n);
+  const fr = so.filter(fruitful).length, full = obs.filter(x => completeness(x.o).full).length;
+  const rs = rainStats(so.filter(fruitful));
+  const html = `${topbar(`Bilan ${Y}`)}
+  ${years.length > 1 ? `<div class="chips" style="margin-top:4px">${years.map(yy => `<button class="chip sq" data-act="bilanYear" data-val="${yy}" aria-pressed="${yy === Y}">${yy}</button>`).join('')}</div>` : ''}
+  <div style="padding-top:12px"><span class="kicker">Saison ${Y}</span><h1 class="display" style="font-size:48px;margin-top:6px">Bilan</h1></div>
+  ${so.length ? `
+  <div class="stats" style="--n:3;margin-top:14px"><div><b>${so.length}</b><span>sorties</span></div><div><b>${Math.round(fr / so.length * 100)} %</b><span>fructueuses</span></div><div><b>${nf.format(obs.reduce((a, x) => a + (Number(x.o.count) || 0), 0))}</b><span>exemplaires</span></div></div>
+  <div class="stats" style="--n:3;border-top:0"><div><b>${bySp.size}</b><span>espèces</span></div><div><b>${news.length}</b><span>nouvelles cases</span></div><div><b>${full}</b><span>relevés complets</span></div></div>
+  <section class="sec"><div class="sec-head"><h2 class="sec-title">Sorties par mois</h2><span class="sec-meta">${so.length}</span></div>
+    <div class="mbars">${months.map((m, i) => `<div class="mbar" title="${MONTHS[i]} : ${m.f} fructueuse(s), ${m.b} blanche(s)">${m.f ? `<i class="f" style="height:${m.f / maxM * 100}%"></i>` : ''}${m.b ? `<i class="b" style="height:${m.b / maxM * 100}%"></i>` : ''}</div>`).join('')}</div>
+    <div class="mlab">${MONTHS_S.map(l => `<span>${l}</span>`).join('')}</div>
+    <div class="legend-sq"><span><i style="background:var(--green)"></i>fructueuses</span><span><i style="background:var(--tape)"></i>blanches</span></div></section>
+  ${news.length ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Nouvelles cases du Mycodex</h2><span class="sec-meta">${news.length}</span></div>
+    <div class="lines">${news.map(({ so: s, o }) => { const t = taxonOf(o); return `<button class="li" data-act="taxon" data-key="${esc(keyOf(o))}"><span class="mark o"></span><span class="mono" style="font-size:12px;width:62px;flex:none">${fmtDots(s.date)}</span><span class="grow" style="font-size:14px;font-weight:600">${esc(nameOf(o))}${t ? ` <span class="faint mono" style="font-weight:400;font-size:11.5px">N° ${num3(t.n)}</span>` : ''}</span>${I.chev}</button>`; }).join('')}</div></section>` : ''}
+  ${top.length ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Espèces les plus notées</h2></div>
+    <div class="lines">${top.map(e => `<button class="li" data-act="taxon" data-key="${esc(e.key)}"><span class="grow" style="font-size:14px">${esc(e.name)}</span><span class="mono faint" style="font-size:11.5px">${plural(e.v, 'fois', 'fois')}</span><span class="mono" style="font-size:12px;font-weight:600;width:64px;text-align:right">${nf.format(e.n)} ex.</span></button>`).join('')}</div></section>` : ''}
+  ${spotsL.length ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Tes spots</h2><span class="sec-meta">fructueuses / sorties</span></div>
+    <div class="lines">${spotsL.map(e => `<button class="li" data-act="go" data-v="spot" data-id="${e.sp?.id || ''}"><span class="mark ${e.f ? 'g' : 'o'}"></span><span class="grow" style="font-size:14px">${esc(e.sp?.name || 'spot supprimé')}</span><span class="mono" style="font-size:12px;font-weight:600">${e.f} / ${e.n}</span></button>`).join('')}</div></section>` : ''}
+  ${rs ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Pluie avant tes bonnes sorties</h2></div>
+    <p style="margin:0"><span class="mono" style="font-size:18px;font-weight:600">${rangeTxt(rs)}</span> <span class="muted">sur 10 jours · médiane ${nf.format(rs.med)} mm · ${plural(rs.n, 'sortie', 'sorties')}</span></p></section>` : ''}
+  ` : `<p class="muted" style="margin-top:20px">Aucune sortie notée en ${Y}.</p>`}`;
+  return { html };
+};
+
 /* ----- Mycodex ----- */
+const DEX_SORTS = [['num', 'Numéro'], ['gb', 'Plus vues en Charente'], ['az', 'A → Z']];
 VIEWS.codex = () => {
-  const f = S.codexF || (S.codexF = { mode: 'tout', q: '', list: 'depart' });
+  const f = S.codexF || (S.codexF = { mode: 'tout', q: '', list: 'depart', sort: 'num' });
   const idx = codexIndex();
   const base = f.list === 'charente' ? ALL : REF;
   const got = base.filter(t => idx.has(norm(t.la))).length;
@@ -1055,6 +1494,7 @@ VIEWS.codex = () => {
     <div class="chips">${[['depart', `Départ · ${REF.length}`], ['charente', `Charente · ${ALL.length}`]].map(([k, l]) => `<button class="chip sq" data-act="dexList" data-val="${k}" aria-pressed="${f.list === k}">${l}</button>`).join('')}</div>
     <input class="in" id="dex-q" type="search" placeholder="Chercher une espèce" value="${esc(f.q)}" aria-label="Chercher une espèce">
     <div class="scroll-x">${['tout', 'observées', 'à trouver', 'de saison'].map(m => `<button class="chip" data-act="dexMode" data-val="${m}" aria-pressed="${f.mode === m}">${m[0].toUpperCase() + m.slice(1)}</button>`).join('')}</div>
+    <div class="row"><label class="label" for="dex-sort">Tri</label><select class="in" id="dex-sort" style="min-height:40px;width:auto;font-size:14px;padding:6px 34px 6px 10px;background-position:calc(100% - 18px) 17px, calc(100% - 13px) 17px">${DEX_SORTS.map(([k, l]) => `<option value="${k}" ${f.sort === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
   </div>
   <div id="dex-list"></div>`;
   return { html, mount: renderDex };
@@ -1063,7 +1503,7 @@ function dexCell(t, e) {
   const seen = !!e;
   const art = seen && e.photo ? `<img data-photo="${e.photo}" alt="">` : seen ? shroom('var(--green)', 'var(--card)', 'var(--ink)') : shroom('none', 'none', 'var(--ink-3)', '3 3');
   const flag = t.tox === 'mortelle' ? '<span class="pill danger">mortelle</span>' : seen && daysBetween(new Date(e.first), new Date()) < 30 ? '<span class="pill tape">nouveau</span>' : '';
-  return `<button class="cell ${seen ? '' : 'no'}" data-act="taxon" data-key="${esc(t.key || norm(t.la))}" aria-label="${esc(`${num3(t.n || 0)} ${t.fr}, ${seen ? 'observée' : 'pas encore observée'}`)}">
+  return `<button class="cell ${seen ? '' : 'no'}" data-act="taxon" data-key="${esc(t.key || norm(t.la))}" aria-label="${esc(`${num3(t.n || 0)} ${t.fr || t.la}, ${seen ? 'observée' : 'pas encore observée'}`)}">
     <div class="cell-top"><span class="cell-n">${t.n ? num3(t.n) : 'hors'}</span>${flag}</div>
     <div class="cell-art">${art}</div>${t.fr ? `<div class="cell-fr">${esc(t.fr)}</div><div class="cell-la">${esc(t.la)}</div>` : `<div class="cell-fr la">${esc(t.la)}</div>`}${t.gb ? `<div class="cell-gb">Charente ×${t.gb}</div>` : ''}</button>`;
 }
@@ -1073,8 +1513,9 @@ function renderDex() {
   const keep = t => { const e = idx.get(norm(t.la));
     if (f.mode === 'observées' && !e) return false; if (f.mode === 'à trouver' && e) return false; if (f.mode === 'de saison' && !t.months?.includes(m)) return false;
     if (q && !norm(t.fr).includes(q) && !norm(t.la).includes(q)) return false; return true; };
+  const cmp = f.sort === 'gb' ? (a, b) => (b.gb || 0) - (a.gb || 0) || a.n - b.n : f.sort === 'az' ? (a, b) => (a.fr || a.la).localeCompare(b.fr || b.la, 'fr') : (a, b) => a.n - b.n;
   let html = GROUPS.map(([g, name]) => {
-    const all = (f.list === 'charente' ? ALL : REF).filter(t => t.g === g), list = all.filter(keep); if (!list.length) return '';
+    const all = (f.list === 'charente' ? ALL : REF).filter(t => t.g === g), list = all.filter(keep).sort(cmp); if (!list.length) return '';
     const got = all.filter(t => idx.has(norm(t.la))).length, done = got === all.length;
     return `<section class="sec" style="margin-top:20px"><div class="sec-head"><h2 class="sec-title">${esc(name)}</h2>${done ? '<span class="ribbon">complet</span>' : `<span class="sec-meta" style="font-weight:600">${got} / ${all.length}</span>`}</div>
       <div class="dex">${list.map(t => dexCell(t, idx.get(norm(t.la)))).join('')}</div></section>`;
@@ -1098,10 +1539,16 @@ VIEWS.taxon = ({ key }) => {
   e?.list.forEach(({ o }) => { if (o.hote) hotes.set(o.hote, (hotes.get(o.hote) || 0) + 1); if (o.soltype) sols.set(o.soltype, (sols.get(o.soltype) || 0) + 1); (o.substrat || []).forEach(s => subs.set(s, (subs.get(s) || 0) + 1)); });
   const fmtMap = mp => [...mp.entries()].sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} × ${v}`).join(' · ');
   const forests = new Map(); e?.list.forEach(({ so }) => { const f = spotById(so.spotId)?.forest; if (f) forests.set(f, (forests.get(f) || 0) + 1); });
+  const alts = e ? e.list.map(({ so, o }) => posOfObs(so, o)).filter(hasAlt).map(p => p.alt) : [];
+  const ph = e ? phenology(e) : [];
+  const st = e ? rainStats(uniqSorties(e.list)) : null, now = rainNow();
+  let shift = '';
+  if (ph.length >= 2) { const dd = doy(ph[0].first) - doy(ph[1].first); shift = dd === 0 ? 'même date que la saison précédente' : `${Math.abs(dd)} jour${Math.abs(dd) > 1 ? 's' : ''} ${dd > 0 ? 'plus tard' : 'plus tôt'} que la saison précédente`; }
+  const note = S.taxnotes[key] || '';
   const html = `${topbar(t ? `N° ${num3(t.n)} · ${GROUPS.find(g => g[0] === t.g)[1]}` : 'Hors liste')}
   <div class="card" style="height:190px;position:relative;overflow:hidden;padding:0;background:var(--sunk)">
     ${TOPO.replace('class="topo"', 'class="topo" style="left:0;right:0;height:190px"')}
-    ${e?.photo ? `<button class="ph" data-act="photo" data-id="${e.photo}" style="position:absolute;inset:0;aspect-ratio:auto;height:100%;border-radius:0"><img data-photo="${e.photo}" alt="${esc(fr)}"></button>`
+    ${e?.photo ? `<button class="ph" data-act="photo" data-id="${e.photo}" style="position:absolute;inset:0;aspect-ratio:auto;height:100%;border-radius:0"><img data-photo="${e.photo}" alt="${esc(fr || la)}"></button>`
       : `<div style="position:absolute;inset:0;display:grid;place-items:center">${e ? shroom('var(--green)', 'var(--card)', 'var(--ink)', '0', 'shroom" style="width:150px;height:112px') : shroom('none', 'none', 'var(--ink-3)', '4 4', 'shroom" style="width:150px;height:112px')}</div>`}
     <div style="position:absolute;left:10px;bottom:10px;display:flex;gap:6px">${e ? `<span class="pill green">observée × ${e.visits}</span>` : '<span class="pill ghost" style="background:var(--card)">pas encore observée</span>'}${t?.tox ? toxPill(t.tox) : ''}</div>
   </div>
@@ -1116,13 +1563,22 @@ VIEWS.taxon = ({ key }) => {
       <span class="ml"></span>${MONTHS_S.map(l => `<span class="mm">${l}</span>`).join('')}
     </div>
     ${t?.months ? '<p class="faint" style="font-size:12px;margin:8px 0 0">Période indicative en France, à affiner avec tes propres relevés.</p>' : ''}
-    ${t?.gb ? `<p class="faint mono" style="font-size:11.5px;margin:6px 0 0">Charente : ${plural(t.gb, 'mention', 'mentions')} sur GBIF</p>` : t ? '<p class="faint mono" style="font-size:11.5px;margin:6px 0 0">Aucune mention sur GBIF en Charente pour l\u2019instant</p>' : ''}
+    ${t?.gb ? `<p class="faint mono" style="font-size:11.5px;margin:6px 0 0">Charente : ${plural(t.gb, 'mention', 'mentions')} sur GBIF</p>` : t ? '<p class="faint mono" style="font-size:11.5px;margin:6px 0 0">Aucune mention sur GBIF en Charente pour l’instant</p>' : ''}
   </section>
-  ${e && (hotes.size || sols.size || subs.size || forests.size) ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Habitat d'après tes fiches</h2></div>
-    <div class="lines">${[['Milieu', fmtMap(forests)], ['Hôte', fmtMap(hotes)], ['Substrat', fmtMap(subs)], ['Sol', fmtMap(sols)]].filter(r => r[1]).map(([k, v]) => `<div class="kv"><span>${k}</span><span>${esc(v)}</span></div>`).join('')}</div></section>` : ''}
+  ${ph.length ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Par saison</h2><span class="sec-meta">première et dernière date</span></div>
+    <div class="lines">${ph.map(r => `<div class="kv"><span>${r.y}</span><span class="mono" style="font-size:13px">1re ${fmtDayNoYear(r.first)}${r.last !== r.first ? ` · dern. ${fmtDayNoYear(r.last)}` : ''} · ${nf.format(r.n)} ex.</span></div>`).join('')}</div>
+    ${shift ? `<p class="faint" style="font-size:12px;margin:8px 0 0">Première pousse ${ph[0].y} : ${shift}.</p>` : ''}</section>` : ''}
+  ${st ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Conditions de tes trouvailles</h2><span class="sec-meta">${plural(st.n, 'relevé', 'relevés')}</span></div>
+    <p style="margin:0"><span class="mono" style="font-size:18px;font-weight:600">${rangeTxt(st)}</span> <span class="muted">de pluie sur les 10 jours d'avant${st.tmin != null ? ` · ${nf.format(st.tmin)} à ${nf.format(st.tmax)} °C en moyenne` : ''}</span></p>
+    ${rangeBar(st, now)}
+    <p class="faint" style="font-size:12px;margin:8px 0 0">${now != null ? `Trait orange : ${nf.format(now)} mm ces 10 derniers jours autour de toi, ${vsTxt(st, now)}. ` : ''}Tes chiffres, pas une prévision.</p></section>` : ''}
+  ${e && (hotes.size || sols.size || subs.size || forests.size || alts.length) ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Habitat d'après tes fiches</h2></div>
+    <div class="lines">${[['Milieu', fmtMap(forests)], ['Hôte', fmtMap(hotes)], ['Substrat', fmtMap(subs)], ['Sol', fmtMap(sols)], ['Altitude', alts.length ? (Math.min(...alts) === Math.max(...alts) ? `${Math.round(alts[0])} m` : `${Math.round(Math.min(...alts))} à ${Math.round(Math.max(...alts))} m`) : '']].filter(r => r[1]).map(([k, v]) => `<div class="kv"><span>${k}</span><span>${esc(v)}</span></div>`).join('')}</div></section>` : ''}
+  <section class="sec"><div class="sec-head"><h2 class="sec-title">Tes critères</h2><span class="sec-meta">ton guide perso</span></div>
+    <textarea class="in" data-taxnote="${esc(key)}" aria-label="Tes critères pour cette espèce" placeholder="Ce qui te permet de la reconnaître, les sosies à écarter, la page du livre…">${esc(note)}</textarea></section>
   ${e ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Tes observations</h2></div>
     <div class="lines">${e.list.map(({ so, o, i }) => { const c = completeness(o); return `<button class="li" data-act="obs" data-sid="${so.id}" data-i="${i}">
-      <span class="mark g"></span><span class="mono" style="font-size:12px;width:62px">${fmtDots(so.date)}</span><span class="grow" style="font-size:14px">${esc(spotById(so.spotId)?.name || '—')}</span>
+      <span class="mark g"></span><span class="mono" style="font-size:12px;width:62px">${fmtDots(so.date)}</span><span class="grow" style="font-size:14px">${esc(spotById(so.spotId)?.name || '—')}${hasPos(o) ? ' <span class="faint mono" style="font-size:11px">· point</span>' : ''}</span>
       <span class="mono" style="font-size:11.5px;${c.full ? 'color:var(--tape);font-weight:600' : 'color:var(--ink-2)'}">${c.full ? 'complet' : c.pct + ' %'}</span><span class="mono" style="font-size:12px;font-weight:600;width:40px;text-align:right">${o.count} ex.</span></button>`; }).join('')}</div></section>` : ''}
   <div class="stack" style="margin-top:22px">
     <button class="btn ink big block" data-act="newSortie" data-sp="${esc(fr || la)}" data-la="${esc(la)}">Noter une observation</button>
@@ -1154,35 +1610,54 @@ VIEWS.rubans = () => {
 /* ----- Fiche spot ----- */
 VIEWS.spot = ({ id }) => {
   const sp = spotById(id); if (!sp) return VIEWS.carnet();
-  const so = sortiesOf(id), n = so.reduce((a, s) => a + countOf(s), 0), fr = so.filter(fruitful).length;
-  const months = Array(12).fill(0); so.filter(fruitful).forEach(s => { months[new Date(s.date).getMonth()]++; });
-  const sps = new Map(); so.forEach(s => (s.obs || []).forEach(o => { const k = o.species || o.latin; if (!k) return; const e = sps.get(k) || { name: k, la: o.latin, n: 0 }; e.n += Number(o.count) || 0; sps.set(k, e); }));
+  const so = sortiesOf(id), n = so.reduce((a, s) => a + countOf(s), 0), frs = so.filter(fruitful);
+  const months = Array(12).fill(0); frs.forEach(s => { months[new Date(s.date).getMonth()]++; });
+  const sps = new Map(); so.forEach(s => (s.obs || []).forEach(o => { if (!o.species && !o.latin) return; const k = keyOf(o); const e = sps.get(k) || { key: k, name: nameOf(o), la: taxonOf(o)?.la || o.latin, n: 0 }; e.n += Number(o.count) || 0; sps.set(k, e); }));
+  const sf = rainStats(frs), sb = rainStats(so.filter(s => !fruitful(s)));
+  const cur = S.spotwx[id];
   const html = `${topbar('Spot', `<button class="icon-btn" data-act="go" data-v="spotForm" data-id="${id}" aria-label="Modifier le spot">${I.edit}</button>`)}
   <div style="display:flex;flex-direction:column;gap:4px;padding-top:4px"><span class="kicker">${esc(sp.forest || 'milieu non précisé')}</span><h1 class="title">${esc(sp.name)}</h1>
-    <span class="mono faint" style="font-size:12px">${hasPos(sp) ? esc(fmtCoords(sp)) : 'sans position'}${S.lastPos && hasPos(sp) ? ` · à ${fmtDist(distance(S.lastPos, sp))}` : ''}</span></div>
-  <div class="stats" style="--n:3;margin-top:14px"><div><b>${so.length}</b><span>sorties</span></div><div><b>${nf.format(n)}</b><span>exemplaires</span></div><div><b>${so.length ? Math.round(fr / so.length * 100) : 0} %</b><span>fructueuses</span></div></div>
+    <span class="mono faint" style="font-size:12px">${hasPos(sp) ? esc(fmtCoords(sp)) : 'sans position'}${hasAlt(sp) ? ` · alt. ${Math.round(sp.alt)} m` : ''}${S.lastPos && hasPos(sp) ? ` · à ${fmtDist(distance(S.lastPos, sp))}` : ''}</span></div>
+  <div class="stats" style="--n:3;margin-top:14px"><div><b>${so.length}</b><span>sorties</span></div><div><b>${nf.format(n)}</b><span>exemplaires</span></div><div><b>${so.length ? Math.round(frs.length / so.length * 100) : 0} %</b><span>fructueuses</span></div></div>
   <div class="btn-row" style="margin-top:14px"><button class="btn ink" data-act="newSortie" data-id="${id}">Noter une sortie</button>${hasPos(sp) ? `<button class="btn" data-act="go" data-v="retrouver" data-id="${id}">${I.compass} Retrouver</button>` : ''}</div>
-  ${sp.notes ? `<section class="sec"><p style="margin:0;font-size:15px;line-height:1.5">${esc(sp.notes)}</p></section>` : ''}
+  ${sp.notes ? `<section class="sec"><p style="margin:0;font-size:15px;line-height:1.5;white-space:pre-wrap">${esc(sp.notes)}</p></section>` : ''}
+  ${sf || sb ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Tes repères ici</h2><span class="sec-meta">pluie sur 10 jours</span></div>
+    <div class="lines">
+      ${sf ? `<div class="kv"><span>Fructueuses</span><span><span class="mono" style="display:block">${rangeTxt(sf)}</span><span class="faint" style="display:block;font-size:12px">médiane ${nf.format(sf.med)} mm · ${plural(sf.n, 'sortie', 'sorties')}</span>${rangeBar(sf, cur?.mm)}</span></div>` : ''}
+      ${sb ? `<div class="kv"><span>Blanches</span><span><span class="mono" style="display:block">${rangeTxt(sb)}</span><span class="faint" style="display:block;font-size:12px">${plural(sb.n, 'sortie', 'sorties')}</span></span></div>` : ''}
+      <div class="kv"><span>En ce moment</span><span class="mono" id="spot-now" style="font-size:13px">${cur ? `${nf.format(cur.mm)} mm${typeof cur.t === 'number' ? ` · ${nf.format(cur.t)} °C` : ''} <span class="faint">· ${ago(new Date(cur.at).toISOString())}</span>` : navigator.onLine && !IN_CLAUDE ? 'relevé en cours…' : 'pas de réseau'}</span></div>
+    </div><p class="faint" style="font-size:12px;margin:8px 0 0">Pluie des 10 jours avant chacune de tes sorties ici. Tes chiffres, pas une prévision.</p></section>` : ''}
   <section class="sec"><div class="sec-head"><h2 class="sec-title">Calendrier du spot</h2><span class="sec-meta">sorties fructueuses</span></div>
     <div class="months"><span class="ml">Sorties</span>${months.map((v, i) => `<span class="${v ? 'on' : ''}" style="${v ? `opacity:${0.35 + 0.65 * v / Math.max(...months)}` : ''}" title="${MONTHS[i]} : ${v}"></span>`).join('')}<span class="ml"></span>${MONTHS_S.map(l => `<span class="mm">${l}</span>`).join('')}</div></section>
   ${sps.size ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Espèces ici</h2><span class="sec-meta">${sps.size}</span></div>
-    <div class="lines">${[...sps.values()].sort((a, b) => b.n - a.n).map(e => `<div class="kv" style="grid-template-columns:minmax(0,1fr) auto"><span style="font-family:var(--f-ui);font-size:14px;color:var(--ink)">${esc(e.name)} ${e.la ? `<span class="la muted">${esc(e.la)}</span>` : ''}</span><span class="mono" style="font-size:12px">${e.n} ex.</span></div>`).join('')}</div></section>` : ''}
+    <div class="lines">${[...sps.values()].sort((a, b) => b.n - a.n).map(e => `<button class="li" data-act="taxon" data-key="${esc(e.key)}"><span class="grow" style="font-size:14px">${esc(e.name)} ${e.la && e.la !== e.name ? `<span class="la muted">${esc(e.la)}</span>` : ''}</span><span class="mono" style="font-size:12px">${e.n} ex.</span></button>`).join('')}</div></section>` : ''}
   <section class="sec"><div class="sec-head"><h2 class="sec-title">Sorties</h2></div>${so.length ? `<div class="lines">${so.map(s => sortieLine(s, false)).join('')}</div>` : '<p class="muted">Aucune sortie notée ici pour le moment.</p>'}</section>`;
-  return { html };
+  return {
+    html,
+    async mount() {
+      if (!(sf || sb) || (cur && Date.now() - cur.at < 3 * 3600e3)) return;
+      const r = await spotRainNow(sp);
+      if (S.view === 'spot' && S.params.id === id && r && r !== cur) render();
+      else if (!r) { const el = $('#spot-now'); if (el && S.params.id === id) el.textContent = 'pas de réseau'; }
+    },
+  };
 };
 
 /* ----- Formulaire spot ----- */
 VIEWS.spotForm = ({ id, here }) => {
   const ex = id ? spotById(id) : null;
-  if (!S.draft || S.draft.kind !== 'spot' || S.draft.id !== (id || null)) S.draft = ex ? { kind: 'spot', ...structuredClone(ex) } : { kind: 'spot', id: null, name: '', forest: '', notes: '', lat: S.lastPos?.lat, lng: S.lastPos?.lng, acc: S.lastPos?.acc };
+  if (!S.draft || S.draft.kind !== 'spot' || S.draft.id !== (id || null)) {
+    const p = freshPos();
+    S.draft = ex ? { kind: 'spot', ...structuredClone(ex) } : { kind: 'spot', id: null, name: '', forest: '', notes: '', ...(p ? posFields(p) : {}) };
+  }
   const d = S.draft;
   const html = `${topbar(ex ? 'Modifier le spot' : 'Nouveau spot')}
   <div class="stack" style="margin-top:6px">
     <div class="field"><label class="label" for="f-name">Nom du spot</label><input class="in" id="f-name" data-bind="name" value="${esc(d.name)}" placeholder="Chênaie du Puits-Rond" autocomplete="off"></div>
     <div class="field"><label class="label" for="f-forest">Milieu</label><select class="in" id="f-forest" data-bind="forest"><option value="">Non précisé</option>${FOREST.map(f => `<option ${d.forest === f ? 'selected' : ''}>${f}</option>`).join('')}</select></div>
     <div class="field"><span class="label">Position</span>
-      <div id="pick" class="map map-pick"><div class="cross"><span></span></div><div class="map-ctl"><button type="button" data-act="pickHere" aria-label="Ma position">${I.locate}</button></div></div>
-      <div class="mono faint" id="pick-coords" style="font-size:12px">${hasPos(d) ? `viseur : ${d.lat.toFixed(5)}, ${d.lng.toFixed(5)}${d.acc ? ` · GPS ±${Math.round(d.acc)} m` : ''}` : 'Fais glisser la carte pour placer le viseur, ou utilise ta position.'}</div>
+      <div id="pick" class="map map-pick"><div class="cross"><span></span></div><div class="map-ctl"><button type="button" data-act="pickHere" aria-label="Ma position">${I.locate}</button><button type="button" data-act="cycleLayer" aria-label="Changer de fond de carte">${I.layers}</button></div></div>
+      <div class="mono faint" id="pick-coords" style="font-size:12px">${hasPos(d) ? `viseur : ${d.lat.toFixed(5)}, ${d.lng.toFixed(5)}${d.acc ? ` · GPS ±${Math.round(d.acc)} m` : ''}${hasAlt(d) ? ` · alt. ${Math.round(d.alt)} m` : ''}` : 'Fais glisser la carte pour placer le viseur, ou utilise ta position.'}</div>
       <details><summary>Saisir les coordonnées</summary><div class="row" style="margin-top:6px"><input class="in num" id="f-lat" inputmode="decimal" placeholder="Latitude" value="${hasPos(d) ? d.lat.toFixed(6) : ''}"><input class="in num" id="f-lng" inputmode="decimal" placeholder="Longitude" value="${hasPos(d) ? d.lng.toFixed(6) : ''}"><button class="btn" data-act="pickManual">OK</button></div></details>
     </div>
     <div class="field"><label class="label" for="f-notes">Notes sur le milieu</label><textarea class="in" id="f-notes" data-bind="notes" placeholder="Exposition, sol, essences, repères pour retrouver le coin…">${esc(d.notes)}</textarea></div>
@@ -1194,7 +1669,7 @@ VIEWS.spotForm = ({ id, here }) => {
     html,
     mount() {
       const c = hasPos(d) ? d : S.lastPos || S.spots.find(hasPos) || { lat: 45.65, lng: 0.16 };
-      map = new SlipMap($('#pick'), { center: c, zoom: hasPos(d) ? 16 : 12, onMove: p => { d.lat = p.lat; d.lng = p.lng; d.acc = null; const el = $('#pick-coords'); if (el) el.textContent = `viseur : ${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}`; } });
+      map = new SlipMap($('#pick'), { center: c, zoom: hasPos(d) ? 16 : 12, layer: S.settings.layer, onMove: p => { d.lat = p.lat; d.lng = p.lng; d.acc = null; delete d.alt; const el = $('#pick-coords'); if (el) el.textContent = `viseur : ${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}`; } });
       S.pickMap = map; if (here && !hasPos(d)) ACT.pickHere();
     },
     unmount() { map?.destroy(); S.pickMap = null; },
@@ -1218,12 +1693,13 @@ VIEWS.sortieForm = ({ id, spotId, newHere, sp, la }) => {
       <select class="in" id="f-spot" data-bind="spotId"><option value="">Choisir un spot…</option>${hasPos(S.lastPos) ? `<option value="__new" ${d.spotId === '__new' ? 'selected' : ''}>＋ Nouveau spot à ma position</option>` : ''}${spots.map(s => `<option value="${s.id}" ${d.spotId === s.id ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select>
       ${d.spotId === '__new' ? `<input class="in" data-bind="newSpotName" value="${esc(d.newSpotName)}" placeholder="Nom du nouveau spot" aria-label="Nom du nouveau spot">` : ''}</div>
     <div class="field"><label class="label" for="f-date">Date et heure</label><input class="in num" type="datetime-local" id="f-date" data-bind="date" value="${esc(d.date)}"></div>
-    <div class="field"><span class="label">Observations · le détail se remplit ensuite dans chaque fiche</span>
+    <div class="field"><span class="label">Observations · « Point » au pied du champignon, le détail ensuite dans chaque fiche</span>
       ${d.obs.map((o, i) => `<div class="obs-row" data-i="${i}">
         <input class="in" list="species-list" data-bind="obs.${i}.species" data-sp="${i}" value="${esc(o.species)}" placeholder="Espèce, nom français ou latin" autocomplete="off" aria-label="Espèce">
         <input class="in la" data-bind="obs.${i}.latin" id="la-${i}" value="${esc(o.latin)}" placeholder="Nom latin" autocomplete="off" aria-label="Nom latin">
         <div class="obs-qty"><div class="stepper"><button type="button" data-act="obsStep" data-i="${i}" data-d="-1" aria-label="Moins">−</button><output>${o.count}</output><button type="button" data-act="obsStep" data-i="${i}" data-d="1" aria-label="Plus">+</button></div>
-          <span class="label grow">exemplaires</span><button type="button" class="icon-btn" data-act="obsDel" data-i="${i}" aria-label="Retirer">${I.trash}</button></div>
+          <span class="grow"></span><button type="button" class="pinbtn" data-act="obsPin" data-i="${i}" aria-pressed="${hasPos(o)}" aria-label="Prendre le point GPS de cette observation">${I.pin}<span>${hasPos(o) ? `±${Math.round(o.acc || 0)} m` : 'Point'}</span></button>
+          <button type="button" class="icon-btn" data-act="obsDel" data-i="${i}" aria-label="Retirer">${I.trash}</button></div>
       </div>`).join('')}
       <button type="button" class="btn block" data-act="obsAdd">+ Ajouter une espèce</button>
       ${!d.obs.length ? '<p class="faint" style="margin:0;font-size:13px">Aucune espèce : ce sera une sortie blanche. Elle compte aussi.</p>' : ''}</div>
@@ -1232,7 +1708,7 @@ VIEWS.sortieForm = ({ id, spotId, newHere, sp, la }) => {
       <div class="field"><span class="label">Sol observé</span>${chips('meteo.sol', SOL, d.meteo.sol)}</div>
       <div class="field"><span class="label">Ciel</span>${chips('meteo.ciel', CIEL, d.meteo.ciel, true)}</div>
       <div class="field"><label class="label" for="f-wx">Conditions, en tes mots</label><input class="in" id="f-wx" data-bind="meteo.text" value="${esc(d.meteo.text)}" placeholder="Grosse pluie dimanche, sol frais sous la mousse…"></div>
-      <p class="faint" style="margin:0;font-size:12px">La pluie des 10 jours précédents (Open-Meteo) s'ajoute seule quand le réseau est là.</p>
+      <p class="faint" style="margin:0;font-size:12px">La pluie et la température des 10 jours précédents (Open-Meteo) s'ajoutent seules quand le réseau est là.</p>
     </div>
     <div class="field"><label class="label" for="f-notes">Notes</label><textarea class="in" id="f-notes" data-bind="notes" placeholder="Sosies écartés, repères, comportement de la poussée…">${esc(d.notes)}</textarea></div>
     <button class="btn tape big block" data-act="saveSortie">${ex ? 'Enregistrer' : 'Enregistrer la sortie'}</button>
@@ -1246,21 +1722,22 @@ VIEWS.sortie = ({ id }) => {
   const so = S.sorties.find(s => s.id === id); if (!so) return VIEWS.carnet();
   const spot = spotById(so.spotId);
   const wxBits = [so.meteo?.sol && `sol ${so.meteo.sol.toLowerCase()}`, ...(so.meteo?.ciel || []).map(c => c.toLowerCase())].filter(Boolean);
+  const pos = posOfSortie(so);
   const html = `${topbar('Sortie', `<button class="icon-btn" data-act="editSortie" data-id="${id}" aria-label="Modifier">${I.edit}</button>`)}
   <div style="display:flex;flex-direction:column;gap:4px;padding-top:4px"><span class="kicker">${fmtDots(so.date)} · ${fmtTime(so.date)}</span>
     <h1 class="title">${spot ? `<button class="link" style="font:inherit;color:inherit;padding:0;text-align:left" data-act="go" data-v="spot" data-id="${spot.id}">${esc(spot.name)}</button>` : 'Spot supprimé'}</h1>
     <div><span class="pill ${fruitful(so) ? 'green' : 'tape'}">${fruitful(so) ? `${countOf(so)} ex. · ${plural((so.obs || []).length, 'espèce', 'espèces')}` : 'sortie blanche'}</span></div></div>
   ${(so.obs || []).length ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Observations</h2><span class="sec-meta">touche pour la fiche complète</span></div>
     <div class="cards">${so.obs.map((o, i) => { const c = completeness(o); const t = taxonOf(o); return `<button class="card" data-act="obs" data-sid="${so.id}" data-i="${i}">
-      <div class="row" style="align-items:flex-start"><div class="grow"><div class="card-m">${t ? 'N° ' + num3(t.n) : 'hors liste'}${c.full ? '' : ` · manque : ${esc(c.miss.slice(0, 3).join(', ').toLowerCase())}${c.miss.length > 3 ? '…' : ''}`}</div>
-      <div class="card-t la" style="margin-top:2px">${esc(o.latin || o.species)}</div>${o.latin && o.species ? `<div style="font-size:13.5px;color:var(--ink-2)">${esc(o.species)}</div>` : ''}</div>
+      <div class="row" style="align-items:flex-start"><div class="grow"><div class="card-m">${t ? 'N° ' + num3(t.n) : 'hors liste'}${hasPos(o) ? ' · point GPS' : ''}${c.full ? '' : ` · manque : ${esc(c.miss.slice(0, 3).join(', ').toLowerCase())}${c.miss.length > 3 ? '…' : ''}`}</div>
+      <div class="card-t la" style="margin-top:2px">${esc(o.latin || o.species)}</div>${(t?.fr || o.species) && (t?.fr || o.species) !== (o.latin || o.species) ? `<div style="font-size:13.5px;color:var(--ink-2)">${esc(t?.fr || o.species)}</div>` : ''}</div>
       <div class="card-side"><b>${o.count}</b>ex.</div></div>
       <div class="row" style="margin-top:8px"><div class="gauge grow ${c.full ? 'full' : ''}"><i style="width:${c.pct}%"></i></div>${c.full ? '<span class="ribbon">relevé complet</span>' : `<span class="mono" style="font-size:11px;color:var(--ink-2)">${c.pct} %</span>`}</div></button>`; }).join('')}</div></section>` : ''}
   ${so.photoIds?.length ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Photos</h2></div>${photoGrid(so.photoIds, false)}</section>` : ''}
   <section class="sec"><div class="sec-head"><h2 class="sec-title">Conditions</h2></div><div class="lines">
     <div class="kv"><span>Observé</span><span>${wxBits.length ? esc(wxBits.join(', ')) : '<span class="faint">rien noté</span>'}${so.meteo?.text ? `<br><span class="muted">${esc(so.meteo.text)}</span>` : ''}</span></div>
-    <div class="kv"><span>Pluie 10 j</span><span class="mono">${so.wx ? `${nf.format(so.wx.mm)} mm · Open-Meteo` : '<span class="faint">en attente de réseau</span>'}</span></div>
-    ${hasPos(so) ? `<div class="kv"><span>Position</span><span class="mono">${esc(fmtCoords(so))}${so.acc ? ` · ±${Math.round(so.acc)} m` : ''}</span></div>` : ''}</div></section>
+    <div class="kv"><span>10 jours avant</span><span class="mono">${so.wx ? `${nf.format(so.wx.mm)} mm${typeof so.wx.t === 'number' ? ` · ${nf.format(so.wx.t)} °C en moyenne` : ''} · Open-Meteo` : '<span class="faint">en attente de réseau</span>'}</span></div>
+    ${hasPos(pos) ? `<div class="kv"><span>Position</span><span class="mono">${esc(fmtPosLine(pos))}${pos === spot ? ' <span class="faint">(spot)</span>' : ''}</span></div>` : ''}</div></section>
   ${so.notes ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Notes</h2></div><p style="margin:0;font-size:15px;line-height:1.5;white-space:pre-wrap">${esc(so.notes)}</p></section>` : ''}`;
   return { html, mount: checkRibbons };
 };
@@ -1275,6 +1752,9 @@ VIEWS.obs = ({ sid, i }) => {
   const o = S.draft.o; const c = completeness(o); const t = taxonOf(o); const spot = spotById(so.spotId);
   const row = (label, inner, id) => `<div class="fgrid">${id ? `<label class="label" for="${id}">${label}</label>` : `<span class="label">${label}</span>`}<div>${inner}</div></div>`;
   const inp = (path, ph, cls = '', id = '', extra = '') => `<input class="in ${cls}" ${id ? `id="${id}"` : ''} data-bind="o.${path}" value="${esc(getPath(S.draft.o, path) ?? '')}" placeholder="${esc(ph)}" autocomplete="off" ${extra}>`;
+  const point = hasPos(o)
+    ? `<div class="stack" style="gap:8px"><span class="mono" style="font-size:13px">${esc(fmtPosLine(o))}</span><div class="btn-row"><button type="button" class="btn" data-act="oHere" style="min-height:42px">${I.locate} Reprendre</button><button type="button" class="btn" data-act="oFind" style="min-height:42px">${I.compass} Retrouver</button><button type="button" class="btn danger" data-act="oClear" style="min-height:42px;flex:0 0 auto" aria-label="Effacer le point">${I.trash}</button></div></div>`
+    : `<div class="stack" style="gap:8px"><span class="faint" style="font-size:13px">Pas de point propre : la position de la sortie sert à l'export.</span><button type="button" class="btn" data-act="oHere" style="min-height:42px;align-self:flex-start">${I.locate} Prendre le point ici</button></div>`;
   const html = `${topbar(`Fiche · ${fmtDots(so.date)}`, `<span class="mono" style="font-size:12px;font-weight:600;width:44px;text-align:center;${c.full ? 'color:var(--tape)' : ''}">${c.pct} %</span>`)}
   ${speciesDatalist()}<datalist id="hotes">${HOTES.map(h => `<option value="${h}">`).join('')}</datalist><datalist id="odeurs">${ODEURS.map(h => `<option value="${h}">`).join('')}</datalist>
   <div style="display:flex;flex-direction:column;gap:6px;padding-top:2px">
@@ -1291,27 +1771,34 @@ VIEWS.obs = ({ sid, i }) => {
     ${row('Méthode', chips('o.methodes', METH, o.methodes, true, true))}
     ${row('Ouvrage', inp('ouvrage', 'Eyssartier & Roux, p. 412', '', 'o-ouv'), 'o-ouv')}
     ${row('Vérifiée par', inp('verif', 'Nom du vérificateur', '', 'o-verif'), 'o-verif')}</section>
-  <section class="sec"><div class="sec-head"><h2 class="sec-title">Habitat</h2><span class="sec-meta">02</span></div>
+  <section class="sec"><div class="sec-head"><h2 class="sec-title">Lieu</h2><span class="sec-meta">02</span></div>
+    ${row('Spot', `<span style="font-size:14px">${esc(spot?.name || '—')}${spot?.forest ? ` <span class="faint">· ${esc(spot.forest)}</span>` : ''}</span>`)}
+    ${row('Point', point)}</section>
+  <section class="sec"><div class="sec-head"><h2 class="sec-title">Habitat</h2><span class="sec-meta">03</span></div>
     ${row('Hôte présumé', inp('hote', 'Quercus petraea, châtaignier…', 'la', 'o-hote', 'list="hotes"'), 'o-hote')}
     ${row('Substrat', chips('o.substrat', SUBSTRAT, o.substrat, true, true))}
     ${row('Sol', chips('o.soltype', SOLTYPE, o.soltype, false, true))}</section>
-  <section class="sec"><div class="sec-head"><h2 class="sec-title">Population</h2><span class="sec-meta">03</span></div>
+  <section class="sec"><div class="sec-head"><h2 class="sec-title">Population</h2><span class="sec-meta">04</span></div>
     ${row('Exemplaires', `<div class="stepper" style="width:max-content"><button type="button" data-act="oStep" data-d="-1" aria-label="Moins">−</button><output id="o-count">${o.count}</output><button type="button" data-act="oStep" data-d="1" aria-label="Plus">+</button></div>`)}
     ${row('Stade', chips('o.stade', STADE, o.stade, true, true))}
     ${row('Répartition', chips('o.repart', REPART, o.repart, false, true))}
     ${row('Poids', inp('weight', 'g, facultatif', 'num', 'o-w', 'inputmode="decimal"'), 'o-w')}</section>
-  <section class="sec"><div class="sec-head"><h2 class="sec-title">Mesures</h2><span class="sec-meta">04 · mm</span></div>
+  <section class="sec"><div class="sec-head"><h2 class="sec-title">Mesures</h2><span class="sec-meta">05 · mm</span></div>
     ${row('Chapeau Ø', `<div class="pair">${inp('capMin', 'min', 'num', 'o-c1', 'inputmode="decimal" aria-label="Chapeau minimum"')}<span class="faint">–</span>${inp('capMax', 'max', 'num', '', 'inputmode="decimal" aria-label="Chapeau maximum"')}</div>`, 'o-c1')}
     ${row('Pied', `<div class="pair">${inp('piedH', 'haut.', 'num', 'o-p1', 'inputmode="decimal" aria-label="Hauteur du pied"')}<span class="faint">×</span>${inp('piedD', 'Ø', 'num', '', 'inputmode="decimal" aria-label="Diamètre du pied"')}</div>`, 'o-p1')}</section>
-  <section class="sec"><div class="sec-head"><h2 class="sec-title">Caractères</h2><span class="sec-meta">05</span></div>
+  <section class="sec"><div class="sec-head"><h2 class="sec-title">Caractères</h2><span class="sec-meta">06</span></div>
     ${row('Odeur', inp('odeur', 'Farine, anis, aucune…', '', 'o-od', 'list="odeurs"'), 'o-od')}
-    ${row('Sporée', chips('o.sporee', SPOREE, o.sporee, false, true))}
+    ${row('Sporée', chips('o.sporee', SPOREE, o.sporee, false, true, SPOREE_C))}
     ${row('Chair', inp('chair', 'Blanche, immuable, bleuit…', '', 'o-ch'), 'o-ch')}
     ${row('Réactions', inp('reactions', 'KOH : brun ; FeSO₄ : rose…', '', 'o-re'), 'o-re')}</section>
-  <section class="sec"><div class="sec-head"><h2 class="sec-title">Notes</h2><span class="sec-meta">06</span></div>
+  <section class="sec"><div class="sec-head"><h2 class="sec-title">Prélèvement</h2><span class="sec-meta">07</span></div>
+    ${row('Statut', chips('o.prelev', PRELEV, o.prelev, false, true))}
+    ${row('N° de récolte', inp('recnum', 'ex. SA-2026-014', 'num', 'o-rec'), 'o-rec')}</section>
+  <section class="sec"><div class="sec-head"><h2 class="sec-title">Notes</h2><span class="sec-meta">08</span></div>
     <textarea class="in" data-bind="o.notes" aria-label="Notes de l'observation" placeholder="Ce que les champs ne disent pas">${esc(o.notes || '')}</textarea></section>
   <div class="stack" style="margin-top:20px">
     <button class="btn tape big block" data-act="saveObs">Enregistrer la fiche</button>
+    <button class="btn block" data-act="avisObs">${I.share} Demander un deuxième avis</button>
     <p class="faint" style="margin:0;font-size:12px">Les champs de cette fiche suivent le format Darwin Core à l'export : GBIF, INPN ou tableur.</p>
   </div>`;
   return { html };
@@ -1321,8 +1808,8 @@ VIEWS.obs = ({ sid, i }) => {
 VIEWS.specimen = ({ id }) => {
   const ex = id ? S.specimens.find(s => s.id === id) : null;
   if (!S.draft || S.draft.kind !== 'specimen' || S.draft.id !== (id || null)) {
-    const near = S.lastPos ? nearestSpot(S.lastPos) : null;
-    S.draft = ex ? { kind: 'specimen', ...structuredClone(ex) } : { kind: 'specimen', id: null, date: localISO(), spotId: near?.spot.id || '', photos: {}, extra: [], odeur: '', sporee: '', hypothese: '', latin: '', notes: '', status: 'a_identifier', lat: S.lastPos?.lat, lng: S.lastPos?.lng };
+    const p = freshPos(); const near = p ? nearestSpot(p) : null;
+    S.draft = ex ? { kind: 'specimen', ...structuredClone(ex) } : { kind: 'specimen', id: null, date: localISO(), spotId: near?.spot.id || '', photos: {}, extra: [], odeur: '', sporee: '', hypothese: '', latin: '', notes: '', status: 'a_identifier', ...(p ? posFields(p) : {}) };
   }
   const d = S.draft; const done = STEPS.filter(([k]) => d.photos[k]).length;
   const html = `${topbar(ex ? 'Spécimen' : 'Spécimen à identifier')}${speciesDatalist()}
@@ -1335,14 +1822,16 @@ VIEWS.specimen = ({ id }) => {
     <div class="field"><span class="label">Prises libres</span>${photoGrid(d.extra, true, 'extra')}</div>
     <div style="border-top:2px solid var(--ink)">
       <div class="fgrid"><span class="label">Odeur</span>${chips('odeur', ODEURS, d.odeur, false, true)}</div>
-      <div class="fgrid"><span class="label">Sporée</span>${chips('sporee', SPOREE, d.sporee, false, true)}</div>
+      <div class="fgrid"><span class="label">Sporée</span>${chips('sporee', SPOREE, d.sporee, false, true, SPOREE_C)}</div>
       <div class="fgrid"><label class="label" for="f-hyp">Hypothèse</label><div class="stack" style="gap:6px"><input class="in" id="f-hyp" list="species-list" data-bind="hypothese" value="${esc(d.hypothese)}" placeholder="À vérifier au livre" autocomplete="off"><input class="in la" id="f-latin" data-bind="latin" value="${esc(d.latin)}" placeholder="Nom latin" autocomplete="off" aria-label="Nom latin"></div></div>
       <div class="fgrid"><label class="label" for="f-spot2">Récolté à</label><select class="in" id="f-spot2" data-bind="spotId"><option value="">Aucun spot</option>${S.spots.map(s => `<option value="${s.id}" ${d.spotId === s.id ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></div>
+      <div class="fgrid"><span class="label">Point</span><div class="row" style="gap:8px"><span class="mono grow" style="font-size:12.5px">${hasPos(d) ? esc(fmtPosLine(d)) : '<span class="faint">pas de point</span>'}</span><button type="button" class="btn" data-act="specHere" style="min-height:40px;flex:none">${I.locate} Ici</button></div></div>
       <div class="fgrid"><span class="label">Statut</span>${chips('statusLabel', ['À identifier', 'Identifié'], d.status === 'identifie' ? 'Identifié' : 'À identifier', false, true)}</div>
     </div>
     <div class="field"><label class="label" for="f-notes">Observations</label><textarea class="in" id="f-notes" data-bind="notes" placeholder="Réactions, lait, anneau, chair, page du livre consultée…">${esc(d.notes)}</textarea></div>
     <p class="faint" style="margin:0;font-size:12px">Mycota n'identifie rien à ta place. Ne consomme jamais un champignon sur la seule foi d'une fiche.</p>
     <button class="btn tape big block" data-act="saveSpecimen">Enregistrer le spécimen</button>
+    <button class="btn block" data-act="avisSpec">${I.share} Demander un deuxième avis</button>
     ${ex && ex.status === 'identifie' && !ex.sortieId ? `<button class="btn ink block" data-act="specToSortie" data-id="${ex.id}">Verser dans une sortie</button>` : ''}
     ${ex?.sortieId ? `<button class="btn block" data-act="go" data-v="sortie" data-id="${ex.sortieId}">Voir la sortie liée</button>` : ''}
     ${ex ? `<button class="btn danger block" data-act="delSpecimen" data-id="${ex.id}">${I.trash} Supprimer le spécimen</button>` : ''}
@@ -1353,10 +1842,13 @@ VIEWS.specimen = ({ id }) => {
 /* ----- Carte ----- */
 VIEWS.carte = () => {
   const pts = S.spots.filter(hasPos);
-  const html = `<div class="head" style="padding-bottom:10px"><span class="kicker">${plural(pts.length, 'spot placé', 'spots placés')}</span><h1 class="display" style="font-size:44px">Carte</h1></div>
+  const opts = allObs().filter(x => hasPos(x.o));
+  const html = `<div class="head" style="padding-bottom:8px"><div class="head-top"><span class="kicker">${plural(pts.length, 'spot', 'spots')} · ${plural(opts.length, 'point', 'points')}</span><button class="btn" data-act="offline" style="min-height:40px">${I.download} Hors ligne</button></div>
+    <h1 class="display" style="font-size:44px">Carte</h1>
+    <div class="row" style="gap:6px">${Object.entries(LAYERS).map(([k, L]) => `<button class="chip sq" data-act="layer" data-val="${k}" aria-pressed="${S.settings.layer === k}">${L.label}</button>`).join('')}<span class="grow"></span><button class="chip sq" data-act="mapObs" aria-pressed="${S.settings.mapObs !== false}">Points</button></div></div>
   <div id="bigmap" class="map map-full">
     <div class="map-ctl"><button data-act="mapLocate" aria-label="Ma position">${I.locate}</button><button data-act="mapFit" aria-label="Voir tous les spots">${I.fit}</button><button data-act="mapZoom" data-d="1" aria-label="Zoomer">+</button><button data-act="mapZoom" data-d="-1" aria-label="Dézoomer">−</button></div>
-    <div class="map-note" id="map-note" hidden>Fond de carte indisponible hors réseau. Tes spots restent placés les uns par rapport aux autres.</div>
+    <div class="map-note" id="map-note" hidden></div>
     <div class="map-card" id="map-card" hidden></div>
     ${S.settings.mask ? `<div class="veil" id="veil"><div class="stack" style="align-items:center">${I.lock}<div class="title" style="font-size:24px">Carte masquée</div><p class="muted" style="margin:0">Le masquage des coordonnées est activé.</p><button class="btn" data-act="unveil">Afficher la carte</button></div></div>` : ''}
   </div>`;
@@ -1364,6 +1856,7 @@ VIEWS.carte = () => {
   const color = s => { const m = markOfSpot(s); return m === 'g' ? 'var(--green)' : m === 'o' ? 'var(--tape)' : 'var(--ink-3)'; };
   const marks = () => {
     const list = pts.map(s => ({ cls: `pin${S.mapSel === s.id ? ' sel' : ''}`, style: `--pc:${color(s)}`, html: '<span></span>', id: s.id, pos: s, label: s.name }));
+    if (S.settings.mapObs !== false) allObs().filter(x => hasPos(x.o)).forEach(({ so, o, i }) => { const mid = `o:${so.id}:${i}`; list.push({ cls: `pt${S.mapSel === mid ? ' sel' : ''}`, id: mid, pos: o, label: nameOf(o) }); });
     if (S.lastPos) list.push({ tag: 'div', cls: 'me', pos: S.lastPos });
     map.setMarks(list);
   };
@@ -1371,16 +1864,34 @@ VIEWS.carte = () => {
     html,
     mount() {
       S.mapSel = null;
-      map = new SlipMap($('#bigmap'), { center: pts[0] || S.lastPos || { lat: 45.65, lng: 0.16 }, zoom: 12, onTap: id => { S.mapSel = id; marks(); showCard(id); } });
-      map.onOffline = () => { const n = $('#map-note'); if (n) n.hidden = false; };
+      map = new SlipMap($('#bigmap'), { center: pts[0] || S.lastPos || { lat: 45.65, lng: 0.16 }, zoom: 12, layer: S.settings.layer, onTap: tid => { S.mapSel = tid; marks(); showCard(tid); } });
+      map.onOffline = () => {
+        const n = $('#map-note'); if (!n || !n.hidden) return;
+        const prepared = S.offline?.layers?.find(k => k !== S.settings.layer);
+        n.innerHTML = !navigator.onLine && prepared && !S.offline.layers.includes(S.settings.layer)
+          ? `Pas de réseau. Ta carte hors ligne est en ${LAYERS[prepared].label}. <button class="link" data-act="layer" data-val="${prepared}" style="padding:0">Y passer</button>`
+          : navigator.onLine && !IN_CLAUDE ? 'Ce fond de carte ne répond pas pour le moment. Essaie une autre couche.'
+          : 'Fond de carte indisponible hors réseau. Tes spots restent placés les uns par rapport aux autres.';
+        n.hidden = false;
+      };
       S.bigMap = map; S.mapMarks = marks; marks();
-      if (pts.length) map.fit(pts); else if (S.lastPos) map.setView(S.lastPos, 14);
+      const all = [...pts, ...opts.map(x => x.o)];
+      if (all.length) map.fit(pts.length ? pts : all); else if (S.lastPos) map.setView(S.lastPos, 14);
     },
-    unmount() { map?.destroy(); S.bigMap = null; },
+    unmount() { map?.destroy(); S.bigMap = null; S.mapMarks = null; },
   };
 };
 function showCard(id) {
   const box = $('#map-card'); if (!box) return;
+  if (id && id.startsWith('o:')) {
+    const [, sid, i] = id.split(':'); const so = S.sorties.find(s => s.id === sid); const o = so?.obs?.[+i];
+    if (!o) { box.hidden = true; return; }
+    box.hidden = false;
+    box.innerHTML = `<div class="card"><div class="row"><span class="mark g"></span><div class="grow"><div class="card-t">${esc(nameOf(o))}</div>
+      <div class="card-m">${fmtDots(so.date)} · ${esc(spotById(so.spotId)?.name || '—')} · ${o.count} ex.${S.lastPos ? ` · ${fmtDist(distance(S.lastPos, o))}` : ''}</div></div></div>
+      <div class="btn-row" style="margin-top:10px"><button class="btn" data-act="obs" data-sid="${sid}" data-i="${i}">Fiche</button><button class="btn ink" data-act="findObs" data-sid="${sid}" data-i="${i}">${I.compass} Retrouver</button></div></div>`;
+    return;
+  }
   const sp = id && spotById(id); if (!sp) { box.hidden = true; return; }
   const last = sortiesOf(id)[0]; box.hidden = false;
   box.innerHTML = `<div class="card"><div class="row"><span class="mark ${markOfSpot(sp)}"></span><div class="grow"><div class="card-t">${esc(sp.name)}</div>
@@ -1391,7 +1902,7 @@ function showCard(id) {
 /* ----- Journal ----- */
 VIEWS.chrono = () => {
   const f = S.chronoF || (S.chronoF = { q: '', spot: '', sp: '' });
-  const allSp = [...new Set(allObs().map(x => x.o.species || x.o.latin))].sort((a, b) => a.localeCompare(b, 'fr'));
+  const allSp = [...new Set(allObs().map(x => nameOf(x.o)))].sort((a, b) => a.localeCompare(b, 'fr'));
   const html = `${topbar('Journal')}
   <div class="stack" style="margin-top:6px">
     <input class="in" id="c-q" type="search" placeholder="Rechercher dans les notes, espèces, spots" value="${esc(f.q)}" aria-label="Rechercher">
@@ -1405,8 +1916,8 @@ function renderChronoList() {
   const q = norm(f.q);
   const list = S.sorties.filter(so => {
     if (f.spot && so.spotId !== f.spot) return false;
-    if (f.sp && !(so.obs || []).some(o => (o.species || o.latin) === f.sp)) return false;
-    if (q) { const hay = [spotById(so.spotId)?.name, so.notes, so.meteo?.text, ...(so.obs || []).flatMap(o => [o.species, o.latin, o.notes])].join(' ').toLowerCase(); if (!hay.includes(q)) return false; }
+    if (f.sp && !(so.obs || []).some(o => nameOf(o) === f.sp)) return false;
+    if (q) { const hay = [spotById(so.spotId)?.name, so.notes, so.meteo?.text, ...(so.obs || []).flatMap(o => [o.species, o.latin, nameOf(o), o.notes])].join(' ').toLowerCase(); if (!hay.includes(q)) return false; }
     return true;
   }).sort((a, b) => b.date.localeCompare(a.date));
   if (!list.length) { box.innerHTML = `<p class="muted" style="margin-top:20px">${S.sorties.length ? 'Aucune sortie ne correspond à ces filtres.' : 'Tes sorties apparaîtront ici, mois après mois.'}</p>`; return; }
@@ -1419,8 +1930,9 @@ function renderChronoList() {
 VIEWS.climat = () => {
   const c = S.climate, rs = rainSummary();
   const html = `<div class="head" style="padding-bottom:6px"><div class="head-top"><span class="kicker">${c ? esc(c.place) + ' · ' + ago(new Date(c.at).toISOString()) : 'pluie autour de toi'}</span><button class="btn" data-act="climRefresh" id="clim-btn" style="min-height:40px">Actualiser</button></div>
-    <h1 class="display" style="font-size:44px">Climat</h1><p class="muted" style="margin:0;font-size:13.5px">Les chiffres bruts d'Open-Meteo pour ta position. À toi de juger si tes coins sont prêts.</p></div>
-  <div id="clim-body">${c ? climateBody(c, rs) : `<div class="card"><p class="muted" style="margin:0">Aucun relevé pour l'instant. Touche Actualiser : Mycota demande ta position puis la pluie des 30 derniers jours et des 7 prochains.</p></div>`}</div>`;
+    <h1 class="display" style="font-size:44px">Climat</h1><p class="muted" style="margin:0;font-size:13.5px">Les chiffres bruts d'Open-Meteo pour ta position, et tes propres repères. À toi de juger si tes coins sont prêts.</p></div>
+  <div id="clim-body">${c ? climateBody(c, rs) : `<div class="card"><p class="muted" style="margin:0">Aucun relevé pour l'instant. Touche Actualiser : Mycota demande ta position puis la pluie des 30 derniers jours et des 7 prochains.</p></div>`}</div>
+  ${reperesHTML()}`;
   return { html, mount() { if (!c || Date.now() - c.at > 3 * 3600e3) ACT.climRefresh(null, true); } };
 };
 function climateBody(c, rs) {
@@ -1439,13 +1951,31 @@ function climateBody(c, rs) {
   ${fc.length ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">7 prochains jours</h2></div><div class="fc-row">${fc.map(x => { const dd = new Date(x.d + 'T12:00'); return `<div><div class="d">${DAYS_S[dd.getDay()]}</div><div class="t">${Math.round(x.tmax)}°<span class="faint" style="font-weight:400"> ${Math.round(x.tmin)}°</span></div><div class="r ${(x.mm || 0) < 0.5 ? 'dry' : ''}">${(x.mm || 0) < 0.5 ? 'sec' : nf.format(x.mm) + ' mm'}</div></div>`; }).join('')}</div></section>` : ''}
   <details style="margin-top:14px"><summary>Tableau jour par jour</summary><div style="overflow-x:auto"><table class="days"><tr><th>Jour</th><td>Pluie</td><td>Min</td><td>Max</td></tr>${[...days].reverse().map(x => `<tr><th>${fmtDayNoYear(x.d)}${x.d > today ? ' (prévu)' : ''}</th><td>${nf.format(x.mm || 0)} mm</td><td>${Math.round(x.tmin)}°</td><td>${Math.round(x.tmax)}°</td></tr>`).join('')}</table></div></details>`;
 }
+function reperesHTML() {
+  const list = speciesWindows().slice(0, 10);
+  if (!list.length) return '';
+  const now = rainNow();
+  return `<section class="sec"><div class="sec-head"><h2 class="sec-title">Tes repères</h2><span class="sec-meta">pluie 10 j avant tes trouvailles</span></div>
+    <div class="lines">${list.map(({ e, st }) => { const v = vsTxt(st, now); return `<button class="li multi" data-act="taxon" data-key="${esc(e.key)}">
+      <span class="row"><span class="grow" style="font-size:14px;font-weight:600">${esc(e.ref?.fr || e.fr || e.la)}</span><span class="mono" style="font-size:12px">${rangeTxt(st)}</span></span>
+      ${rangeBar(st, now)}
+      <span class="row" style="margin-top:6px"><span class="faint mono grow" style="font-size:11px">${plural(st.n, 'relevé', 'relevés')}${st.tmin != null ? ` · ${nf.format(st.tmin)} à ${nf.format(st.tmax)} °C` : ''}</span>${v ? `<span class="mono" style="font-size:11px;${v === 'dans ta fourchette' ? 'color:var(--green);font-weight:600' : 'color:var(--ink-2)'}">${v}</span>` : ''}</span></button>`; }).join('')}</div>
+    <p class="faint" style="font-size:12px;margin:8px 0 0">${now != null ? `Trait orange : ${nf.format(now)} mm ces 10 derniers jours autour de toi. ` : ''}Ce sont tes chiffres, pas une prévision : la pluie n'explique pas tout.</p></section>`;
+}
 
-/* ----- Retrouver ----- */
-VIEWS.retrouver = ({ id }) => {
-  const sp = spotById(id); if (!sp || !hasPos(sp)) return VIEWS.carnet();
+/* ----- Retrouver : un spot ou le point exact d'une observation ----- */
+VIEWS.retrouver = params => {
+  let target = null, name = '', kind = 'spot';
+  if (params.sid != null) {
+    const so = S.sorties.find(s => s.id === params.sid); const o = so?.obs?.[Number(params.i)];
+    if (o && hasPos(o)) { target = o; name = nameOf(o); kind = 'obs'; }
+  } else {
+    const sp = spotById(params.id); if (sp && hasPos(sp)) { target = sp; name = sp.name; }
+  }
+  if (!target) return VIEWS.carnet();
   const needsPerm = typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function';
   const html = `${topbar('Retrouver')}
-  <div class="finder"><span class="kicker">Direction de</span><h1 class="title">${esc(sp.name)}</h1>
+  <div class="finder"><span class="kicker">${kind === 'obs' ? 'Ton point d’observation' : 'Direction de'}</span><h1 class="title">${esc(name)}</h1>
     <div class="dial"><div class="rose" id="rose"><span class="n">N</span></div>
       <div class="arrow" id="arrow"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 6 L70 62 L50 52 L30 62 Z" fill="var(--tape)" stroke="var(--ink)" stroke-width="2"/><path d="M50 52 L70 62 L50 94 L30 62 Z" fill="var(--sunk)" stroke="var(--ink)" stroke-width="2"/></svg></div></div>
     <div class="dist" id="dist">…</div><div class="muted" id="dir">Recherche de ta position</div><div class="mono faint" id="acc" style="font-size:12px"></div>
@@ -1453,10 +1983,10 @@ VIEWS.retrouver = ({ id }) => {
     ${needsPerm ? '<button class="btn" data-act="compass" id="cmp-btn">Activer la boussole</button>' : ''}</div>`;
   let watch = null, heading = null, pos = null;
   const update = () => {
-    if (!pos) return;
-    const d = distance(pos, sp), b = bearing(pos, sp), here = d < 15;
+    if (!pos || !$('#dist')) return;
+    const d = distance(pos, target), b = bearing(pos, target), here = d < Math.max(8, Math.min(15, pos.acc || 15));
     $('#dist').textContent = here ? 'Ici' : fmtDist(d);
-    $('#dir').textContent = here ? 'Tu es sur le spot.' : `Cap ${Math.round(b)}° · ${cardinal(b)}`;
+    $('#dir').textContent = here ? (kind === 'obs' ? 'Tu es au point noté.' : 'Tu es sur le spot.') : `Cap ${Math.round(b)}° · ${cardinal(b)}`;
     $('#acc').textContent = `précision GPS ±${Math.round(pos.acc)} m`;
     $('#arrow').style.transform = `rotate(${here ? 0 : (heading == null ? b : b - heading)}deg)`; $('#arrow').style.opacity = here ? '0.25' : '1';
     $('#rose').style.transform = `rotate(${heading == null ? 0 : -heading}deg)`;
@@ -1479,49 +2009,92 @@ VIEWS.retrouver = ({ id }) => {
 /* ----- Réglages ----- */
 VIEWS.reglages = () => {
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  const bk = backupState();
   const html = `${topbar('Réglages')}
-  <section class="sec" style="margin-top:8px"><div class="sec-head"><h2 class="sec-title">Confidentialité</h2></div>
+  <section class="sec" style="margin-top:8px"><div class="sec-head"><h2 class="sec-title">Observateur</h2></div>
+    <div class="field"><label class="label" for="set-obs">Ton nom, tel qu'il apparaîtra dans l'export scientifique</label><input class="in" id="set-obs" value="${esc(S.settings.observer || '')}" placeholder="Prénom Nom" autocomplete="name"></div></section>
+  <section class="sec"><div class="sec-head"><h2 class="sec-title">Confidentialité</h2></div>
     <div class="row" style="padding:8px 0"><div class="grow"><b>Masquer les coordonnées</b><div class="faint" style="font-size:13px">Les fiches n'affichent que le nom du spot, la carte reste voilée.</div></div><button class="chip" data-act="toggleMask" aria-pressed="${S.settings.mask}">${S.settings.mask ? 'Activé' : 'Désactivé'}</button></div>
-    <div class="row" style="padding:8px 0;border-top:1px solid var(--line)"><div class="grow"><b>Code de protection</b><div class="faint" style="font-size:13px">${S.vault ? 'Activé : positions chiffrées (AES-256) sur ce téléphone.' : 'Chiffre les positions avec un code demandé à chaque ouverture.'}</div></div><button class="chip" data-act="${S.vault ? 'vaultOff' : 'vaultOn'}" aria-pressed="${!!S.vault}">${S.vault ? 'Activé' : 'Activer'}</button></div>
-    <p class="faint" style="margin:6px 0 0;font-size:12px">Aucun compte, aucun serveur. Les photos sont réencodées à l'ajout : leur position GPS disparaît.</p></section>
+    <div class="row" style="padding:8px 0;border-top:1px solid var(--line)"><div class="grow"><b>Code de protection</b><div class="faint" style="font-size:13px">${S.vault ? 'Activé : positions des spots et des observations chiffrées (AES-256) sur ce téléphone.' : 'Chiffre les positions avec un code demandé à chaque ouverture.'}</div></div><button class="chip" data-act="${S.vault ? 'vaultOff' : 'vaultOn'}" aria-pressed="${!!S.vault}">${S.vault ? 'Activé' : 'Activer'}</button></div>
+    <p class="faint" style="margin:6px 0 0">Aucun compte, aucun serveur. Les photos sont réencodées à l'ajout : leur position GPS disparaît.</p></section>
+  <section class="sec"><div class="sec-head"><h2 class="sec-title">Carte hors ligne</h2></div>
+    <div class="row"><span class="grow muted" style="font-size:14px">${S.offline ? `${nf.format(S.offline.n)} tuiles ${S.offline.layers.map(k => LAYERS[k].label).join(' + ')} · préparée le ${fmtDots(S.offline.at)}` : 'Pas encore préparée.'}</span><button class="btn" data-act="offline" style="flex:none">${I.download} ${S.offline ? 'Mettre à jour' : 'Préparer'}</button></div></section>
   <section class="sec"><div class="sec-head"><h2 class="sec-title">Sauvegarde et export</h2></div><div class="stack">
-    <p class="muted" style="margin:0;font-size:14px">Tes données ne vivent que sur ce téléphone. Exporte une sauvegarde après tes sorties.</p>
+    <p class="muted" style="margin:0;font-size:14px">${bk?.ok ? `Dernière sauvegarde le ${fmtDots(bk.at)}, à jour.` : bk?.at ? `Dernière sauvegarde le ${fmtDots(bk.at)}. Des relevés ont changé depuis.` : 'Tes données ne vivent que sur ce téléphone. Exporte une sauvegarde après tes sorties.'}</p>
     <button class="btn ink block" data-act="exportJSON">Sauvegarde complète (photos comprises)</button>
     <label class="btn block">Restaurer une sauvegarde<input type="file" class="vh" accept="application/json,.json" data-import="1"></label>
-    <div class="btn-row"><button class="btn" data-act="exportDwC">Darwin Core (CSV)</button><button class="btn" data-act="exportGPX">Spots en GPX</button></div>
-    <p class="faint" style="margin:0;font-size:12px">L'export Darwin Core floute les coordonnées à environ 1 km (2 décimales), comme pour un dépôt public.</p>
+    <div class="btn-row"><button class="btn" data-act="exportDwC">Darwin Core (CSV)</button><button class="btn" data-act="exportGPX">Spots et points (GPX)</button></div>
+    <p class="faint" style="margin:0;font-size:12px">L'export Darwin Core te laisse choisir : coordonnées floutées à environ 1 km pour un dépôt public, ou exactes pour toi.</p>
     <div class="faint mono" id="storage-info" style="font-size:11.5px"></div></div></section>
   ${!standalone && !IN_CLAUDE ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Installer</h2></div><p class="muted" style="margin:0;font-size:14px">Sur iPhone : Partager, puis « Sur l'écran d'accueil ». Installée, l'app s'ouvre sans réseau et Safari ne vide plus ses données.</p></section>` : ''}
   <section class="sec"><div class="sec-head"><h2 class="sec-title">Données</h2></div><div class="stack">
     <div class="row"><span class="grow muted" style="font-size:14px">${plural(S.spots.length, 'spot', 'spots')}, ${plural(S.sorties.length, 'sortie', 'sorties')}, ${plural(S.specimens.length, 'spécimen', 'spécimens')}</span>
       ${S.spots.some(s => s.demo) ? '<button class="btn" data-act="clearDemo">Retirer les exemples</button>' : '<button class="btn" data-act="loadDemo">Exemples</button>'}</div>
     <button class="btn danger block" data-act="wipe">Tout effacer sur ce téléphone</button></div></section>
-  <p class="faint mono" style="text-align:center;font-size:11px;margin:22px 0 0">Mycota ${APP_VERSION} · météo Open-Meteo · fond © OpenStreetMap</p>
+  <p class="faint mono" style="text-align:center;font-size:11px;margin:22px 0 0">Mycota ${APP_VERSION} · météo Open-Meteo · fonds © IGN, © OpenStreetMap</p>
   <p class="faint mono" style="text-align:center;font-size:11px;margin:6px 0 0">Liste Charente : <a href="${CH_SRC.url}" target="_blank" rel="noopener" style="color:inherit">${esc(CH_SRC.label)}</a></p>`;
   return { html, async mount() { try { const est = await navigator.storage?.estimate?.(); const per = await navigator.storage?.persisted?.(); const el = $('#storage-info'); if (el && est) el.textContent = `${nf.format((est.usage || 0) / 1048576)} Mo utilisés · stockage ${per ? 'protégé' : 'non protégé : installe l’app et exporte régulièrement'}`; } catch { /* rien */ } } };
 };
 
 VIEWS.lock = () => ({
-  html: `<div class="lock"><span class="kicker">Carnet protégé</span><h1 class="display">Mycota</h1><p class="muted" style="margin:0">Entre ton code pour déchiffrer les positions de tes spots.</p>
+  html: `<div class="lock"><span class="kicker">Carnet protégé</span><h1 class="display">Mycota</h1><p class="muted" style="margin:0">Entre ton code pour déchiffrer les positions de tes spots et de tes observations.</p>
     <input class="in" type="password" id="unlock-pass" autocomplete="current-password" placeholder="Code" aria-label="Code"><button class="btn ink big block" data-act="unlock">Ouvrir le carnet</button><p class="faint" id="unlock-err" style="margin:0;font-size:13px"></p></div>`,
   mount() { const i = $('#unlock-pass'); i?.focus(); i?.addEventListener('keydown', e => { if (e.key === 'Enter') ACT.unlock(); }); },
 });
 
 /* ==========================================================================
+   EXPORTS
+   ========================================================================== */
+function buildDwC(exact) {
+  const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const cols = ['occurrenceID', 'basisOfRecord', 'occurrenceStatus', 'eventDate', 'scientificName', 'vernacularName', 'individualCount', 'recordedBy', 'identifiedBy', 'identificationQualifier', 'identificationReferences', 'identificationRemarks', 'recordNumber', 'preparations',
+    'decimalLatitude', 'decimalLongitude', 'geodeticDatum', 'coordinateUncertaintyInMeters', 'minimumElevationInMeters', 'maximumElevationInMeters', 'locality', 'habitat', 'associatedTaxa', 'substrate', 'lifeStage', 'occurrenceRemarks', 'country', 'countryCode', 'stateProvince'];
+  const rows = [cols];
+  allObs().sort((a, b) => a.so.date.localeCompare(b.so.date)).forEach(({ so, o, i }) => {
+    const sp = spotById(so.spotId) || {}, p = posOfObs(so, o) || {};
+    const hide = S.settings.mask || !hasPos(p);
+    const rem = [o.capMin || o.capMax ? `chapeau ${o.capMin || '?'}-${o.capMax || '?'} mm` : '', o.piedH || o.piedD ? `pied ${o.piedH || '?'} x ${o.piedD || '?'} mm` : '', o.sporee ? `sporée ${o.sporee.toLowerCase()}` : '', o.odeur ? `odeur ${o.odeur.toLowerCase()}` : '', o.chair ? `chair ${o.chair}` : '', o.reactions ? `réactions ${o.reactions}` : '', o.repart ? o.repart.toLowerCase() : '', o.prelev ? o.prelev.toLowerCase() : '', so.wx ? `pluie 10 j ${so.wx.mm} mm` : '', typeof so.wx?.t === 'number' ? `température moyenne 10 j ${so.wx.t} °C` : '', o.notes || ''].filter(Boolean).join(' ; ');
+    const alt = hasAlt(p) ? Math.round(p.alt) : '';
+    rows.push([`mycota:${so.id}:${i}`, 'HumanObservation', 'present', so.date, taxonOf(o)?.la || o.latin || o.species, nameOf(o), o.count, S.settings.observer || '', S.settings.observer || '', o.certitude === 'Certaine' ? '' : (o.certitude || ''), o.ouvrage || '', o.verif ? `vérifiée par ${o.verif}` : '', o.recnum || '', o.recnum ? 'exsiccatum' : '',
+      hide ? '' : exact ? p.lat.toFixed(6) : p.lat.toFixed(2), hide ? '' : exact ? p.lng.toFixed(6) : p.lng.toFixed(2), hide ? '' : 'WGS84', hide ? '' : exact ? (p.acc ? Math.max(5, Math.round(p.acc)) : '') : 1000, alt, alt,
+      exact ? sp.name || '' : '', [sp.forest, o.soltype ? 'sol ' + o.soltype.toLowerCase() : ''].filter(Boolean).join(', '),
+      o.hote || '', (o.substrat || []).join(' | '), (o.stade || []).join(' | '), rem, 'France', 'FR', 'Charente']);
+  });
+  return '﻿' + rows.map(r => r.map(q).join(',')).join('\r\n');
+}
+function buildGPX() {
+  const wpt = (p, name, desc) => `  <wpt lat="${p.lat.toFixed(6)}" lon="${p.lng.toFixed(6)}">${hasAlt(p) ? `<ele>${Math.round(p.alt)}</ele>` : ''}<name>${esc(name)}</name>${desc ? `<desc>${esc(desc)}</desc>` : ''}</wpt>`;
+  const spots = S.spots.filter(hasPos).map(s => wpt(s, s.name, [s.forest, s.notes].filter(Boolean).join(' — ')));
+  const pts = allObs().filter(x => hasPos(x.o)).map(({ so, o }) => wpt(o, `${nameOf(o)} · ${fmtDots(so.date)}`, `${o.count} ex. · ${spotById(so.spotId)?.name || ''}`));
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Mycota" xmlns="http://www.topografix.com/GPX/1/1">\n${[...spots, ...pts].join('\n')}\n</gpx>\n`;
+}
+
+/* ==========================================================================
    ACTIONS
    ========================================================================== */
+async function persistObs() {
+  syncDraft(); const d = S.draft; const so = S.sorties.find(s => s.id === d?.sid); if (!so) return null;
+  const o = d.o; o.species = (o.species || '').trim(); o.latin = (o.latin || '').trim(); o.count = Math.max(0, Number(o.count) || 0);
+  if (!o.latin) { const m = matchLatin(o.species); if (m) o.latin = m.la; }
+  const was = completeness(so.obs[d.i]).full;
+  so.obs[d.i] = structuredClone(o); await saveRec('sortie', so);
+  return { so, was, now: completeness(o).full };
+}
 const ACT = {
   back() { if (history.state?.depth > 0) history.back(); else { S.draft = null; go('carnet', {}, { replace: true }); } },
   go(t) { const p = {}; if (t.dataset.id) p.id = t.dataset.id; S.draft = null; go(t.dataset.v, p); },
   tab(t) { S.draft = null; go(t.dataset.v, {}, { replace: TABS.includes(S.view) }); },
   taxon(t) { S.draft = null; go('taxon', { key: t.dataset.key }); },
   obs(t) { S.draft = null; go('obs', { sid: t.dataset.sid, i: Number(t.dataset.i) }); },
+  findObs(t) { go('retrouver', { sid: t.dataset.sid, i: Number(t.dataset.i) }); },
   photo(t) { viewPhoto(t.dataset.id); },
+  bilanYear(t) { go('bilan', { y: Number(t.dataset.val) }, { replace: true }); },
   dexList(t) { S.codexF.list = t.dataset.val; render(); },
   dexMode(t) { S.codexF.mode = t.dataset.val; $$('[data-act="dexMode"]').forEach(b => b.setAttribute('aria-pressed', b === t)); renderDex(); },
   async note() {
     const s = openSheet(`<div class="stack"><div><span class="kicker">Sur le terrain</span><h2 class="title" style="font-size:28px;margin-top:4px">Que veux-tu noter ?</h2><div class="mono faint" id="note-pos" style="font-size:12px;margin-top:6px">recherche de ta position…</div></div>
-      <button class="card" data-x="sortie"><div class="choice"><span class="ic">${I.walk}</span><div class="grow"><div class="card-t">Une sortie ici</div><div class="card-m" id="note-near">espèces, photos, conditions</div></div></div></button>
+      <label class="card" style="cursor:pointer"><div class="choice"><span class="ic">${I.camera}</span><div class="grow"><div class="card-t">Photo rapide</div><div class="card-m">une photo et le point GPS, le reste ce soir</div></div></div><input type="file" class="vh" accept="image/*" capture="environment" data-quick="1"></label>
+      <button class="card" data-x="sortie"><div class="choice"><span class="ic">${I.walk}</span><div class="grow"><div class="card-t">Une sortie ici</div><div class="card-m" id="note-near">espèces, points GPS, conditions</div></div></div></button>
       <button class="card" data-x="spot"><div class="choice"><span class="ic">${I.pin}</span><div class="grow"><div class="card-t">Un nouveau spot</div><div class="card-m">marquer ce coin pour le retrouver</div></div></div></button>
       <button class="card" data-x="specimen"><div class="choice"><span class="ic">${I.lens}</span><div class="grow"><div class="card-t">Un spécimen à identifier</div><div class="card-m">cinq plans guidés pour le livre, ce soir</div></div></div></button></div>`);
     let near = null;
@@ -1530,7 +2103,7 @@ const ACT = {
     $('[data-x="specimen"]', s).onclick = () => { closeSheet(); S.draft = null; go('specimen', {}); };
     const p = await getPos(12000); const el = $('#note-pos'); if (!el) return;
     if (p.error) { el.textContent = posError(p.error); return; }
-    near = nearestSpot(p); el.textContent = `position trouvée · ±${Math.round(p.acc)} m`;
+    near = nearestSpot(p); el.textContent = `position trouvée · ±${Math.round(p.acc)} m${hasAlt(p) ? ` · alt. ${p.alt} m` : ''}`;
     const nn = $('#note-near'); if (nn) nn.textContent = near ? `à ${fmtDist(near.d)} de « ${near.spot.name} »` : 'aucun spot à moins de 250 m : un nouveau sera créé';
   },
   newSortie(t) { S.draft = null; go('sortieForm', t.dataset.id ? { spotId: t.dataset.id } : { sp: t.dataset.sp, la: t.dataset.la }); },
@@ -1539,7 +2112,7 @@ const ACT = {
     const d = S.draft; if (!d) return;
     syncDraft();
     const path = t.dataset.path, v = t.dataset.val, multi = t.dataset.multi === '1';
-    if (path === 'statusLabel') { d.status = (d.status === 'identifie') ? 'a_identifier' : 'identifie'; if (v === 'Identifié') d.status = 'identifie'; else d.status = 'a_identifier'; }
+    if (path === 'statusLabel') d.status = v === 'Identifié' ? 'identifie' : 'a_identifier';
     else if (multi) { const cur = getPath(d, path) || []; setPath(d, path, cur.includes(v) ? cur.filter(x => x !== v) : [...cur, v]); }
     else setPath(d, path, getPath(d, path) === v ? '' : v);
     if (d.kind === 'obs') { render(); return; }
@@ -1549,6 +2122,15 @@ const ACT = {
   oStep(t) { syncDraft(); const o = S.draft.o; o.count = Math.max(0, (Number(o.count) || 0) + Number(t.dataset.d)); $('#o-count').textContent = o.count; },
   obsAdd() { syncDraft(); S.draft.obs.push(blankObs()); render(); const rows = $$('.obs-row'); rows[rows.length - 1]?.querySelector('input')?.focus(); },
   obsDel(t) { syncDraft(); S.draft.obs.splice(+t.dataset.i, 1); render(); },
+  async obsPin(t) {
+    syncDraft(); const i = +t.dataset.i; const span = t.querySelector('span'); if (span) span.textContent = '…';
+    const p = await getPos(12000);
+    if (p.error) { toast(posError(p.error)); if (span) span.textContent = 'Point'; return; }
+    const o = S.draft?.obs?.[i]; if (!o) return;
+    Object.assign(o, posFields(p));
+    t.setAttribute('aria-pressed', 'true'); if (span) span.textContent = `±${Math.round(p.acc)} m`;
+    toast(`Point pris à ±${Math.round(p.acc)} m.`);
+  },
   photoDel(t) {
     syncDraft(); const d = S.draft;
     if (t.dataset.target === 'extra') d.extra = d.extra.filter(x => x !== t.dataset.id); else d.photoIds = d.photoIds.filter(x => x !== t.dataset.id);
@@ -1560,29 +2142,44 @@ const ACT = {
     let spotId = d.spotId;
     if (spotId === '__new') {
       if (!hasPos(S.lastPos)) { toast('Position indisponible pour créer le spot.'); return; }
-      spotId = (await saveRec('spot', { id: 's' + uid(), name: d.newSpotName.trim() || `Spot du ${fmtDayNoYear(d.date)}`, forest: '', notes: '', lat: S.lastPos.lat, lng: S.lastPos.lng, acc: S.lastPos.acc })).id;
+      spotId = (await saveRec('spot', { id: 's' + uid(), name: d.newSpotName.trim() || `Spot du ${fmtDayNoYear(d.date)}`, forest: '', notes: '', ...posFields(S.lastPos) })).id;
     }
     const obs = d.obs.map(o => ({ ...o, species: (o.species || '').trim(), latin: (o.latin || '').trim(), count: Math.max(0, Number(o.count) || 0) })).filter(o => o.species || o.latin);
     const ex = d.id ? S.sorties.find(s => s.id === d.id) : null;
     const rec = { ...(ex || {}), id: d.id || 'o' + uid(), spotId, date: d.date, obs, photoIds: d.photoIds, meteo: d.meteo, notes: (d.notes || '').trim() };
-    if (!ex && hasPos(S.lastPos) && Date.now() - (S.lastPos.at || 0) < 30 * 60e3) Object.assign(rec, { lat: S.lastPos.lat, lng: S.lastPos.lng, acc: S.lastPos.acc });
+    const p = freshPos(30 * 60e3);
+    if (!ex && p) Object.assign(rec, posFields(p));
     if (ex && ex.date !== rec.date) delete rec.wx;
     const before = codexIndex();
     await saveRec('sortie', rec); S.draft = null;
-    const fresh = obs.map(taxonOf).filter(t => t && !before.has(norm(t.la)));
-    if (fresh.length) toast(`Nouvelle case au Mycodex : ${fresh.map(t => 'N° ' + num3(t.n) + ' ' + t.fr).join(', ')}`, true);
+    const fresh = [...new Map(obs.map(taxonOf).filter(t => t && !before.has(norm(t.la))).map(t => [t.la, t])).values()];
+    if (fresh.length) toast(`Nouvelle case au Mycodex : ${fresh.map(t => 'N° ' + num3(t.n) + ' ' + (t.fr || t.la)).join(', ')}`, true);
     else toast(obs.length ? 'Sortie enregistrée.' : 'Sortie blanche enregistrée.');
     go('sortie', { id: rec.id }, { replace: true });
     syncWeather().then(() => { if (S.view === 'sortie' && S.params.id === rec.id) render(); });
   },
   async saveObs() {
-    syncDraft(); const d = S.draft; const so = S.sorties.find(s => s.id === d.sid); if (!so) return;
-    const o = d.o; o.species = (o.species || '').trim(); o.latin = (o.latin || '').trim(); o.count = Math.max(0, Number(o.count) || 0);
-    if (!o.latin) { const m = matchLatin(o.species); if (m) o.latin = m.la; }
-    const was = completeness(so.obs[d.i]).full;
-    so.obs[d.i] = o; await saveRec('sortie', so); S.draft = null;
-    toast(!was && completeness(o).full ? 'Relevé complet. Le ruban est noué.' : 'Fiche enregistrée.', !was && completeness(o).full);
-    history.state?.depth > 0 ? history.back() : go('sortie', { id: so.id }, { replace: true });
+    const r = await persistObs(); if (!r) return;
+    S.draft = null;
+    toast(!r.was && r.now ? 'Relevé complet. Le ruban est noué.' : 'Fiche enregistrée.', !r.was && r.now);
+    if (history.state?.depth > 0) history.back(); else go('sortie', { id: r.so.id }, { replace: true });
+  },
+  async oHere() {
+    syncDraft(); toast('Recherche de ta position…');
+    const p = await getPos(12000);
+    if (p.error) { toast(posError(p.error)); return; }
+    if (S.draft?.kind !== 'obs') return;
+    Object.assign(S.draft.o, posFields(p)); render(); toast(`Point pris à ±${Math.round(p.acc)} m.`);
+  },
+  oClear() { syncDraft(); POS_KEYS.forEach(k => delete S.draft.o[k]); render(); },
+  async oFind() { const r = await persistObs(); if (!r) return; const { sid, i } = S.draft; S.draft = null; go('retrouver', { sid, i }); },
+  async avisObs() { const r = await persistObs(); if (!r) return; const o = S.draft.o, so = r.so; avisSheet(opts => avisFromObs(so, o, opts)); },
+  avisSpec() { syncDraft(); const d = S.draft; avisSheet(opts => avisFromSpecimen(d, opts)); },
+  async specHere() {
+    syncDraft(); const p = await getPos(12000);
+    if (p.error) { toast(posError(p.error)); return; }
+    if (S.draft?.kind !== 'specimen') return;
+    Object.assign(S.draft, posFields(p)); render(); toast(`Point pris à ±${Math.round(p.acc)} m.`);
   },
   delSortie(t) { confirmSheet({ title: 'Supprimer cette sortie ?', text: 'Ses observations, ses fiches et ses photos seront effacées de ce téléphone.', ok: 'Supprimer', onOk: async () => { await deleteRec('sortie', t.dataset.id); S.draft = null; toast('Sortie supprimée.'); go('carnet', {}, { replace: true }); } }); },
   async saveSpot() {
@@ -1590,7 +2187,7 @@ const ACT = {
     if (!d.name) { toast('Donne un nom à ce spot.'); $('#f-name').focus(); return; }
     if (!hasPos(d)) { toast('Place le spot sur la carte ou saisis ses coordonnées.'); return; }
     const ex = d.id ? spotById(d.id) : null; const { kind, ...rest } = d;
-    const rec = await saveRec('spot', { ...(ex || {}), ...rest, id: d.id || 's' + uid() });
+    const rec = await saveRec('spot', { ...(ex ? omit(ex, POS_KEYS) : {}), ...rest, id: d.id || 's' + uid() });
     S.draft = null; toast(ex ? 'Spot mis à jour.' : 'Spot créé.'); go('spot', { id: rec.id }, { replace: true });
   },
   delSpot(t) {
@@ -1602,13 +2199,54 @@ const ACT = {
   async pickHere() {
     toast('Recherche de ta position…'); const p = await getPos();
     if (p.error) { toast(posError(p.error)); return; }
-    S.pickMap?.setView(p, 17); if (S.draft) Object.assign(S.draft, { lat: p.lat, lng: p.lng, acc: p.acc });
-    const el = $('#pick-coords'); if (el) el.textContent = `ta position : ${p.lat.toFixed(5)}, ${p.lng.toFixed(5)} · GPS ±${Math.round(p.acc)} m`;
+    S.pickMap?.setView(p, 17); if (S.draft) Object.assign(S.draft, posFields(p));
+    const el = $('#pick-coords'); if (el) el.textContent = `ta position : ${p.lat.toFixed(5)}, ${p.lng.toFixed(5)} · GPS ±${Math.round(p.acc)} m${hasAlt(p) ? ` · alt. ${p.alt} m` : ''}`;
   },
   pickManual() {
     const lat = parseFloat(($('#f-lat').value || '').replace(',', '.')), lng = parseFloat(($('#f-lng').value || '').replace(',', '.'));
     if (!(Math.abs(lat) <= 90 && Math.abs(lng) <= 180)) { toast('Coordonnées invalides. Exemple : 45.6935 et 0.2915'); return; }
     S.pickMap?.setView({ lat, lng }, 16);
+  },
+  cycleLayer() {
+    const keys = Object.keys(LAYERS); const k = keys[(keys.indexOf(S.settings.layer) + 1) % keys.length];
+    S.settings.layer = k; saveSettings(); S.pickMap?.setLayer(k); toast(`Fond : ${LAYERS[k].label}`);
+  },
+  layer(t) {
+    const k = t.dataset.val; if (!LAYERS[k]) return;
+    S.settings.layer = k; saveSettings();
+    S.bigMap?.setLayer(k); S.pickMap?.setLayer(k);
+    $$('[data-act="layer"].chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.val === k));
+    const n = $('#map-note'); if (n) n.hidden = true;
+  },
+  mapObs(t) { S.settings.mapObs = S.settings.mapObs === false; saveSettings(); t.setAttribute('aria-pressed', S.settings.mapObs); S.mapMarks?.(); },
+  offline() {
+    const n = S.spots.filter(hasPos).length;
+    let layers = ['plan'];
+    const s = openSheet(`<div class="stack"><div><span class="kicker">Sans réseau en forêt</span><h2 class="title" style="font-size:28px;margin-top:4px">Carte hors ligne</h2></div>
+      <p class="muted" style="margin:0">Mycota télécharge le Plan IGN dans un rayon d'environ 1 km autour de ${n ? `tes ${plural(n, 'spot', 'spots')}` : 'tes spots'}, du zoom secteur au zoom sentier. Sur place, la carte s'affiche même sans réseau.</p>
+      <button class="chip sq" id="off-photo" aria-pressed="false" style="align-self:flex-start">Ajouter la photo aérienne</button>
+      <div class="mono faint" id="off-est" style="font-size:12px"></div>
+      <div class="gauge" id="off-bar" hidden><i style="width:0%"></i></div>
+      <div class="btn-row"><button class="btn ink" id="off-go" ${n ? '' : 'disabled'}>${offlineJob ? 'Préparation en cours…' : 'Préparer'}</button>${S.offline ? '<button class="btn danger" id="off-del">Supprimer</button>' : ''}</div>
+      <p class="faint" style="margin:0;font-size:12px">${S.offline ? `Déjà prête : ${nf.format(S.offline.n)} tuiles ${S.offline.layers.map(k => LAYERS[k].label).join(' + ')}, le ${fmtDots(S.offline.at)}. ` : ''}${n ? '' : 'Crée d’abord un spot. '}OpenStreetMap n'autorise pas ce téléchargement : hors ligne, passe sur le Plan IGN ou la photo. Relance après avoir ajouté un spot.</p></div>`);
+    const upd = () => { const t = offlineTiles(layers); const mb = t.reduce((a, x) => a + LAYERS[x.k].kb, 0) / 1024; $('#off-est', s).textContent = `${nf.format(t.length)} tuiles · environ ${nf.format(Math.max(1, Math.round(mb)))} Mo`; };
+    upd();
+    $('#off-photo', s).onclick = e => { const on = !pressed(e.currentTarget); e.currentTarget.setAttribute('aria-pressed', on); layers = on ? ['plan', 'ortho'] : ['plan']; upd(); };
+    const del = $('#off-del', s);
+    if (del) del.onclick = async () => { try { await caches.delete(OFFLINE_CACHE); } catch { /* rien */ } S.offline = null; DB.del('meta', 'offline').catch(() => {}); closeSheet(); toast('Carte hors ligne supprimée.'); if (S.view === 'reglages') render(); };
+    $('#off-go', s).onclick = async () => {
+      if (offlineJob) return;
+      if (IN_CLAUDE) { toast("La carte hors ligne se prépare dans la version installée, pas dans l'aperçu."); return; }
+      if (!navigator.onLine) { toast('Il faut du réseau pour préparer la carte.'); return; }
+      const btn = $('#off-go', s), bar = $('#off-bar', s); btn.disabled = true; btn.textContent = 'Préparation…'; bar.hidden = false;
+      offlineJob = prepareOffline(layers, (done, total) => { const b = $('#off-bar i'); if (b) b.style.width = `${Math.round(done / total * 100)}%`; const g = $('#off-go'); if (g) g.textContent = `${done} / ${total}`; });
+      try {
+        const r = await offlineJob;
+        toast(r.fail ? `Carte hors ligne prête : ${nf.format(r.n)} tuiles (${r.fail} manquantes).` : `Carte hors ligne prête : ${nf.format(r.n)} tuiles.`, true);
+        closeSheet(); if (S.view === 'reglages') render();
+      } catch (e) { toast(e?.message === 'ign' ? "Le serveur IGN ne répond pas. Réessaie plus tard." : "La carte hors ligne n'a pas pu être préparée sur cet appareil."); const g = $('#off-go'); if (g) { g.disabled = false; g.textContent = 'Réessayer'; } }
+      finally { offlineJob = null; }
+    };
   },
   async saveSpecimen() {
     syncDraft(); const d = S.draft; const ex = d.id ? S.specimens.find(s => s.id === d.id) : null; const { kind, ...rest } = d;
@@ -1621,7 +2259,7 @@ const ACT = {
     if (!sp.spotId) { toast("Indique d'abord le spot où il a été récolté."); return; }
     const day = sp.date.slice(0, 10);
     let so = S.sorties.find(s => s.spotId === sp.spotId && s.date.slice(0, 10) === day);
-    const ob = { ...blankObs(sp.hypothese || 'Espèce identifiée', sp.latin || ''), photos: { ...sp.photos }, odeur: sp.odeur, sporee: sp.sporee, notes: sp.notes, methodes: ['Macroscopie', ...(sp.sporee ? ['Sporée'] : [])], certitude: 'Probable' };
+    const ob = { ...blankObs(sp.hypothese || 'Espèce identifiée', sp.latin || ''), photos: { ...sp.photos }, odeur: sp.odeur, sporee: sp.sporee, notes: sp.notes, methodes: ['Macroscopie', ...(sp.sporee ? ['Sporée'] : [])], certitude: 'Probable', prelev: 'Prélevé pour détermination', ...(hasPos(sp) ? pick(sp, POS_KEYS) : {}) };
     if (so) so.obs = [...(so.obs || []), ob]; else so = { id: 'o' + uid(), spotId: sp.spotId, date: sp.date, obs: [ob], photoIds: [...(sp.extra || [])], meteo: { sol: '', ciel: [], text: '' }, notes: '' };
     await saveRec('sortie', so); sp.sortieId = so.id; sp.photos = {}; sp.extra = []; await saveRec('specimen', sp);
     toast('Versé dans la sortie du ' + fmtDayNoYear(so.date) + '. Complète la fiche.');
@@ -1629,7 +2267,7 @@ const ACT = {
   },
   delSpecimen(t) { confirmSheet({ title: 'Supprimer ce spécimen ?', text: 'Ses photos seront effacées.', ok: 'Supprimer', onOk: async () => { await deleteRec('specimen', t.dataset.id); S.draft = null; toast('Spécimen supprimé.'); go('carnet', {}, { replace: true }); } }); },
   async mapLocate() { const p = await getPos(); if (p.error) { toast(posError(p.error)); return; } S.bigMap?.setView(p, 15); S.mapMarks?.(); },
-  mapFit() { const pts = S.spots.filter(hasPos); if (pts.length) S.bigMap?.fit(pts); },
+  mapFit() { const pts = S.spots.filter(hasPos); const all = pts.length ? pts : allObs().filter(x => hasPos(x.o)).map(x => x.o); if (all.length) S.bigMap?.fit(all); },
   mapZoom(t) { const m = S.bigMap; if (m) m.zoomAbout(Math.round(m.z) + Number(t.dataset.d), m.W / 2, m.H / 2); },
   unveil() { $('#veil')?.remove(); },
   wxDay(t) {
@@ -1645,10 +2283,10 @@ const ACT = {
     catch { if (!quiet || !S.climate) toast(IN_CLAUDE ? "Open-Meteo n'est pas joignable depuis l'aperçu claude.ai." : 'Open-Meteo injoignable. Hors réseau ? Le dernier relevé reste affiché.'); if (btn) { btn.disabled = false; btn.textContent = 'Actualiser'; } }
   },
   async compass() {
-    try { const r = await DeviceOrientationEvent.requestPermission(); if (r === 'granted') { S.attachCompass?.(); $('#cmp-btn')?.remove(); $('#hint').textContent = 'Boussole active. La flèche pointe vers le spot.'; } else toast('Boussole refusée : la flèche reste orientée vers le nord.'); }
+    try { const r = await DeviceOrientationEvent.requestPermission(); if (r === 'granted') { S.attachCompass?.(); $('#cmp-btn')?.remove(); $('#hint').textContent = 'Boussole active. La flèche pointe vers ta cible.'; } else toast('Boussole refusée : la flèche reste orientée vers le nord.'); }
     catch { toast('Boussole indisponible sur cet appareil.'); }
   },
-  async toggleMask() { S.settings.mask = !S.settings.mask; await metaPut('settings', S.settings); render(); },
+  async toggleMask() { S.settings.mask = !S.settings.mask; await saveSettings(); render(); },
   vaultOn() {
     const s = openSheet(`<div class="stack"><h2 class="title" style="font-size:28px">Protéger les positions</h2>
       <p class="muted" style="margin:0">Choisis un code d'au moins 6 caractères. Il sera demandé à chaque ouverture. <b>Perdu, il ne se récupère pas.</b> Garde aussi une sauvegarde.</p>
@@ -1677,33 +2315,27 @@ const ACT = {
     toast('Préparation de la sauvegarde…');
     const photos = await DB.all('photos').catch(() => []);
     const toData = b => new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.onerror = () => r(null); fr.readAsDataURL(b); });
-    const out = { app: 'Mycota', format: 2, exportedAt: new Date().toISOString(), note: 'Contient les coordonnées de tes spots en clair.', spots: S.spots, sorties: S.sorties, specimens: S.specimens, settings: S.settings, seen: S.seen,
+    const out = { app: 'Mycota', format: 3, exportedAt: new Date().toISOString(), note: 'Contient les coordonnées de tes spots et de tes observations en clair.', spots: S.spots, sorties: S.sorties, specimens: S.specimens, settings: omit(S.settings, ['tms']), seen: S.seen, taxnotes: S.taxnotes,
       photos: await Promise.all(photos.map(async p => ({ id: p.id, createdAt: p.createdAt, blob: await toData(p.blob), thumb: p.thumb ? await toData(p.thumb) : null }))) };
-    await saveFile(`mycota-sauvegarde-${dayISO(new Date())}.json`, new Blob([JSON.stringify(out)], { type: 'application/json' }));
+    const blob = new Blob([JSON.stringify(out)], { type: 'application/json' });
+    offerFile(`mycota-sauvegarde-${dayISO(new Date())}.json`, blob, { title: 'Sauvegarde prête', onDone() { S.backup = { at: new Date().toISOString() }; metaPut('backup', S.backup); if (S.view === 'carnet' || S.view === 'reglages') render(); } });
   },
-  async exportDwC() {
-    const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
-    const cols = ['occurrenceID', 'basisOfRecord', 'eventDate', 'scientificName', 'vernacularName', 'individualCount', 'identificationQualifier', 'identifiedBy', 'identificationReferences', 'decimalLatitude', 'decimalLongitude', 'coordinateUncertaintyInMeters', 'locality', 'habitat', 'associatedTaxa', 'substrate', 'lifeStage', 'occurrenceRemarks', 'country', 'countryCode', 'stateProvince'];
-    const rows = [cols];
-    allObs().sort((a, b) => a.so.date.localeCompare(b.so.date)).forEach(({ so, o, i }) => {
-      const sp = spotById(so.spotId) || {}, p = posOfSortie(so) || {};
-      const rem = [o.capMin || o.capMax ? `chapeau ${o.capMin || '?'}-${o.capMax || '?'} mm` : '', o.piedH || o.piedD ? `pied ${o.piedH || '?'} x ${o.piedD || '?'} mm` : '', o.sporee ? `sporée ${o.sporee.toLowerCase()}` : '', o.odeur ? `odeur ${o.odeur.toLowerCase()}` : '', o.chair ? `chair ${o.chair}` : '', o.reactions ? `réactions ${o.reactions}` : '', o.repart ? o.repart.toLowerCase() : '', so.wx ? `pluie 10 j ${so.wx.mm} mm` : '', o.notes || ''].filter(Boolean).join(' ; ');
-      rows.push([`mycota:${so.id}:${i}`, 'HumanObservation', so.date, o.latin || o.species, o.species, o.count, o.certitude === 'Certaine' ? '' : (o.certitude || ''), o.verif || '', o.ouvrage || '',
-        S.settings.mask || !hasPos(p) ? '' : p.lat.toFixed(2), S.settings.mask || !hasPos(p) ? '' : p.lng.toFixed(2), hasPos(p) ? 1000 : '', sp.name || '', [sp.forest, o.soltype ? 'sol ' + o.soltype.toLowerCase() : ''].filter(Boolean).join(', '),
-        o.hote || '', (o.substrat || []).join(' | '), (o.stade || []).join(' | '), rem, 'France', 'FR', 'Charente']);
-    });
-    const csv = '﻿' + rows.map(r => r.map(q).join(',')).join('\r\n');
-    await saveFile(`mycota-darwin-core-${dayISO(new Date())}.csv`, new Blob([csv], { type: 'text/csv' }));
+  exportDwC() {
+    const s = openSheet(`<div class="stack"><h2 class="title" style="font-size:28px">Export Darwin Core</h2>
+      <p class="muted" style="margin:0">Une ligne par observation, lisible par GBIF, l'INPN ou un tableur. ${S.settings.mask ? 'Le masquage est activé : aucune coordonnée ne sera exportée.' : 'Choisis la précision des coordonnées.'}</p>
+      <button class="btn ink big block" id="dwc-blur">Floutées à ~1 km · dépôt public</button>
+      <button class="btn block" id="dwc-exact">Exactes · usage personnel</button></div>`);
+    const run = async exact => { closeSheet(); const ok = await saveFile(`mycota-darwin-core-${exact ? 'exact' : 'floute'}-${dayISO(new Date())}.csv`, new Blob([buildDwC(exact)], { type: 'text/csv' })); if (ok) toast('Export prêt.'); };
+    $('#dwc-blur', s).onclick = () => run(false);
+    $('#dwc-exact', s).onclick = () => run(true);
   },
-  async exportGPX() {
-    const gpx = `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Mycota" xmlns="http://www.topografix.com/GPX/1/1">\n${S.spots.filter(hasPos).map(s => `  <wpt lat="${s.lat.toFixed(6)}" lon="${s.lng.toFixed(6)}"><name>${esc(s.name)}</name><desc>${esc([s.forest, s.notes].filter(Boolean).join(' — '))}</desc></wpt>`).join('\n')}\n</gpx>\n`;
-    await saveFile(`mycota-spots-${dayISO(new Date())}.gpx`, new Blob([gpx], { type: 'application/gpx+xml' }));
-  },
-  loadDemo() { confirmSheet({ title: 'Charger des exemples ?', text: 'Trois spots fictifs et quelques sorties, marqués comme exemples. Tu pourras les retirer en un geste.', ok: 'Charger', danger: false, onOk: async () => { await loadDemo(); toast('Exemples chargés.'); go('carnet', {}, { replace: true }); } }); },
+  async exportGPX() { await saveFile(`mycota-spots-${dayISO(new Date())}.gpx`, new Blob([buildGPX()], { type: 'application/gpx+xml' })); },
+  loadDemo() { confirmSheet({ title: 'Charger des exemples ?', text: 'Trois spots fictifs et quelques sorties sur deux saisons, marqués comme exemples. Tu pourras les retirer en un geste.', ok: 'Charger', danger: false, onOk: async () => { await loadDemo(); toast('Exemples chargés.'); go('carnet', {}, { replace: true }); } }); },
   async clearDemo() { for (const k of ['sortie', 'specimen', 'spot']) for (const r of [...S[STORE_OF[k]]]) if (r.demo) await deleteRec(k, r.id); toast('Exemples retirés.'); render(); },
-  wipe() { confirmSheet({ title: 'Tout effacer ?', text: 'Spots, sorties, spécimens et photos seront supprimés de ce téléphone. Sans sauvegarde, rien ne pourra être récupéré.', ok: 'Tout effacer', onOk: async () => {
+  wipe() { confirmSheet({ title: 'Tout effacer ?', text: 'Spots, sorties, spécimens, photos et carte hors ligne seront supprimés de ce téléphone. Sans sauvegarde, rien ne pourra être récupéré.', ok: 'Tout effacer', onOk: async () => {
     for (const s of STORES) await DB.clear(s).catch(() => {});
-    Object.assign(S, { spots: [], sorties: [], specimens: [], climate: null, settings: { mask: false }, vault: null, seen: {} }); Vault.key = null;
+    try { await caches.delete(OFFLINE_CACHE); } catch { /* rien */ }
+    Object.assign(S, { spots: [], sorties: [], specimens: [], climate: null, settings: { mask: false, layer: 'plan', observer: '', tms: {}, mapObs: true }, vault: null, seen: {}, taxnotes: {}, backup: null, offline: null, spotwx: {} }); Vault.key = null;
     toast('Carnet effacé.'); go('carnet', {}, { replace: true }); } }); },
 };
 
@@ -1712,14 +2344,21 @@ document.addEventListener('click', e => {
   const t = e.target.closest('[data-act]'); if (!t || t.closest('.map-marks')) return;
   const f = ACT[t.dataset.act]; if (f) { e.preventDefault(); f(t, e); }
 });
+let noteT = null;
 document.addEventListener('input', e => {
   const t = e.target;
   if (t.id === 'c-q') { S.chronoF.q = t.value; renderChronoList(); }
   if (t.id === 'dex-q') { S.codexF.q = t.value; renderDex(); }
+  if (t.dataset.taxnote !== undefined) {
+    const k = t.dataset.taxnote; if (t.value.trim()) S.taxnotes[k] = t.value; else delete S.taxnotes[k];
+    clearTimeout(noteT); noteT = setTimeout(() => metaPut('taxnotes', S.taxnotes), 400);
+  }
 });
 document.addEventListener('change', async e => {
   const t = e.target;
   if (t.id === 'c-spot' || t.id === 'c-sp') { S.chronoF[t.id === 'c-spot' ? 'spot' : 'sp'] = t.value; renderChronoList(); return; }
+  if (t.id === 'dex-sort') { S.codexF.sort = t.value; renderDex(); return; }
+  if (t.id === 'set-obs') { S.settings.observer = t.value.trim(); saveSettings(); toast('Nom enregistré.'); return; }
   if (t.id === 'f-spot' && S.draft?.kind === 'sortie') { syncDraft(); render(); return; }
   if (t.dataset.sp !== undefined || t.id === 'o-fr' || t.id === 'f-hyp') {
     const m = matchLatin(t.value);
@@ -1728,6 +2367,7 @@ document.addEventListener('change', async e => {
     return;
   }
   if (t.dataset.import) { await importFile(t.files[0]); t.value = ''; return; }
+  if (t.dataset.quick && t.files?.length) { closeSheet(); await quickPhoto(t.files[0]); return; }
   if (t.dataset.photoIn && t.files?.length) {
     const target = t.dataset.photoIn, files = [...t.files], d = S.draft; if (!d) return;
     syncDraft(); toast(files.length > 1 ? `Ajout de ${files.length} photos…` : 'Ajout de la photo…');
@@ -1739,11 +2379,22 @@ document.addEventListener('change', async e => {
         else if (target.startsWith('step:')) { const k = target.slice(5); if (d.photos[k]) DB.del('photos', d.photos[k]).catch(() => {}); d.photos[k] = id; }
         else if (target.startsWith('obs:')) { const k = target.slice(4); d.o.photos = d.o.photos || {}; if (d.o.photos[k]) DB.del('photos', d.o.photos[k]).catch(() => {}); d.o.photos[k] = id; }
       }
-      if (d.kind === 'specimen' && !hasPos(d) && hasPos(S.lastPos)) Object.assign(d, { lat: S.lastPos.lat, lng: S.lastPos.lng });
+      if (d.kind === 'specimen' && !hasPos(d) && freshPos()) Object.assign(d, posFields(freshPos()));
       render(); const tt = $('.toast'); if (tt) tt.hidden = true;
     } catch { toast("Cette image n'a pas pu être lue. Essaie une photo prise par l'appareil."); }
   }
 });
+/** Photo rapide : une photo, la position, un spécimen « à identifier » créé d'un geste. */
+async function quickPhoto(file) {
+  toast('Photo gardée, création de la fiche…');
+  try {
+    const id = await addPhoto(file);
+    const p = freshPos(15 * 60e3); const near = p ? nearestSpot(p) : null;
+    const rec = await saveRec('specimen', { id: 'm' + uid(), date: localISO(), spotId: near?.spot.id || '', photos: { chapeau: id }, extra: [], odeur: '', sporee: '', hypothese: '', latin: '', notes: '', status: 'a_identifier', quick: true, ...(p ? posFields(p) : {}) });
+    S.draft = null; toast(p ? 'Fiche créée avec le point GPS. Complète-la quand tu veux.' : 'Fiche créée. La position n’était pas disponible.');
+    go('specimen', { id: rec.id });
+  } catch { toast("Cette image n'a pas pu être lue. Essaie une photo prise par l'appareil."); }
+}
 
 /* ---------- import ---------- */
 function dataURLtoBlob(d) { const [h, b] = d.split(','); const mime = (h.match(/data:(.*?);/) || [])[1] || 'image/jpeg'; const bin = atob(b); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new Blob([u], { type: mime }); }
@@ -1757,6 +2408,8 @@ async function importFile(file) {
   for (const r of j.sorties || []) await saveRec('sortie', r);
   for (const r of j.specimens || []) await saveRec('specimen', r);
   if (j.seen) { S.seen = { ...j.seen, ...S.seen }; metaPut('seen', S.seen); }
+  if (j.taxnotes) { S.taxnotes = { ...j.taxnotes, ...S.taxnotes }; metaPut('taxnotes', S.taxnotes); }
+  if (j.settings?.observer && !S.settings.observer) { S.settings.observer = j.settings.observer; saveSettings(); }
   toast(`Restauré : ${plural((j.spots || []).length, 'spot', 'spots')}, ${plural((j.sorties || []).length, 'sortie', 'sorties')}.`);
   go('carnet', {}, { replace: true });
 }
@@ -1766,17 +2419,19 @@ async function loadDemo() {
   const now = new Date();
   const back = (d, h = 10) => { const x = new Date(now); x.setDate(x.getDate() - d); x.setHours(h, 30, 0, 0); return localISO(x); };
   const spots = [
-    { id: 'demo-s1', name: 'Chênaie du Puits-Rond', forest: 'Chênaie-charmaie', lat: 45.69352, lng: 0.29148, notes: 'Vieux chênes sessiles sur le versant nord, sol calcaire sous la mousse. Entrer par le chemin forestier, à gauche après la barrière.' },
-    { id: 'demo-s2', name: 'Hêtraie de la Combe', forest: 'Hêtraie', lat: 45.71023, lng: 0.30577, notes: 'Fond de vallon frais, litière épaisse.' },
-    { id: 'demo-s3', name: 'Lisière aux châtaigniers', forest: 'Châtaigneraie', lat: 45.82894, lng: 0.19722, notes: 'Talus exposé sud-est. Donne tôt, sèche vite.' },
+    { id: 'demo-s1', name: 'Chênaie du Puits-Rond', forest: 'Chênaie-charmaie', lat: 45.69352, lng: 0.29148, alt: 118, notes: 'Vieux chênes sessiles sur le versant nord, sol calcaire sous la mousse. Entrer par le chemin forestier, à gauche après la barrière.' },
+    { id: 'demo-s2', name: 'Hêtraie de la Combe', forest: 'Hêtraie', lat: 45.71023, lng: 0.30577, alt: 96, notes: 'Fond de vallon frais, litière épaisse.' },
+    { id: 'demo-s3', name: 'Lisière aux châtaigniers', forest: 'Châtaigneraie', lat: 45.82894, lng: 0.19722, alt: 134, notes: 'Talus exposé sud-est. Donne tôt, sèche vite.' },
   ].map(s => ({ ...s, demo: true }));
   const O = (fr, count, extra = {}) => ({ ...blankObs(fr, REF_BY_FR.get(norm(fr))?.la || ''), count, ...extra });
+  const W = (mm, t) => ({ mm, t, days: 10, v: 2 });
   const sorties = [
-    { spotId: 'demo-s1', date: back(4), obs: [O('Cèpe de Bordeaux', 7, { certitude: 'Certaine', methodes: ['Macroscopie', 'Sporée'], ouvrage: 'Eyssartier & Roux', hote: 'Quercus petraea', substrat: ['Sol'], soltype: 'Calcaire', stade: ['Jeunes', 'Matures'], repart: 'Dispersés', capMin: '62', capMax: '118', piedH: '70', piedD: '34', sporee: 'Brun olive', odeur: 'Fongique', chair: 'Blanche, immuable' }), O('Girolle', 23, { certitude: 'Certaine', hote: 'Quercus petraea' })], meteo: { sol: 'Humide', ciel: ['Nuageux'], text: 'Grosse pluie dix jours plus tôt' }, notes: 'Spécimens jeunes au pied des deux chênes jumeaux.', wx: { mm: 34.2, days: 10 } },
-    { spotId: 'demo-s2', date: back(11), obs: [], meteo: { sol: 'Sec', ciel: ['Soleil'], text: 'Litière craquante' }, notes: 'Trop tôt.', wx: { mm: 6.1, days: 10 } },
-    { spotId: 'demo-s3', date: back(19), obs: [O('Cèpe bronzé', 3), O('Amanite des Césars', 2, { hote: 'Castanea sativa', soltype: 'Acide' })], meteo: { sol: 'Frais', ciel: ['Soleil'], text: '' }, notes: 'Les Césars laissées en place.', wx: { mm: 21.8, days: 10 } },
-    { spotId: 'demo-s1', date: back(33), obs: [O('Girolle', 41), O('Russule charbonnière', 6)], meteo: { sol: 'Humide', ciel: ['Pluie'], text: 'Bruine continue' }, notes: '', wx: { mm: 48.5, days: 10 } },
-    { spotId: 'demo-s2', date: back(372), obs: [O('Trompette de la mort', 120), O('Pied-de-mouton', 15)], meteo: { sol: 'Détrempé', ciel: ['Brouillard', 'Gelée'], text: 'Premier coup de gel la veille' }, notes: 'Poussée le long du ru.', wx: { mm: 62.0, days: 10 } },
+    { spotId: 'demo-s1', date: back(4), obs: [O('Cèpe de Bordeaux', 7, { certitude: 'Certaine', methodes: ['Macroscopie', 'Sporée'], ouvrage: 'Eyssartier & Roux', hote: 'Quercus petraea', substrat: ['Sol'], soltype: 'Calcaire', stade: ['Jeunes', 'Matures'], repart: 'Dispersés', capMin: '62', capMax: '118', piedH: '70', piedD: '34', sporee: 'Brun olive', odeur: 'Fongique', chair: 'Blanche, immuable', prelev: 'Photographié', lat: 45.69381, lng: 0.29117, acc: 6, alt: 121 }), O('Girolle', 23, { certitude: 'Certaine', hote: 'Quercus petraea', lat: 45.69334, lng: 0.29176, acc: 9, alt: 117 })], meteo: { sol: 'Humide', ciel: ['Nuageux'], text: 'Grosse pluie dix jours plus tôt' }, notes: 'Spécimens jeunes au pied des deux chênes jumeaux.', wx: W(34.2, 11.4) },
+    { spotId: 'demo-s2', date: back(11), obs: [], meteo: { sol: 'Sec', ciel: ['Soleil'], text: 'Litière craquante' }, notes: 'Trop tôt.', wx: W(6.1, 14.2) },
+    { spotId: 'demo-s3', date: back(19), obs: [O('Cèpe bronzé', 3), O('Amanite des Césars', 2, { hote: 'Castanea sativa', soltype: 'Acide' })], meteo: { sol: 'Frais', ciel: ['Soleil'], text: '' }, notes: 'Les Césars laissées en place.', wx: W(21.8, 15.1) },
+    { spotId: 'demo-s1', date: back(33), obs: [O('Girolle', 41), O('Russule charbonnière', 6)], meteo: { sol: 'Humide', ciel: ['Pluie'], text: 'Bruine continue' }, notes: '', wx: W(48.5, 13.8) },
+    { spotId: 'demo-s1', date: back(366), obs: [O('Cèpe de Bordeaux', 5), O('Girolle', 12)], meteo: { sol: 'Frais', ciel: ['Nuageux'], text: '' }, notes: 'Première poussée de la saison au pied des chênes jumeaux.', wx: W(27.9, 12.6) },
+    { spotId: 'demo-s2', date: back(372), obs: [O('Trompette de la mort', 120), O('Pied-de-mouton', 15)], meteo: { sol: 'Détrempé', ciel: ['Brouillard', 'Gelée'], text: 'Premier coup de gel la veille' }, notes: 'Poussée le long du ru.', wx: W(62.0, 8.9) },
   ].map((s, i) => ({ id: 'demo-o' + i, photoIds: [], demo: true, ...s }));
   const specimens = [{ id: 'demo-m1', date: back(4, 16), spotId: 'demo-s1', photos: {}, extra: [], odeur: 'Farine', sporee: 'Rose', hypothese: 'Clitocybe nébuleux', latin: 'Clitocybe nebularis', notes: "Lames décurrentes serrées. À comparer avec l'entolome livide avant tout.", status: 'a_identifier', demo: true }];
   for (const s of spots) await saveRec('spot', s);
@@ -1785,7 +2440,7 @@ async function loadDemo() {
 }
 
 /* ---------- démarrage ---------- */
-function afterBoot() { try { navigator.storage?.persist?.(); } catch { /* sans effet */ } syncWeather(); window.addEventListener('online', syncWeather); }
+function afterBoot() { try { navigator.storage?.persist?.(); } catch { /* sans effet */ } syncWeather(); refreshClimateQuiet(); window.addEventListener('online', () => { syncWeather(); refreshClimateQuiet(); }); }
 (async () => {
   await DB.open();
   if (DB.mem) setTimeout(() => toast('Stockage indisponible : rien ne sera conservé après fermeture.'), 600);

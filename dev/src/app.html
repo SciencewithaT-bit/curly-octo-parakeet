@@ -1692,7 +1692,7 @@ function refreshMeter() {
 const planSlots = (prefix, defs, photos) => `<div class="plans">${defs.map(([k, l]) => { const p = photos?.[k];
   return p ? `<button type="button" class="plan" data-act="planSlot" data-target="${prefix}:${k}" data-id="${p}" data-label="${esc(l)}" aria-label="Photo ${esc(l)} : voir, reprendre ou retirer"><span class="ph"><img data-photo="${p}" alt=""></span><span>${esc(l)}</span></button>`
     : `<label class="plan empty" aria-label="Prendre la photo ${esc(l)}"><span class="ph">${I.camera}</span><span>${esc(l)}</span><input type="file" class="vh" accept="image/*" capture="environment" data-photo-in="${prefix}:${k}"></label>`; }).join('')}</div>
-  ${defs.some(([k]) => !photos?.[k]) ? `<label class="link" style="display:inline-block;font-size:13px;cursor:pointer;margin-top:6px">Photos déjà prises ? Les choisir dans la photothèque<input type="file" class="vh" accept="image/*" multiple data-photo-in="${prefix}:*"></label>` : ''}`;
+  ${defs.some(([k]) => !photos?.[k]) ? `<label class="link" style="display:inline-block;font-size:13px;cursor:pointer;margin-top:6px">Photos déjà prises ? Les choisir dans la photothèque, dans l'ordre des plans<input type="file" class="vh" accept="image/*" multiple data-photo-in="${prefix}:*"></label>` : ''}`;
 
 function huntHTML(list) {
   if (!list.length) return '';

@@ -96,7 +96,7 @@ def route(r):
             calls["pm"] += 1
         kind = "ortho" if "ORTHOIMAGERY" in u else "plan"
         return r.fulfill(status=200, content_type="image/png" if kind == "plan" else "image/jpeg", headers={"Access-Control-Allow-Origin": "*"}, body=TILES[kind])
-    if u.startswith(BASE):
+    if u.startswith(BASE) or u.startswith(("blob:", "data:")):   # WebKit fait passer par ici jusqu'aux images créées dans la page
         return r.continue_()
     if "fonts.g" not in u and "openstreetmap" not in u:
         calls["autres"].append(u)

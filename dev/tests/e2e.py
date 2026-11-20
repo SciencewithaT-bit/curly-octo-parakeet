@@ -132,7 +132,16 @@ with sync_playwright() as p:
     ENGINE = os.environ.get("MYCOTA_NAVIGATEUR", "chromium")
     b = getattr(p, ENGINE).launch()
     print("navigateur :", ENGINE, b.version, flush=True)
-    ctx = b.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2, is_mobile=True, has_touch=True, locale="fr-FR", timezone_id="Europe/Paris", accept_downloads=True)
+    opened = []
+
+    def new_ctx(**opts):
+        """Chromium : un contexte neuf. WebKit : un profil sur disque, car ses sessions éphémères refusent
+        les photos dans IndexedDB, comme la navigation privée de Safari."""
+        c = p.webkit.launch_persistent_context(tempfile.mkdtemp(prefix="mycota-profil-"), **opts) if ENGINE == "webkit" else b.new_context(**opts)
+        opened.append(c)
+        return c
+
+    ctx = new_ctx(viewport={"width": 390, "height": 844}, device_scale_factor=2, is_mobile=True, has_touch=True, locale="fr-FR", timezone_id="Europe/Paris", accept_downloads=True)
     ctx.add_init_script(GEO)
     ctx.route("**/*", route)
     pg = ctx.new_page()
@@ -1009,7 +1018,7 @@ with sync_playwright() as p:
     nav("carnet")
 
     # ---------- bascule de grille IGN (autre téléphone, serveur qui refuse la première grille) ----------
-    ctx2 = b.new_context(viewport={"width": 390, "height": 844}, locale="fr-FR")
+    ctx2 = new_ctx(viewport={"width": 390, "height": 844}, locale="fr-FR")
     ctx2.add_init_script(GEO)
     ctx2.route("**/*", route)
     p2 = ctx2.new_page()
@@ -1024,7 +1033,7 @@ with sync_playwright() as p:
     FAIL_PM019[0] = False
 
     # ---------- carnet chiffré sous V3, ouvert par la V4 ----------
-    ctx3 = b.new_context(viewport={"width": 390, "height": 844}, locale="fr-FR", timezone_id="Europe/Paris")
+    ctx3 = new_ctx(viewport={"width": 390, "height": 844}, locale="fr-FR", timezone_id="Europe/Paris")
     ctx3.add_init_script(GEO)
     ctx3.route("**/*", route)
     p3 = ctx3.new_page()
@@ -1051,7 +1060,7 @@ with sync_playwright() as p:
           and [o.get("id") for o in raw["obs"]] == ["vo:0", "vo:1"] and all("lat" not in o for o in raw["obs"]) and "enc" in raw and p3.evaluate("S.spots.find(s => s.id === 'demo-s1').lat") == 45.69352)
 
     # ---------- navigateur qui refuse le stockage : l'app reste utilisable et le dit ----------
-    ctx4 = b.new_context(viewport={"width": 390, "height": 844}, locale="fr-FR")
+    ctx4 = new_ctx(viewport={"width": 390, "height": 844}, locale="fr-FR")
     ctx4.add_init_script(GEO + "Object.defineProperty(window, 'indexedDB', { configurable: true, get() { throw new Error('stockage refusé'); } });")
     ctx4.route("**/*", route)
     p4 = ctx4.new_page()
@@ -1064,6 +1073,8 @@ with sync_playwright() as p:
     pid = p4.evaluate(MKPHOTO, "#446688")
     r4 = p4.evaluate("async id => [!!DB.mem, (await DB.keys('photos')).includes(id), await sweepPhotos(), S.spots.length]", pid)
     check("stockage refusé par le navigateur : annoncé, carnet utilisable en mémoire", "Stockage indisponible" in msg and r4 == [True, True, 0, 3], f"{msg} {r4}")
+    for c in opened:
+        c.close()
     b.close()
 
 srv.shutdown()

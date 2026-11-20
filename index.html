@@ -339,6 +339,18 @@ details summary { cursor: pointer; color: var(--green); font-weight: 600; font-s
 .months > span.mm { height: auto; background: none; }
 .legend-sq { display: flex; gap: 14px; margin-top: 8px; font-size: 12px; color: var(--ink-2); }
 .legend-sq i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+
+/* ---------- V4 ---------- */
+button.plan { border: 0; background: none; padding: 0; color: inherit; width: 100%; min-width: 0; }
+.plan.empty .ph { color: var(--ink-3); }
+.plan.empty .ph svg.i { width: 20px; height: 20px; }
+.pending { display: flex; align-items: center; gap: 10px; }
+.toast.top { bottom: auto; top: calc(12px + env(safe-area-inset-top, 0px)); }
+.reveal { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; }
+.reveal .shroom.stamp { width: 148px; height: 111px; animation: stamp 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+.reveal-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; }
+.reveal-row .cell { min-height: 0; align-items: center; text-align: center; }
+@keyframes stamp { from { transform: scale(1.5) rotate(-8deg); opacity: 0; } }
 </style>
 
 <div id="app" aria-live="polite"></div>
@@ -356,11 +368,11 @@ details summary { cursor: pointer; color: var(--green); font-weight: 600; font-s
 <script>
 'use strict';
 /* ==========================================================================
-   Mycota 3 — carnet de terrain du mycologue, Mycodex de Charente
+   Mycota 4 — carnet de terrain du mycologue, Mycodex de Charente
    Tout reste sur l'appareil : IndexedDB, photos réencodées (sans EXIF),
    positions chiffrées si un code est défini. Aucune identification automatique.
    ========================================================================== */
-const APP_VERSION = '3.0';
+const APP_VERSION = '4.0';
 const IN_CLAUDE = typeof window.claude === 'object' && window.claude !== null;
 const PREFERS_TOUCH = matchMedia('(pointer: coarse)').matches;
 
@@ -448,7 +460,57 @@ const TOPO = `<div class="topo" aria-hidden="true"><svg viewBox="0 0 400 240" pr
   <path d="M-10 60 C60 30 120 90 200 60 S330 20 410 50"/><path d="M-10 86 C70 58 130 118 210 88 S330 48 410 78"/><path d="M-10 114 C80 88 140 146 220 116 S330 78 410 108"/>
   <path d="M-10 144 C90 118 150 176 230 146 S330 110 410 140"/><path d="M-10 176 C100 150 160 206 240 178 S330 144 410 174"/>
   <path d="M260 22 C290 12 330 24 340 46 S310 78 280 68 S246 34 260 22"/><path d="M272 32 C292 26 318 34 324 48 S306 66 288 60 S264 40 272 32"/></svg></div>`;
-const shroom = (cap, stem, stroke, dash = '0', cls = 'shroom') => `<svg class="${cls}" viewBox="0 0 64 48" aria-hidden="true"><path d="M6 26 C8 12 20 5 32 5 C44 5 56 12 58 26 Q32 22 6 26 Z" fill="${cap}" stroke="${stroke}" stroke-width="1.6" stroke-dasharray="${dash}"/><path d="M27 25 C26 32 25 38 23 44 Q32 47 41 44 C39 38 38 32 37 25 Z" fill="${stem}" stroke="${stroke}" stroke-width="1.6" stroke-dasharray="${dash}"/></svg>`;
+/* Une silhouette par groupe du Mycodex (viewBox 64×48) : pied, chapeau, détails au trait. */
+const GLYPHS = {
+  bolets: {
+    stem: 'M25 26 C20 32 19 40 24 45 Q32 47.5 40 45 C45 40 44 32 39 26 Z',
+    cap: 'M7 23 C7 12 18 5 32 5 C46 5 57 12 57 23 C57 27.5 7 27.5 7 23 Z',
+    det: '<path d="M27 33 Q32 35 37 33 M26 38.5 Q32 41 38 38.5"/>',
+  },
+  chanterelles: {
+    cap: 'M6 11 C12 15 19 9 25 13 C29 15.5 35 15.5 39 13 C45 9 52 15 58 11 C56 22 42 26 38 44 Q32 47 26 44 C22 26 8 22 6 11 Z',
+    det: '<path d="M17 17 Q24 28 28.5 42 M32 17 L32 44 M47 17 Q40 28 35.5 42"/>',
+  },
+  amanites: {
+    stem: 'M29 20 L28.5 38 C23 39 22 46 32 46 C42 46 41 39 35.5 38 L35 20 Z',
+    cap: 'M8 22 C9 11 19 5 32 5 C45 5 55 11 56 22 Q32 18 8 22 Z',
+    det: '<path d="M26.5 27 Q32 30.5 37.5 27"/><circle cx="20" cy="14" r="1.4" fill="var(--card)"/><circle cx="30" cy="10" r="1.4" fill="var(--card)"/><circle cx="41" cy="12.5" r="1.4" fill="var(--card)"/><circle cx="48" cy="17.5" r="1.4" fill="var(--card)"/>',
+  },
+  russules: {
+    stem: 'M26 21 L25 43 Q32 46 39 43 L38 21 Z',
+    cap: 'M5 18 C9 11 22 8 32 10.5 C42 8 55 11 59 18 C53 23.5 11 23.5 5 18 Z',
+    det: '<path d="M13 20.5 L25 22 M51 20.5 L39 22"/>',
+  },
+  lames: {
+    stem: 'M30.5 22 C30.5 30 30 38 28.5 45 Q32 46.5 35.5 45 C34 38 33.5 30 33.5 22 Z',
+    cap: 'M9 25 C13 14 24 9 32 5 C40 9 51 14 55 25 Q32 20 9 25 Z',
+    det: '',
+  },
+  agarics: {
+    stem: 'M30 20 L29.5 40 C27 42 27 45.5 32 45.5 C37 45.5 37 42 34.5 40 L34 20 Z',
+    cap: 'M4 22 C8 13 20 8.5 28 8 C29 5 35 5 36 8 C44 8.5 56 13 60 22 Q32 18 4 22 Z',
+    det: '<path d="M27.5 28 L36.5 28 M28.5 30.5 L35.5 30.5 M15 16 l3.5 -1 M23 12.5 l3.5 -0.8 M38 11.8 l3.5 0.8 M46 15 l3.5 1"/>',
+  },
+  lignicoles: {
+    stem: 'M8 2 L17 2 L17 46 L8 46 Z',
+    cap: 'M17 11 C31 9 47 11 55 19 C45 22.5 29 22.5 17 21.5 Z M17 27 C29 25.5 40 27 46 33 C38 36 27 36 17 35 Z',
+    det: '<path d="M23 15.5 Q37 14.5 47 17.5 M22 30.5 Q32 30 39 32"/>',
+  },
+  ascos: {
+    stem: 'M25 29 C23 35 23 41 25 45 Q32 47 39 45 C41 41 41 35 39 29 Q32 32 25 29 Z',
+    cap: 'M32 4 C41 7 46 18 43 28 Q32 33 21 28 C18 18 23 7 32 4 Z',
+    det: '<path d="M28 9.5 Q26 16 28 23 M32 7 L32 27 M36 9.5 Q38 16 36 23 M24.5 16 Q32 19 39.5 16 M23 22.5 Q32 26 41 22.5"/>',
+  },
+  curiosites: {
+    stem: 'M19.5 23 L7 31 L21 29.5 L13 43 L27 36 L32 47 L37 36 L51 43 L43 29.5 L57 31 L44.5 23',
+    cap: 'M32 7 C39.5 7 45 12 45 19.5 C45 27 39.5 31.5 32 31.5 C24.5 31.5 19 27 19 19.5 C19 12 24.5 7 32 7 Z',
+    det: '<path d="M29.5 9 L32 4.5 L34.5 9 M25 20 Q32 23 39 20"/>',
+  },
+};
+const shroom = (cap, stem, stroke, dash = '0', cls = 'shroom', g = 'lames') => {
+  const G = GLYPHS[g] || GLYPHS.lames;
+  return `<svg class="${cls}" viewBox="0 0 64 48" aria-hidden="true" fill="none" stroke="${stroke}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="${dash}">${G.stem ? `<path d="${G.stem}" fill="${stem}"/>` : ''}<path d="${G.cap}" fill="${cap}"/>${dash === '0' && G.det ? `<g stroke-width="1.2">${G.det}</g>` : ''}</svg>`;
+};
 
 /* ==========================================================================
    LISTE DE RÉFÉRENCE (noms et périodes indicatives en France, sans fiche descriptive)
@@ -510,6 +572,22 @@ const ALL = [...REF, ...CH];
 const ALL_BY_LA = new Map(ALL.map(t => [norm(t.la), t]));
 Object.entries(CH_ALIAS).forEach(([a, acc]) => { const t = ALL_BY_LA.get(norm(acc)); if (t && !ALL_BY_LA.has(norm(a))) ALL_BY_LA.set(norm(a), t); });
 
+/* ---------- noms français et identifiants : TAXREF v18 (PatriNat : OFB, CNRS, MNHN), Licence Ouverte 2.0 ----------
+   Chaque espèce est rattachée par son nom latin, ou par les noms sous lesquels elle a été saisie en Charente.
+   Neuf espèces de la liste Charente n'ont pas pu l'être sans deviner : elles restent en latin seul. */
+const TX_SRC = { label: 'TAXREF v18, PatriNat (OFB, CNRS, MNHN), Licence Ouverte 2.0', url: 'https://taxref.mnhn.fr/' };
+const TX = {"Boletus edulis":[29388,"Cèpe de Bordeaux|Cèpe du Périgord"],"Boletus aereus":[29357,"Cèpe bronzé"],"Boletus reticulatus":[29362,"Cèpe d'été"],"Boletus pinophilus":[29436,"Cèpe des pins"],"Imleria badia":[971206,"Bolet bai"],"Neoboletus luridiformis":[967890,"Bolet à pied rouge"],"Suillellus luridus":[968047,"Bolet blafard"],"Rubroboletus satanas":[942438,"Bolet satan|Cèpe du diable|Bolet diabolique"],"Xerocomellus chrysenteron":[520743,"Bolet à chair jaune"],"Leccinum scabrum":[29628,"Bolet rude"],"Tylopilus felleus":[29768,"Bolet chicotin|Bolet amer|Bolet de fiel|Chicotin|Faux cèpe"],"Suillus luteus":[29729,"Nonnette voilée"],"Suillus granulatus":[29712,"Bolet granuleux"],"Cantharellus cibarius":[29904,"Girolle"],"Craterellus cornucopioides":[29937,"Trompette des morts"],"Craterellus tubaeformis":[462065,"Chanterelle en tube"],"Craterellus lutescens":[462055,"Chanterelle jaune"],"Hydnum repandum":[42792,"Pied de mouton"],"Hydnum rufescens":[42796],"Amanita caesarea":[38993,"Amanite des césars"],"Amanita phalloides":[39106,"Amanite phalloïde|Oronge verte|Calice de la mort|Agaric bulbeux|Oronge ciguë"],"Amanita virosa":[39179,"Amanite vireuse|Ange de la mort|Ange destructeur"],"Amanita muscaria":[39079,"Amanite tue-mouches|Fausse oronge"],"Amanita pantherina":[39099,"Amanite panthère"],"Amanita rubescens":[39128,"Amanite rougissante|Oronge vineuse"],"Amanita citrina":[39001,"Amanite citrine"],"Amanita crocea":[39168,"Amanite safran"],"Amanita vaginata":[39155,"Grisette|Coulemelle|Amanite vaginee"],"Russula cyanoxantha":[39680,"Russule charbonnière"],"Russula virescens":[40139,"Palomet"],"Russula vesca":[40110,"Russule vieux-rose"],"Russula emetica":[39707,"Russule émétique"],"Russula nigricans":[39925,"Russule noircissante"],"Lactarius deliciosus":[39288,"Lactaire délicieuse"],"Lactarius piperatus":[994907,"Lactaire poivré"],"Lactarius quietus":[39415,"Lactaire tranquille"],"Lactarius torminosus":[39489,"Lactaire à toison|Lactaire aux coliques|Lactaire aux tranchées"],"Lepista nuda":[32276,"Pied bleu|Tout-bleu"],"Clitocybe nebularis":[32274,"Clitocybe nébuleux"],"Calocybe gambosa":[30809,"Tricholome de la Saint-Georges|Mousseron de la Saint-Georges"],"Tricholoma terreum":[33401,"Tricholome terreux|Petit-gris"],"Tricholoma equestre":[33189,"Tricholome équestre|Chevalier|Tricholome chevalier|Tricholome des chevaliers|Canari|Jaunet"],"Tricholoma pardinum":[33303,"Tricholome tigré|Tricholome moucheté|Tricholome rayé|Tricholome léopard|Faux griset|Faux petit-gris|Grivelé"],"Infundibulicybe geotropa":[31754,"Clitocybe géotrope"],"Laccaria amethystina":[32178,"Laque améthyste"],"Marasmius oreades":[31038,"Faux mousseron"],"Gymnopus dryophilus":[30606,"Collybie des chênes"],"Paxillus involutus":[29879,"Paxille enroulé|Paxille à bords enroulés|Paxille involuté|Bolet à lamelles|Chanterelle brune"],"Cortinarius orellanus":[35315,"Cortinaire à couleur de rocou|Cortinaire des montagnes"],"Entoloma sinuatum":[33741,"Entolome livide"],"Galerina marginata":[36003,"Galère marginée|Pholiote marginée"],"Agaricus campestris":[462638,"Rosé des prés|Agaric champêtre|Psalliote champêtre"],"Agaricus xanthodermus":[38130,"Agaric (psalliote) jaunissant"],"Macrolepiota procera":[38682,"Lépiote élevée|Grande coulemelle"],"Chlorophyllum rhacodes":[462359,"Lépiote déguenillée"],"Lepiota cristata":[38323,"Lépiote crêtée|Lépiote puante|Lépiote crêpue"],"Coprinus comatus":[37248,"Coprin chevelu"],"Lycoperdon perlatum":[40561,"Vesse de loup perlée"],"Pleurotus ostreatus":[34488,"Pleurote en huître"],"Laetiporus sulphureus":[43216,"Polypore soufré"],"Fistulina hepatica":[42445,"Langue de bœuf|Fistuline hépatique"],"Armillaria mellea":[31682,"Armillaire couleur de miel|Armillaire des feuillus"],"Flammulina velutipes":[30705,"Collybie à pied velouté"],"Hypholoma fasciculare":[36977,"Hypholome en touffes|Hypholome fasciculé|Géophile|Nématolome en touffes"],"Kuehneromyces mutabilis":[37002,"Pholiote changeante"],"Omphalotus olearius":[32832,"Pleurote de l'olivier|Clitocybe de l'olivier"],"Sparassis crispa":[44557,"Sparassis crépu"],"Hericium erinaceus":[461885,"Hydne hérisson"],"Trametes versicolor":[44911,"Tramète versicolore|Tramète à couleur changeante"],"Fomes fomentarius":[42504,"Amadouvier|Polypore allume-feu"],"Auricularia auricula-judae":[41571,"Oreille de Judas"],"Morchella esculenta":[48691,"Morille ronde|Morille grise"],"Morchella elata":[48683,"Morille élevée"],"Gyromitra esculenta":[47646,"Fausse morille|Gyromitre fausse morille|Moricaude|Cervelot|Gyromitre commune"],"Helvella crispa":[47723,"Helvelle crêpue"],"Aleuria aurantia":[45328,"Pézize orangée"],"Phallus impudicus":[40654,"Satyre puant|Phallus impudique|Morille du diable"],"Clathrus ruber":[40260,"Clathre rouge|Clathre grillagé|Cœur de sorcière|Cage grillagée"],"Coprinopsis picacea":[510325,"Coprin pie|Coprin noir et blanc"],"Volvopluteus gloiocephalus":[989308,"Volvaire gluante"],"Lentinus tigrinus":[34286,"Lentin tigré"],"Amanita excelsa":[39025,"Amanite élevée"],"Clathrus archeri":[40256,"Anthurus étoilé|Anthurus d'Archer|Doigts du diable|Pieuvre des bois"],"Tremella mesenterica":[44992,"Trémelle mésentérique"],"Suillellus queletii":[967886,"Bolet de Quélet"],"Terana coerulea":[44192],"Auricularia mesenterica":[41575,"Oreille poilue"],"Bolbitius titubans":[36773],"Cortinarius violaceus":[35841],"Phellinus pomaceus":[37652],"Caloboletus radicans":[971180,"Bolet radicant"],"Cyclocybe cylindracea":[993698,"Pholiote du peuplier"],"Daedaleopsis confragosa":[42189,"Tramète rougissante"],"Geopora sumneriana":[47544,"Pézize du cèdre"],"Gliophorus psittacinus":[30280,"Hygrophore perroquet"],"Helvella lacunosa":[47753,"Helvelle lacuneuse"],"Leccinum aurantiacum":[29545,"Bolet orangé"],"Macrolepiota mastoidea":[38670,"Lépiote mamelonnée"],"Mycena rosea":[31456,"Mycène pure forme rose"],"Russula violeipes":[40133,"Russule à pied violet"],"Sarcoscypha coccinea":[49776,"Pézize écarlate"],"Schizophyllum commune":[34527,"Schizophylle commun"],"Scleroderma citrinum":[40716,"Scléroderme vulgaire|Scléroderme commun|Scléroderme citron|Scléroderme orangé"],"Tricholoma atrosquamosum":[33180],"Xylaria polymorpha":[50344,"Xylaire polymorphe|Doigt de Satan|Doigt du mort"],"Amanita subnudipes":[39009],"Apioperdon pyriforme":[973132,"Vesse de loup en poire"],"Artomyces pyxidatus":[40826,"Clavaire en chandelier"],"Calocera cornea":[41746,"Calocère petite-corne"],"Calocera viscosa":[41755,"Calocère visqueuse"],"Candolleomyces candolleanus":[1043522,"Hypholome de De Candolle"],"Cantharellus pallens":[471675,"Girolle pruineuse"],"Clavulina rugosa":[40912,"Clavaire rugueuse"],"Clitocybe odora":[31916,"Clitocybe odorant"],"Coprinellus disseminatus":[510243,"Coprin grégaire|Coprin disséminé"],"Coprinopsis lagopus":[901577],"Cuphophyllus virgineus":[30058,"Hygrophore blanc de neige"],"Cyathus striatus":[40281,"Cyathe strié"],"Daedaleopsis tricolor":[42194,"Lenzite tricolore"],"Echinoderma asperum":[38251],"Heterobasidion annosum":[42721,"Polypore du rond des pins"],"Hygrocybe coccinea":[30126,"Hygrophore cocciné"],"Hygrocybe conica":[30136,"Hygrophore conique"],"Hygrocybe punicea":[30286,"Hygrocybe ponceau"],"Hygrophoropsis aurantiaca":[32158,"Fausse girolle"],"Imperator rhodopurpureus":[971198,"Bolet vieux rose"],"Infundibulicybe gibba":[509740,"Clitocybe en entonnoir"],"Leotia lubrica":[48407],"Lycoperdon pratense":[40808,"Vesse de loup des prés"],"Meripilus giganteus":[43385,"Polypore géant"],"Mitrula paludosa":[48551,"Mitrule des marais"],"Nemania confluens":[856894],"Pisolithus arhizus":[465278],"Pluteus chrysophaeus":[38815],"Pseudoclitocybe cyathiformis":[32865,"Clitocybe en coupe"],"Ramaria stricta":[41107,"Clavaire dressée"],"Rubroboletus lupinus":[967902,"Bolet de loup"],"Russula rosea":[39870,"Russule jolie"],"Scleroderma polyrhizum":[40718,"Scléroderme en forme d'étoile"],"Stereum hirsutum":[44622,"Stérée hirsute"],"Stereum subtomentosum":[44641,"Stérée remarquable"],"Suillus bovinus":[29694,"Bolet des bouviers"],"Tricholoma acerbum":[33157,"Tricholome acerbe"],"Tulostoma brumale":[40790],"Abortiporus biennis":[41255,"Polypore bisannuel"],"Agaricus arvensis":[37905,"Agaric des jachères|Psalliote des jachères"],"Agaricus augustus":[462625,"Agaric impérial|Psalliote impérial"],"Agaricus devoniensis":[37964,"Agaric des dunes|Psalliote des dunes"],"Agaricus impudicus":[38118],"Agaricus sylvaticus":[901371,"Psalliote des bois|Agaric des forêts|Psalliote des forêts"],"Agaricus sylvicola":[37972,"Agaric à pied bulbeux|Psalliote à pied bulbeux"],"Amanita ceciliae":[38997,"Amanite impériale"],"Amanita echinocephala":[39017,"Amanite épineuse"],"Amanita franchetii":[39031,"Amanite à voile jaune"],"Amanita fulva":[39040,"Amanite fauve"],"Amanita gemmata":[39055,"Amanite jonquille"],"Amanita lividopallescens":[39066],"Amanita mairei":[39069,"Amanite argentée"],"Amanita porphyria":[39119,"Amanite porphyre"],"Amanita submembranacea":[39150,"Amanite à volve grise"],"Ampulloclitocybe clavipes":[462560,"Tête de moine|Clitocybe à pied en massue"],"Anthracobia melaloma":[45450],"Anthracobia tristis":[45455],"Antrodiella serpula":[462751,"Polypore vorace"],"Armillaria cepistipes":[31670,"Armillaire pied-bot"],"Astraeus hygrometricus":[40179,"Géastre hygrométrique"],"Atheniella flavoalba":[995503],"Aureoboletus gentilis":[29336,"Bolet cramoisi"],"Balsamia vulgaris":[45734],"Bjerkandera adusta":[41622,"Tramète brûlée"],"Bovista plumbea":[40208],"Britzelmayria multipedata":[37692],"Bulgaria inquinans":[45908,"Bulgarie salissante"],"Calocybe obscurissima":[31895],"Cantharellus cinereus":[29963,"Chanterelle cendrée"],"Cerioporus leptocephalus":[966674,"Polypore variable"],"Cerioporus squamosus":[44088,"Polypore écailleux"],"Chlorociboria aeruginascens":[46239],"Choiromyces venosus":[46261],"Chroogomphus rutilus":[29848,"Gomphide visqueux"],"Clavaria acuta":[40848],"Clavariadelphus pistillaris":[40883,"Clavaire en pilon"],"Clavulina coralloides":[40905,"Clavaire crêtée"],"Clavulinopsis corniculata":[40925,"Clavaire cornue"],"Clitocybe costata":[30893,"Clitocybe côtelé"],"Clitocybe fragrans":[31742,"Clitocybe anisé strié"],"Clitocybe phaeophthalma":[31931,"Clitocybe à odeur de poulailler"],"Collybia tuberosa":[30683,"Collybie à sclérote noir"],"Collybiopsis confluens":[30593],"Coltricia perennis":[42002,"Polypore vivace"],"Coprinellus micaceus":[510311,"Coprin micacé"],"Cordyceps militaris":[46486,"Cordyceps militaire"],"Cortinarius aleuriosmus":[34605],"Cortinarius caperatus":[36627,"Pholiote ridée"],"Cortinarius infractus":[35071],"Cortinarius mucifluoides":[35213],"Cortinarius uliginosus":[35783],"Crepidotus cesatii":[33087],"Crepidotus epibryus":[33097],"Crucibulum laeve":[40268,"Crucibule lisse"],"Cudoniella clavus":[46668],"Cuphophyllus fornicatus":[987229],"Cuphophyllus russocoriaceus":[30045],"Cyanoboletus pulverulentus":[967881,"Bolet pulvérulent"],"Cyanosporus subcaesius":[996356,"Polypore bleuté des feuillus"],"Cystoderma amianthinum":[38156,"Cystoderme furfuracé"],"Cystodermella cinnabarina":[38192,"Cystoderme rouge cinabre"],"Cystolepiota seminuda":[38242],"Daedalea quercina":[42185,"Lenzite du chêne|Dédalée du chêne"],"Daedaleopsis nitida":[44328,"Polypore nid d'abeilles"],"Daldinia concentrica":[46706,"Daldinie concentrique"],"Deconica crobula":[464876],"Delicatula integrella":[32044],"Dermoloma pseudocuneifolium":[32063],"Dissingia leucomelaena":[993955,"Helvelle blanche et noire"],"Entoloma aprile":[33484,"Entolome d'avril"],"Entoloma araneosum":[462153],"Entoloma bloxamii":[33509],"Entoloma chalybeum":[462146],"Entoloma clandestinum":[33538],"Entoloma lividoalbum":[33733],"Entoloma mutabilipes":[33770],"Entoloma rhodocylix":[33898],"Entoloma sepium":[33942],"Exidia glandulosa":[42331,"Exidie glanduleuse"],"Fomitopsis betulina":[44020,"Polypore du bouleau"],"Fomitopsis pinicola":[42514,"Polypore marginé"],"Fuscoporia ferruginosa":[461808,"Polypore ferrugineux"],"Galerina graminea":[35996],"Galerina vittiformis":[36092],"Ganoderma applanatum":[42549,"Ganoderme plat|Ganoderme aplani"],"Ganoderma lucidum":[42551,"Ganoderme luisant"],"Gliophorus laetus":[30198],"Gloeophyllum sepiarium":[42614,"Lenzite des clôtures"],"Grifola frondosa":[42644,"Polypore en touffes"],"Gymnopilus junonius":[36923,"Pholiote remarquable"],"Gymnopilus penetrans":[36933,"Gymnopile pénétrant|Pholiote pénétrante"],"Gymnopus erythropus":[462473,"Collybie à pied rouge"],"Gymnopus foetidus":[1015036,"Marasme fétide"],"Gymnopus fusipes":[30626,"Souchette"],"Gyrodon lividus":[29523,"Bolet livide"],"Gyroporus castaneus":[29528,"Bolet châtain"],"Hapalopilus rutilans":[42667,"Polypore rutilant"],"Hebeloma radicosum":[36182,"Hébélome radicant"],"Hebeloma sinapizans":[36191,"Hébélome brûlant|Hébélome couleur moutarde"],"Helvella solitaria":[47802,"Helvelle solitaire"],"Hemileccinum impolitum":[508990,"Bolet dépoli"],"Homophron spadiceum":[971482],"Hortiboletus bubalinus":[971210],"Hydnellum ioeides":[975245],"Hydnoporia tabacina":[42820],"Hygrocybe acutoconica":[30208],"Hygrocybe chlorophana":[30111],"Hygrocybe citrinovirens":[30122],"Hygrocybe intermedia":[30185],"Hygrocybe mucronella":[30232],"Hygrocybe quieta":[30291],"Hygrocybe reidii":[30300],"Hygrophorus discoxanthus":[30384],"Hygrophorus eburneus":[30389,"Hygrophore blanc d'ivoire"],"Hygrophorus persoonii":[30462,"Hygrophore bicolore"],"Hygrophorus russula":[30496,"Hygrophore russule"],"Imperator luteocupreus":[971196,"Bolet cuivré"],"Imperator torosus":[971200,"Bolet de plomb|Bolet massif"],"Inocybe geophylla":[36338,"Inocybe à lames couleur de terre|Inocybe terreux"],"Inocybe griseolilacina":[36364],"Inocybe haemacta":[36368],"Inocybe mixtilis":[36435],"Inocybe terrifera":[36519],"Inonotus hispidus":[43103,"Polypore herissé"],"Inosperma bongardii":[1043643],"Laccaria laccata":[32192,"Clitocybe laqué"],"Laccaria proxima":[32204],"Laccaria tortilis":[32219],"Lacrymaria lacrymabunda":[37550,"Lacrymaire velouté"],"Lactarius acerrimus":[39216,"Lactaire à lames interveinées"],"Lactarius camphoratus":[39261,"Lactaire à odeur de chicorée"],"Lactarius circellatus":[39268,"Lactaire cerclé"],"Lactarius controversus":[39279,"Lactaire des peupliers"],"Lactarius flavidus":[39299,"Lactaire jaunâtre"],"Lactarius fluens":[39302,"Lactaire pisse-lait"],"Lactarius fulvissimus":[39310,"Lactaire fauve"],"Lactarius pubescens":[39404,"Lactaire pubescent"],"Lactarius quieticolor":[39413,"Lactaire orangé gris"],"Lactarius ruginosus":[39442,"Lactaire festonné"],"Lactarius semisanguifluus":[39455,"Lactaire semi-sanguin"],"Lactarius uvidus":[39494,"Lactaire humide"],"Lactarius zonarius":[39522,"Lactaire zoné"],"Lactifluus volemus":[969743,"Lactaire à lait abondant"],"Laxitextum bicolor":[43242],"Leccinellum crocipodium":[1031559,"Bolet craquelé"],"Leccinellum pseudoscabrum":[973593],"Leccinum floccopus":[29649,"Bolet roux"],"Lentinus brumalis":[973094,"Polypore d'hiver"],"Lentinus substrictus":[44070,"Polypore cilié"],"Lenzites betulinus":[43251,"Lenzite du bouleau|Tramète du bouleau"],"Lepiota clypeolaria":[38310,"Lépiote en bouclier"],"Lepiota magnispora":[38454],"Lepiota ochraceodisca":[38404],"Lepiota pseudolilacea":[38418],"Lepiota subincarnata":[38448],"Lepista personata":[32294,"Pied-violet|Tricholome sinistre|Tricholome des Oies"],"Leucocortinarius bulbiger":[32316,"Leucocortinaire bulbeux"],"Lycoperdon echinatum":[40525,"Vesse de loup hérisson"],"Lycoperdon excipuliforme":[40234],"Lycoperdon mammaeforme":[464310],"Lycoperdon nigrescens":[40534],"Lyophyllum helvella":[32379],"Macrolepiota excoriata":[38647,"Lépiote excoriée"],"Macrolepiota fuliginosa":[38689],"Marasmiellus candidus":[30946],"Marasmius bulliardii":[30988],"Marasmius curreyi":[31009],"Meottomyces dissimulans":[464514],"Metacampanella tricolor":[30968],"Morchella semilibera":[48547,"Morillon"],"Mucidula mucida":[31604,"Collybie visqueuse"],"Mycena capillaripes":[31194],"Mycena galericulata":[31292,"Mycène casquée"],"Mycena inclinata":[30788,"Mycène inclinée"],"Mycena leptocephala":[31206],"Mycena renati":[465104],"Mycena sanguinolenta":[31468,"Mycène sanguinolent"],"Mycena seynesii":[31479],"Naematelia aurantia":[464239],"Nectria cinnabarina":[48765],"Otidea alutacea":[48989],"Panaeolina foenisecii":[37033],"Panaeolus papilionaceus":[37043],"Panellus stipticus":[34332,"Panelle astringente"],"Paragalactinia succosa":[1002432],"Paralepista flaccida":[32234,"Clitocybe inverse des feuillus"],"Parasola plicatilis":[510329,"Coprin parasol"],"Phaeolus schweinitzii":[465040,"Polypore éponge|Phéole de schweinitz"],"Phaeotremella foliacea":[994198,"Trémelle foliacée"],"Phlebia radiata":[43906],"Phloeomana speirea":[994015],"Pholiota gummosa":[37108],"Picipes badius":[517085,"Polypore bai"],"Pleuroflammula tuberculosa":[37160],"Pleurotus cornucopiae":[34373,"Corne d'abondance"],"Pleurotus pulmonarius":[34495],"Plicaturopsis crispa":[44033],"Pluteus atromarginatus":[38799,"Plutée à arêtes noires"],"Pluteus aurantiorugosus":[38803,"Plutée orangé"],"Pluteus leoninus":[465266,"Pluté couleur de lion"],"Pluteus nanus":[38868,"Plutée nain"],"Pluteus plautus":[38880],"Pluteus romellii":[38891],"Polyporus lipsiensis":[42549,"Ganoderme plat|Ganoderme aplani"],"Postia tephroleuca":[43580,"Polypore souris"],"Psathyrella cotonea":[37476],"Psathyrella spadiceogrisea":[37825],"Pseudoboletus parasiticus":[464866,"Bolet parasite"],"Pseudosperma squamatum":[1043683],"Rhodocollybia butyracea":[509948,"Collybie beurrée"],"Rhodocybe gemina":[972016],"Rickenella swartzii":[31855],"Rigidoporus ulmarius":[44264,"Polypore de l'orme"],"Roridomyces roridus":[463334],"Rubroboletus dupainii":[967900,"Bolet de dupain"],"Rubroboletus legaliae":[967901,"Bolet chicorée"],"Russula acrifolia":[39532,"Russule à lames âcres"],"Russula aeruginea":[39545,"Russule verdâtre"],"Russula albonigra":[39548,"Russule blanche et noire"],"Russula alutacea":[39558,"Russule alutacée"],"Russula amoena":[39569,"Russule veloutée"],"Russula amoenicolor":[39573,"Russule panachée"],"Russula amoenolens":[39579,"Russule à odeur de topinambour"],"Russula anthracina":[39587,"Russule anthracite"],"Russula atropurpurea":[39841,"Russule pourpre et noire"],"Russula aurea":[39605,"Russule dorée"],"Russula brunneoviolacea":[39636,"Russule brun violacé"],"Russula caerulea":[39560,"Russule mamelonnée"],"Russula cuprea":[39671,"Russule cuivrée"],"Russula decipiens":[39683,"Russule trompeuse"],"Russula exalbicans":[39726,"Russule pâlissante"],"Russula foetens":[39751,"Russule fétide"],"Russula fragilis":[39756,"Russule fragile"],"Russula lilacea":[39877,"Russule lilas"],"Russula luteotacta":[39887,"Russule jaunissante"],"Russula olivacea":[39948,"Russule olivacée"],"Russula pseudointegra":[39994,"Russule coccinée"],"Russula risigallina":[463479,"Russule caméléon"],"Russula solaris":[40060,"Russule soleil"],"Russula turci":[40089,"Russule cocardée"],"Russula xerampelina":[40147,"Russule écrevisse"],"Scleroderma bovista":[40710],"Scutellinia peloponnesiaca":[861655],"Stereum gausapatum":[44619],"Stereum insignitum":[44625,"Stérée remarquable"],"Strobilomyces strobilaceus":[29679,"Bolet pomme de pin"],"Stropharia caerulea":[37194],"Stropharia inuncta":[37205],"Suillus collinitus":[29704,"Bolet à base rose"],"Suillus grevillei":[29720,"Bolet élégant"],"Thecotheus pelletieri":[50036],"Tomentella lapida":[464082],"Trametes cinnabarina":[44209,"Tramète cinabre"],"Trametes gibbosa":[44887,"Tramète bossue"],"Trametes ochracea":[464086,"Tramète zonée"],"Trichaptum abietinum":[45025,"Tramète lilas"],"Tricholoma batschii":[33240],"Tricholoma columbetta":[33219,"Colombette"],"Tricholoma scalpturatum":[33362,"Tricholome gravé"],"Tricholoma sejunctum":[33371,"Jaunet"],"Tricholomopsis rutilans":[33446,"Tricholome rutilant"],"Tuber melanosporum":[50200,"Truffe noire|Truffe du Périgord"],"Verpa conica":[50296,"Verpe conique"],"Volvariella murinella":[38936],"Xanthoporia radiata":[995012,"Polypore radié"],"Xerocomellus porosporus":[520774,"Bolet fissuré"],"Xerocomellus pruinatus":[520781,"Bolet pruineux"],"Xerocomus subtomentosus":[29831,"Bolet subtomenteux"],"Xerophorus donadinii":[971734]};
+const fold = s => norm(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+ALL.forEach(t => { const x = TX[t.la]; t.vn = x && x[1] ? x[1].split('|') : []; if (x) t.cd = x[0]; if (!t.fr && t.vn.length) t.fr = t.vn[0]; t.q = fold([t.fr, t.la, ...t.vn].join(' | ')); });
+/* Un nom français qui ne désigne qu'une espèce de la liste permet de la retrouver ; un nom partagé par deux espèces n'en désigne aucune. */
+const ALL_BY_FR = new Map(REF_BY_FR), FOLDED = new Map();
+{
+  const owners = new Map();
+  ALL.forEach(t => new Set([t.fr, ...t.vn].filter(Boolean).map(norm)).forEach(k => owners.set(k, (owners.get(k) || []).concat(t))));
+  owners.forEach((ts, k) => { if (ts.length === 1 && !ALL_BY_FR.has(k)) ALL_BY_FR.set(k, ts[0]); });
+  [...ALL_BY_LA, ...ALL_BY_FR].forEach(([k, t]) => { const f = fold(k); FOLDED.set(f, FOLDED.has(f) && FOLDED.get(f) !== t ? null : t); });
+}
+
 const FOREST = ['Chênaie', 'Hêtraie', 'Châtaigneraie', 'Charmaie', 'Chênaie-charmaie', 'Pinède', 'Sapinière', 'Pessière', 'Forêt mixte', 'Bois humide', 'Lisière', 'Prairie', 'Pelouse calcaire', 'Parc ou jardin', 'Autre'];
 const SOL = ['Sec', 'Frais', 'Humide', 'Détrempé'];
 const CIEL = ['Soleil', 'Nuageux', 'Pluie', 'Brouillard', 'Gelée', 'Vent'];
@@ -548,7 +626,7 @@ const DB = {
   run(store, mode, fn) {
     if (this.mem) {
       const m = this.mem[store];
-      const fake = { getAll: () => ({ result: [...m.values()] }), get: k => ({ result: m.get(k) }), put: v => { m.set(v.id, v); return { result: v.id }; }, delete: k => { m.delete(k); return {}; }, clear: () => { m.clear(); return {}; } };
+      const fake = { getAll: () => ({ result: [...m.values()] }), getAllKeys: () => ({ result: [...m.keys()] }), get: k => ({ result: m.get(k) }), put: v => { m.set(v.id, v); return { result: v.id }; }, delete: k => { m.delete(k); return {}; }, clear: () => { m.clear(); return {}; } };
       return Promise.resolve(fn(fake).result);
     }
     return new Promise((res, rej) => {
@@ -559,6 +637,7 @@ const DB = {
     });
   },
   all(s) { return this.run(s, 'readonly', st => st.getAll()); },
+  keys(s) { return this.run(s, 'readonly', st => st.getAllKeys()); },
   get(s, k) { return this.run(s, 'readonly', st => st.get(k)); },
   put(s, v) { return this.run(s, 'readwrite', st => st.put(v)); },
   del(s, k) { return this.run(s, 'readwrite', st => st.delete(k)); },
@@ -607,15 +686,26 @@ async function unpack(rec) {
 const S = {
   spots: [], sorties: [], specimens: [], settings: { mask: false, layer: 'plan', observer: '', tms: {}, mapObs: true },
   climate: null, lastPos: null, vault: null, seen: {}, taxnotes: {}, backup: null, offline: null, spotwx: {},
-  view: 'carnet', params: {}, draft: null, unmount: null,
+  view: 'carnet', params: {}, draft: null, draftBase: null, draftKey: null, draftFresh: false, pendingDraft: null, loadOk: false, unmount: null,
 };
+/* ---------- mémo : les listes dérivées ne sont recalculées que lorsque le carnet change ---------- */
+let dataRev = 0;
+const memoC = new Map();
+const touchData = () => { dataRev++; };
+function memo(key, f) { const c = memoC.get(key); if (c && c.rev === dataRev) return c.v; const v = f(); memoC.set(key, { rev: dataRev, v }); return v; }
 const STORE_OF = { spot: 'spots', sortie: 'sorties', specimen: 'specimens' };
 async function saveRec(kind, rec) {
   const store = STORE_OF[kind];
   rec.updatedAt = new Date().toISOString(); rec.createdAt = rec.createdAt || rec.updatedAt;
-  const list = S[store]; const i = list.findIndex(x => x.id === rec.id);
+  const list = S[store]; const i = list.findIndex(x => x.id === rec.id); const prev = i >= 0 ? list[i] : null;
   if (i >= 0) list[i] = rec; else list.push(rec);
-  try { await DB.put(store, await pack(rec)); } catch (e) { toast("Enregistrement impossible : l'espace de stockage est indisponible."); throw e; }
+  touchData();
+  try { await DB.put(store, await pack(rec)); }
+  catch (e) {
+    // Rien n'a été écrit : la liste en mémoire revient à ce que le téléphone contient vraiment.
+    const cur = S[store], j = cur.indexOf(rec); if (j >= 0) { if (prev) cur[j] = prev; else cur.splice(j, 1); } touchData();
+    toast("Enregistrement impossible : l'espace de stockage est indisponible."); throw e;
+  }
   return rec;
 }
 function photosOfRec(rec) {
@@ -627,25 +717,49 @@ async function deleteRec(kind, id) {
   const store = STORE_OF[kind];
   const rec = S[store].find(x => x.id === id);
   S[store] = S[store].filter(x => x.id !== id);
+  touchData();
   await DB.del(store, id).catch(() => {});
   for (const p of photosOfRec(rec)) await DB.del('photos', p).catch(() => {});
+  if (S.pendingDraft && !validDraft(S.pendingDraft)) storeDraft(null);
 }
 const metaPut = (id, value) => DB.put('meta', { id, value }).catch(() => {});
 const saveSettings = () => metaPut('settings', S.settings);
+/** Chaque observation porte un identifiant stable. Les anciennes gardent « sortie:rang », celui de leurs exports passés. */
+function ensureObsIds(so) {
+  const used = new Set((so.obs || []).map(o => o.id).filter(Boolean)); let changed = false;
+  (so.obs || []).forEach((o, i) => { if (o.id) return; let id = `${so.id}:${i}`; if (used.has(id)) id = 'b' + uid(); o.id = id; used.add(id); changed = true; });
+  return changed;
+}
 async function loadAll() {
-  const [sp, so, sm, meta] = await Promise.all(['spots', 'sorties', 'specimens', 'meta'].map(s => DB.all(s).catch(() => [])));
+  const got = await Promise.all(['spots', 'sorties', 'specimens', 'meta'].map(s => DB.all(s).then(v => ({ ok: true, v }), () => ({ ok: false, v: [] }))));
+  const [sp, so, sm, meta] = got.map(g => g.v);
+  S.loadOk = got.every(g => g.ok);
   S.spots = await Promise.all(sp.map(unpack));
   S.sorties = await Promise.all(so.map(unpack));
   S.specimens = await Promise.all(sm.map(unpack));
+  for (const s of S.sorties) if (ensureObsIds(s) && S.loadOk) { try { await DB.put('sorties', await pack(s)); } catch { /* refait au prochain démarrage */ } }
   const m = Object.fromEntries(meta.map(x => [x.id, x.value]));
   S.settings = { mask: false, layer: 'plan', observer: '', tms: {}, mapObs: true, ...(m.settings || {}) };
   if (!LAYERS[S.settings.layer]) S.settings.layer = 'plan';
   S.climate = m.climate || null;
   S.seen = m.seen || {};
   S.taxnotes = m.taxnotes || {};
+  // Des critères notés sous un nom français désormais reconnu suivent leur espèce.
+  let moved = false;
+  for (const k of Object.keys(S.taxnotes)) {
+    const t = !ALL_BY_LA.has(k) && ALL_BY_FR.get(k); if (!t) continue;
+    const nk = norm(t.la); S.taxnotes[nk] = S.taxnotes[nk] ? [S.taxnotes[nk], S.taxnotes[k]].join(String.fromCharCode(10)) : S.taxnotes[k]; delete S.taxnotes[k]; moved = true;
+  }
+  if (moved && S.loadOk) metaPut('taxnotes', S.taxnotes);
   S.backup = m.backup || null;
   S.offline = m.offline || null;
   S.spotwx = m.spotwx || {};
+  touchData();
+  // Saisie restée en attente (app fermée ou quittée avant d'enregistrer).
+  let pd = m.draft || null;
+  try { if (pd && pd.enc) pd = Vault.key ? await Vault.dec(pd.enc) : null; } catch { pd = null; }
+  S.pendingDraft = validDraft(pd);
+  if (m.draft && !S.pendingDraft && S.loadOk) DB.del('meta', 'draft').catch(() => {});
 }
 
 /* ---------- requêtes dérivées ---------- */
@@ -668,17 +782,19 @@ function nearestSpot(pos, max = 250) {
 }
 /** Retrouve le taxon de référence d'une observation (latin d'abord, nom français ensuite). */
 function taxonOf(o) {
-  return ALL_BY_LA.get(norm(o.latin)) || REF_BY_FR.get(norm(o.species)) || ALL_BY_LA.get(norm(o.species)) || null;
+  return ALL_BY_LA.get(norm(o.latin)) || ALL_BY_FR.get(norm(o.species)) || ALL_BY_LA.get(norm(o.species)) || null;
 }
 const keyOf = o => { const t = taxonOf(o); return t ? norm(t.la) : norm(o.latin || o.species); };
 const nameOf = o => { const t = taxonOf(o); return t?.fr || o.species || o.latin || ''; };
-function allObs() {
+function allObs() { return memo('obs', allObs0); }
+function allObs0() {
   const out = [];
   S.sorties.forEach(so => (so.obs || []).forEach((o, i) => { if ((o.species || o.latin || '').trim()) out.push({ so, o, i }); }));
   return out;
 }
 /** Index du Mycodex : ce que tu as observé, par espèce. */
-function codexIndex() {
+function codexIndex() { return memo('idx', codexIndex0); }
+function codexIndex0() {
   const m = new Map();
   allObs().forEach(({ so, o, i }) => {
     const k = keyOf(o);
@@ -693,17 +809,18 @@ function codexIndex() {
   for (const e of m.values()) { if (!e.photo) { const so = e.list.find(x => x.so.photoIds?.length); if (so) e.photo = so.so.photoIds[0]; } e.list.sort((a, b) => b.so.date.localeCompare(a.so.date)); }
   return m;
 }
-function speciesHistory() {
+function speciesHistory() { return memo('hist', speciesHistory0); }
+function speciesHistory0() {
   const m = new Map();
   allObs().forEach(({ o }) => { if (o.species) m.set(o.species.trim(), o.latin || ''); });
   REF.forEach(t => { if (!m.has(t.fr)) m.set(t.fr, t.la); });
-  CH.forEach(t => { if (!m.has(t.la)) m.set(t.la, 'Charente'); });
+  CH.forEach(t => { if (t.fr && !m.has(t.fr)) m.set(t.fr, t.la); if (!m.has(t.la)) m.set(t.la, t.fr || 'Charente'); });
   return m;
 }
 function matchLatin(name) {
   const k = norm(name);
   if (!k) return null;
-  const t = REF_BY_FR.get(k) || ALL_BY_LA.get(k);
+  const t = ALL_BY_FR.get(k) || ALL_BY_LA.get(k) || FOLDED.get(fold(k));   // en dernier recours, sans tenir compte des accents
   if (t) return { fr: t.fr, la: t.la, viaLatin: ALL_BY_LA.has(k) };
   for (const { o } of allObs()) if (norm(o.species) === k && o.latin) return { fr: name.trim(), la: o.latin };
   return null;
@@ -777,7 +894,8 @@ function completeness(o) {
 
 /* ---------- rubans et titre ---------- */
 const SEASON = m => (m === 11 || m <= 1) ? 'hiver' : m <= 4 ? 'printemps' : m <= 7 ? 'été' : 'automne';
-function progress() {
+function progress() { return memo('prog', progress0); }
+function progress0() {
   const obs = allObs();
   const idx = codexIndex();
   const full = obs.filter(x => completeness(x.o).full).length;
@@ -857,8 +975,9 @@ async function addPhoto(file) {
   const img = await loadImage(file);
   const blob = await resize(img, 1800, 0.82), thumb = await resize(img, 420, 0.72);
   URL.revokeObjectURL(img.src);
+  if (!blob) throw new Error('image');
   const p = { id: 'p' + uid(), blob, thumb, createdAt: new Date().toISOString() };
-  await DB.put('photos', p);
+  try { await DB.put('photos', p); } catch { throw new Error('store'); }
   return p.id;
 }
 async function photoURL(id, full = false) {
@@ -899,6 +1018,59 @@ function getPos(timeout = 15000) {
 const posError = e => e === 'denied' ? 'Position refusée. Autorise la localisation pour Mycota dans les réglages du téléphone.'
   : IN_CLAUDE ? "La position n'est pas accessible dans l'aperçu claude.ai. Elle fonctionne dans la version installée."
   : 'Position introuvable pour le moment. Réessaie à découvert.';
+
+/** Meilleur point : on écoute le GPS quelques secondes et on garde la position la plus précise.
+    Avec « job », un deuxième toucher sur le même bouton valide tout de suite le meilleur point déjà reçu. */
+const posJob = {};
+function bestPos({ maxMs = 9000, good = 8, giveUp = maxMs + 8000, onUpdate, job } = {}) {
+  return new Promise(res => {
+    if (!('geolocation' in navigator)) return res({ error: 'unsupported' });
+    const t0 = Date.now(); let best = null, id = null, done = false, failed = false, t1 = null, t2 = null;
+    const stop = () => { if (best) finish(best); };
+    function finish(v) {
+      if (done) return; done = true; clearTimeout(t1); clearTimeout(t2);
+      if (job && posJob[job] === stop) delete posJob[job];
+      try { if (id != null) navigator.geolocation.clearWatch(id); } catch { /* rien */ }
+      res(v);
+    }
+    if (job) posJob[job] = stop;
+    t1 = setTimeout(() => { if (best) finish(best); else if (failed) finish({ error: 'unavailable' }); }, maxMs);
+    t2 = setTimeout(() => finish(best || { error: 'unavailable' }), giveUp);
+    try {
+      id = navigator.geolocation.watchPosition(p => {
+        if (done) return;
+        const c = p.coords; const v = { lat: c.latitude, lng: c.longitude, acc: c.accuracy, at: Date.now() };
+        if (typeof c.altitude === 'number' && Number.isFinite(c.altitude)) v.alt = Math.round(c.altitude);
+        if (!best || v.acc <= best.acc) { best = v; S.lastPos = v; onUpdate?.(v); }
+        if (best.acc <= good || Date.now() - t0 >= maxMs) finish(best);
+      }, e => {
+        if (e.code === 1) finish({ error: 'denied' });
+        // Position indisponible : on laisse trois secondes au GPS pour se reprendre, pas plus.
+        else if (!failed) { failed = true; setTimeout(() => { if (!best) finish({ error: 'unavailable' }); }, 3000); }
+      }, { enableHighAccuracy: true, maximumAge: 0, timeout: Math.max(1000, giveUp - 1000) });
+      if (done && id != null) { try { navigator.geolocation.clearWatch(id); } catch { /* rien */ } }
+    } catch { finish({ error: 'unavailable' }); }
+  });
+}
+const hideToast = () => { const t = $('.toast'); if (t) t.hidden = true; };
+/* Au-delà de cette distance du spot, la position du téléphone n'est sans doute pas celle de la récolte (fiche complétée à la maison). */
+const NEAR_SPOT = 1500;
+const farFrom = (p, spot) => hasPos(p) && hasPos(spot) && distance(p, spot) > NEAR_SPOT;
+/** Un point loin du spot n'entre dans une fiche que si tu le décides. Réponse : true (le garder), false (sans lui), null (feuille fermée). */
+function confirmFar(p, spot, saved = false) {
+  if (!farFrom(p, spot)) return Promise.resolve(true);
+  return new Promise(res => {
+    const d = fmtDist(distance(p, spot));
+    const s = openSheet(`<div class="stack"><h2 class="title" style="font-size:28px">${saved ? `Ce point est à ${d} du spot` : `Tu es à ${d} du spot`}</h2>
+      <p class="muted" style="margin:0">${saved ? `Le point GPS de cette fiche est loin de « ${esc(spot.name)} ». S'il a été pris à la maison et non sur le terrain, retire-le.` : `Ce point placerait ta récolte ici, loin de « ${esc(spot.name)} ». Si tu complètes ta fiche à la maison, ne le prends pas.`}</p>
+      <div class="btn-row"><button class="btn ink" data-x="no">${saved ? 'Retirer le point' : 'Ne pas le prendre'}</button><button class="btn" data-x="ok">${saved ? 'Le garder' : 'Le prendre quand même'}</button></div></div>`);
+    let answered = false;
+    const done = v => { if (answered) return; answered = true; res(v); closeSheet(); };
+    s._onClose = () => done(null);
+    $('[data-x="no"]', s).onclick = () => done(false);
+    $('[data-x="ok"]', s).onclick = () => done(true);
+  });
+}
 
 /* ---------- météo (Open-Meteo, coordonnées arrondies à ~1 km) ---------- */
 async function getJSON(url, ms = 12000) {
@@ -989,12 +1161,67 @@ function offerFile(name, blob, { title = 'Fichier prêt', text = '', preview = f
   return s;
 }
 
+/* ---------- archive ZIP sans compression : la sauvegarde garde les photos en fichiers, sans tout charger en mémoire ---------- */
+const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u8) { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+async function zipStore(files, onProgress) {
+  const enc = new TextEncoder(), parts = [], central = [];
+  const d = new Date(), dosTime = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1), dosDate = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+  let offset = 0, n = 0;
+  for (const f of files) {
+    const name = enc.encode(f.name), size = f.blob.size;
+    const crc = crc32(new Uint8Array(await f.blob.arrayBuffer()));
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(10, dosTime, true); lh.setUint16(12, dosDate, true);
+    lh.setUint32(14, crc, true); lh.setUint32(18, size, true); lh.setUint32(22, size, true); lh.setUint16(26, name.length, true);
+    parts.push(lh.buffer, name, f.blob);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(12, dosTime, true); ch.setUint16(14, dosDate, true);
+    ch.setUint32(16, crc, true); ch.setUint32(20, size, true); ch.setUint32(24, size, true); ch.setUint16(28, name.length, true); ch.setUint32(42, offset, true);
+    central.push(ch.buffer, name);
+    offset += 30 + name.length + size;
+    onProgress?.(++n, files.length);
+  }
+  const cdSize = central.reduce((a, p) => a + p.byteLength, 0);
+  if (offset + cdSize > 0xFFFFFF00 || files.length > 65000) throw new Error('zip-too-big');
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true); end.setUint32(12, cdSize, true); end.setUint32(16, offset, true);
+  return new Blob([...parts, ...central, end.buffer], { type: 'application/zip' });
+}
+async function zipRead(file) {
+  const tailLen = Math.min(file.size, 66000);
+  const tail = new DataView(await file.slice(file.size - tailLen).arrayBuffer());
+  let p = -1; for (let i = tail.byteLength - 22; i >= 0; i--) if (tail.getUint32(i, true) === 0x06054b50) { p = i; break; }
+  if (p < 0) throw new Error('zip');
+  const count = tail.getUint16(p + 10, true), cdSize = tail.getUint32(p + 12, true), cdOff = tail.getUint32(p + 16, true);
+  const cd = new DataView(await file.slice(cdOff, cdOff + cdSize).arrayBuffer());
+  const dec = new TextDecoder(), entries = new Map();
+  for (let k = 0, q = 0; k < count; k++) {
+    if (cd.getUint32(q, true) !== 0x02014b50) throw new Error('zip');
+    const nameLen = cd.getUint16(q + 28, true);
+    entries.set(dec.decode(new Uint8Array(cd.buffer, q + 46, nameLen)), { method: cd.getUint16(q + 10, true), csize: cd.getUint32(q + 20, true), lho: cd.getUint32(q + 42, true) });
+    q += 46 + nameLen + cd.getUint16(q + 30, true) + cd.getUint16(q + 32, true);
+  }
+  return {
+    names: [...entries.keys()],
+    async get(name, type = '') {
+      const e = entries.get(name); if (!e) return null;
+      const lh = new DataView(await file.slice(e.lho, e.lho + 30).arrayBuffer());
+      const start = e.lho + 30 + lh.getUint16(26, true) + lh.getUint16(28, true);
+      const raw = file.slice(start, start + e.csize);
+      if (e.method === 0) return new Blob([await raw.arrayBuffer()], { type });
+      if (e.method === 8 && typeof DecompressionStream === 'function') return new Blob([await new Response(raw.stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer()], { type });
+      throw new Error('zip-method');
+    },
+  };
+}
+
 /* ---------- interface commune ---------- */
 let toastT = null;
 function toast(msg, win = false) {
   let t = $('.toast');
   if (!t) { t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
-  t.textContent = msg; t.classList.toggle('win', win); t.hidden = false;
+  t.textContent = msg; t.classList.toggle('win', win); t.classList.toggle('top', !!$('#scrim')); t.hidden = false;
   clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, win ? 4200 : 3200);
 }
 function openSheet(html) {
@@ -1002,9 +1229,9 @@ function openSheet(html) {
   const s = document.createElement('div'); s.className = 'scrim'; s.id = 'scrim';
   s.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div>`;
   s.addEventListener('click', e => { if (e.target === s) closeSheet(); });
-  document.body.appendChild(s); return s;
+  document.body.appendChild(s); $('.toast')?.classList.add('top'); return s;
 }
-const closeSheet = () => { const s = $('#scrim'); if (!s) return; $$('img.preview', s).forEach(i => URL.revokeObjectURL(i.src)); s.remove(); };
+const closeSheet = () => { const s = $('#scrim'); if (!s) return; $$('img.preview', s).forEach(i => URL.revokeObjectURL(i.src)); s.remove(); s._onClose?.(); };
 function confirmSheet({ title, text, ok, danger = true, onOk }) {
   const s = openSheet(`<div class="stack"><h2 class="title" style="font-size:28px">${esc(title)}</h2>${text ? `<p class="muted" style="margin:0">${esc(text)}</p>` : ''}
     <div class="btn-row"><button class="btn" data-x="no">Annuler</button><button class="btn ${danger ? 'danger' : 'ink'}" data-x="ok">${esc(ok)}</button></div></div>`);
@@ -1025,17 +1252,121 @@ const speciesDatalist = () => `<datalist id="species-list">${[...speciesHistory(
 const toxPill = t => t === 'mortelle' ? '<span class="pill danger">mortelle</span>' : t === 'toxique' ? '<span class="pill">toxique</span>' : '';
 function syncDraft() { if (!S.draft) return; $$('[data-bind]').forEach(el => setPath(S.draft, el.dataset.bind, el.value)); }
 
+/* ---------- saisie en cours : gardée à chaque modification, reprise si l'app est fermée ou quittée par erreur ---------- */
+const FORM_VIEWS = ['spotForm', 'sortieForm', 'obs', 'specimen'];
+const VIEW_OF = { spot: 'spotForm', sortie: 'sortieForm', obs: 'obs', specimen: 'specimen' };
+/** Texte de comparaison, insensible à l'ordre des champs. */
+const canon = v => JSON.stringify(v, (k, x) => x && typeof x === 'object' && !Array.isArray(x) ? Object.fromEntries(Object.keys(x).sort().map(n => [n, x[n]])) : x);
+const sameParams = (a, b) => canon(a || {}) === canon(b || {});
+function newDraft(d) { S.draft = d; S.draftBase = canon(d); S.draftKey = uid(); S.draftFresh = true; return d; }
+const isDirty = () => !!S.draft && canon(S.draft) !== S.draftBase;
+function validDraft(pd) {
+  if (!pd || !pd.draft || !pd.key || VIEW_OF[pd.draft.kind] !== pd.view) return null;
+  const d = pd.draft;
+  if (d.kind === 'obs' && !S.sorties.find(s => s.id === d.sid)?.obs?.some(o => o.id === d.oid)) return null;
+  if (d.kind === 'sortie' && d.id && !S.sorties.some(s => s.id === d.id)) return null;
+  if (d.kind === 'spot' && d.id && !spotById(d.id)) return null;
+  if (d.kind === 'specimen' && d.id && !S.specimens.some(s => s.id === d.id)) return null;
+  return pd;
+}
+function draftLabel(pd) {
+  const d = pd.draft;
+  if (d.kind === 'sortie') {
+    const n = (d.obs || []).filter(o => o.species || o.latin).length;
+    return `Sortie${Number.isNaN(new Date(d.date).getTime()) ? '' : ` du ${fmtDots(d.date)}`}${n ? ` · ${plural(n, 'espèce', 'espèces')}` : ''}`;
+  }
+  if (d.kind === 'obs') return `Fiche ${d.o?.latin || d.o?.species || 'd’observation'}`;
+  if (d.kind === 'spot') return d.name ? `Spot « ${d.name} »` : 'Nouveau spot';
+  return d.hypothese ? `Spécimen « ${d.hypothese} »` : 'Spécimen à identifier';
+}
+let draftQ = Promise.resolve(), draftT = null;
+/** Écrit (ou efface) la saisie gardée. Les écritures se suivent dans l'ordre ; avec le coffre, elle est chiffrée en entier. */
+function storeDraft(pd) {
+  S.pendingDraft = pd;
+  draftQ = draftQ.then(async () => {
+    try { if (!pd) await DB.del('meta', 'draft'); else await DB.put('meta', { id: 'draft', value: Vault.key ? { enc: await Vault.enc(pd) } : pd }); } catch { /* la saisie reste en mémoire */ }
+  });
+  return draftQ;
+}
+function touchDraft() { if (!S.draft || !FORM_VIEWS.includes(S.view)) return; clearTimeout(draftT); draftT = setTimeout(saveDraftNow, 500); }
+function saveDraftNow() {
+  clearTimeout(draftT);
+  if (!S.draft || S.draftFresh || VIEW_OF[S.draft.kind] !== S.view) return;
+  syncDraft();
+  if (!isDirty()) { if (S.pendingDraft && S.pendingDraft.key === S.draftKey) storeDraft(null); return; }
+  storeDraft({ view: S.view, params: S.params, draft: structuredClone(S.draft), base: S.draftBase, key: S.draftKey, at: Date.now() });
+}
+/** La saisie a été enregistrée, ou jetée par toi : on l'oublie. */
+function dropDraft() {
+  clearTimeout(draftT);
+  if (S.pendingDraft && S.pendingDraft.key === S.draftKey) storeDraft(null);
+  S.draft = null; S.draftBase = null; S.draftKey = null; S.draftFresh = false;
+}
+/** On quitte un formulaire sans enregistrer ni jeter : ce qui a été modifié reste gardé, à reprendre depuis le Carnet. */
+function parkDraft() { saveDraftNow(); S.draft = null; S.draftBase = null; S.draftKey = null; S.draftFresh = false; }
+function takeDraft(pd) { S.draft = structuredClone(pd.draft); S.draftBase = pd.base ?? null; S.draftKey = pd.key; S.draftFresh = false; }
+/** Reprend la saisie gardée si elle est celle de l'écran affiché. */
+function adoptPending() {
+  const pd = S.pendingDraft;
+  if (!pd || S.draft || pd.view !== S.view || !sameParams(pd.params, S.params)) return false;
+  takeDraft(pd); return true;
+}
+function resumeDraft() { const pd = S.pendingDraft; if (!pd) return; takeDraft(pd); go(pd.view, pd.params || {}); }
+function askPending(view, params, replace) {
+  const pd = S.pendingDraft;
+  const s = openSheet(`<div class="stack"><div><span class="kicker">Saisie non enregistrée</span><h2 class="title" style="font-size:26px;margin-top:4px">${esc(draftLabel(pd))}</h2></div>
+    <p class="muted" style="margin:0">Tu l'avais commencée ${ago(new Date(pd.at).toISOString())} sans l'enregistrer. Une seule saisie peut rester en attente.</p>
+    <button class="btn ink big block" data-x="resume">La reprendre</button>
+    <button class="btn danger block" data-x="drop">La jeter et continuer</button></div>`);
+  $('[data-x="resume"]', s).onclick = () => { closeSheet(); resumeDraft(); };
+  $('[data-x="drop"]', s).onclick = async () => { closeSheet(); await storeDraft(null); go(view, params, { replace }); };
+}
+/** Arrivée sur un écran par l'historique ou au démarrage : on y reprend la saisie gardée si c'est la sienne ;
+    une autre saisie en attente ramène au Carnet, où elle est proposée. */
+function landOn(state) {
+  S.view = state.view; S.params = state.params || {};
+  if (!FORM_VIEWS.includes(S.view) || !S.pendingDraft) return false;
+  if (adoptPending()) return true;
+  S.view = 'carnet'; S.params = {};
+  try { history.replaceState({ view: 'carnet', params: {}, depth: state.depth || 0 }, ''); } catch { /* cadre restreint */ }
+  return false;
+}
+/** Photos qui ne sont plus dans aucune fiche (saisie abandonnée, photo remplacée) : nettoyées au démarrage, jamais à chaud,
+    et seulement si elles ont plus de deux jours. */
+async function sweepPhotos() {
+  if (!S.loadOk) return 0;
+  let n = 0;
+  try {
+    const keep = new Set([...S.spots, ...S.sorties, ...S.specimens].flatMap(photosOfRec));
+    for (const d of [S.draft, S.pendingDraft?.draft]) if (d) (JSON.stringify(d).match(/"p[a-z0-9]{10,}"/g) || []).forEach(q => keep.add(q.slice(1, -1)));
+    const limit = Date.now() - 2 * 864e5;
+    for (const k of await DB.keys('photos')) {
+      if (keep.has(k)) continue;
+      const p = await DB.get('photos', k);
+      if (p && new Date(p.createdAt || 0).getTime() < limit) { await DB.del('photos', k); n++; }
+    }
+  } catch { /* on réessaiera au prochain démarrage */ }
+  return n;
+}
+
 /* ---------- navigation ---------- */
 function go(view, params = {}, { replace = false } = {}) {
+  // Une saisie non enregistrée attend : on la retrouve sur sa propre fiche, sinon on demande avant d'en ouvrir une autre.
+  const pd = S.pendingDraft;
+  if (pd && FORM_VIEWS.includes(view) && !(S.draft && S.draftKey === pd.key)) {
+    if (pd.view === view && sameParams(pd.params, params) && (pd.draft.id || pd.draft.kind === 'obs')) { takeDraft(pd); toast('Tu retrouves ta saisie non enregistrée.'); }
+    else { askPending(view, params, replace); return; }
+  }
   S.unmount?.(); S.unmount = null; S.view = view; S.params = params;
   const depth = (history.state?.depth || 0) + (replace ? 0 : 1);
   try { (replace ? history.replaceState : history.pushState).call(history, { view, params, depth }, ''); } catch { /* cadre restreint */ }
   render(); window.scrollTo(0, 0);
 }
 window.addEventListener('popstate', e => {
-  if (!e.state || !e.state.view) return;
-  closeSheet(); S.unmount?.(); S.unmount = null; S.draft = null;
-  S.view = e.state.view; S.params = e.state.params || {}; render();
+  if (!e.state || !e.state.view || S.view === 'lock') return;
+  parkDraft();   // retour arrière par erreur : ce qui était modifié reste gardé
+  closeSheet(); S.unmount?.(); S.unmount = null;
+  landOn(e.state); render();
 });
 const TABS = ['carnet', 'codex', 'carte', 'climat'];
 function render() {
@@ -1049,6 +1380,8 @@ function render() {
   app.classList.toggle('no-tabs', !tabbed);
   $$('.tab').forEach(t => t.setAttribute('aria-current', t.dataset.v === S.view ? 'page' : 'false'));
   S.unmount = out.unmount || null; out.mount?.(); hydratePhotos(app);
+  // Première mise à l'écran d'une saisie : son état de départ est celui que le formulaire affiche.
+  if (S.draftFresh) { S.draftFresh = false; if (S.draft) { syncDraft(); S.draftBase = canon(S.draft); } }
 }
 
 /* ---------- fonds de carte : Plan IGN, photographies aériennes IGN, OpenStreetMap ---------- */
@@ -1349,12 +1682,41 @@ function avisSheet(build) {
    ========================================================================== */
 const VIEWS = {};
 
+/** Petit moment quand une case du Mycodex se remplit pour la première fois. */
+function revealNew(taxa, so) {
+  const idx = codexIndex(), base = taxa.some(t => t.ext) ? ALL : REF, got = base.filter(t => idx.has(norm(t.la))).length;
+  const one = taxa.length === 1 ? taxa[0] : null, spot = spotById(so.spotId);
+  const s = openSheet(`<div class="reveal"><span class="ribbon">${one ? 'Nouvelle case' : `${taxa.length} nouvelles cases`} au Mycodex</span>
+    ${one ? `<div style="margin-top:10px">${shroom('var(--green)', 'var(--card)', 'var(--ink)', '0', 'shroom stamp', one.g)}</div>
+      <span class="kicker">N° ${num3(one.n)}</span><div class="title la" style="font-size:28px">${esc(one.la)}</div>${one.fr ? `<div class="sub">${esc(one.fr)}</div>` : ''}`
+    : `<div class="reveal-row" style="margin-top:10px">${taxa.slice(0, 6).map(t => `<div class="cell"><span class="cell-n">${num3(t.n)}</span><div class="cell-art">${shroom('var(--green)', 'var(--card)', 'var(--ink)', '0', 'shroom', t.g)}</div><div class="cell-fr${t.fr ? '' : ' la'}">${esc(t.fr || t.la)}</div></div>`).join('')}</div>`}
+    <div class="mono faint" style="font-size:12px;margin-top:6px">1re observation · ${fmtDots(so.date)}${spot ? ` · ${esc(spot.name)}` : ''}</div>
+    <div class="tapebar" style="width:100%;margin-top:10px"><i style="width:${Math.round(got / base.length * 100)}%"></i></div>
+    <div class="mono faint" style="font-size:11.5px">${got} / ${base.length} ${base === ALL ? 'de la liste Charente' : 'de la liste de départ'}</div>
+    <div class="btn-row" style="width:100%;margin-top:12px"><button class="btn" id="rv-codex">Voir le Mycodex</button><button class="btn ink" id="rv-ok">Continuer</button></div></div>`);
+  $('#rv-ok', s).onclick = closeSheet;
+  $('#rv-codex', s).onclick = () => { closeSheet(); go('codex', {}); };
+}
+/** Met à jour la jauge de la fiche sans tout redessiner : le clavier et le défilement restent en place. */
+function refreshMeter() {
+  if (S.draft?.kind !== 'obs' || S.view !== 'obs') return;
+  const c = completeness(S.draft.o);
+  const pct = $('#o-pct'); if (pct) { pct.textContent = `${c.pct} %`; pct.style.color = c.full ? 'var(--tape)' : ''; }
+  const g = $('#o-gauge'); if (g) { g.classList.toggle('full', c.full); g.firstElementChild.style.width = `${c.pct}%`; }
+  const m = $('#o-miss'); if (m) m.outerHTML = c.full ? '<span class="ribbon" id="o-miss">relevé complet</span>' : `<span class="mono" id="o-miss" style="font-size:11px;color:var(--ink-2)">manque ${c.miss.length}</span>`;
+}
+/** Les cinq plans : une case vide ouvre l'appareil photo, une case remplie propose de voir, reprendre, choisir ou retirer. */
+const planSlots = (prefix, defs, photos) => `<div class="plans">${defs.map(([k, l]) => { const p = photos?.[k];
+  return p ? `<button type="button" class="plan" data-act="planSlot" data-target="${prefix}:${k}" data-id="${p}" data-label="${esc(l)}" aria-label="Photo ${esc(l)} : voir, reprendre ou retirer"><span class="ph"><img data-photo="${p}" alt=""></span><span>${esc(l)}</span></button>`
+    : `<label class="plan empty" aria-label="Prendre la photo ${esc(l)}"><span class="ph">${I.camera}</span><span>${esc(l)}</span><input type="file" class="vh" accept="image/*" capture="environment" data-photo-in="${prefix}:${k}"></label>`; }).join('')}</div>
+  ${defs.some(([k]) => !photos?.[k]) ? `<label class="link" style="display:inline-block;font-size:13px;cursor:pointer;margin-top:6px">Photos déjà prises ? Les choisir dans la photothèque<input type="file" class="vh" accept="image/*" multiple data-photo-in="${prefix}:*"></label>` : ''}`;
+
 function huntHTML(list) {
   if (!list.length) return '';
   return `<section class="sec"><div class="sec-head"><h2 class="sec-title">Liste de chasse</h2><span class="sec-meta">de saison · ${MONTHS[new Date().getMonth()]}</span></div>
     <div class="hunt">${list.map(t => `<button class="cell" data-act="taxon" data-key="${esc(norm(t.la))}">
       <div class="cell-top"><span class="cell-n">${num3(t.n)}</span>${t.tox ? toxPill(t.tox) : ''}</div>
-      <div class="cell-art">${shroom('none', 'none', 'var(--tape)', '3 3')}</div>
+      <div class="cell-art">${shroom('none', 'none', 'var(--tape)', '3 3', 'shroom', t.g)}</div>
       <div class="cell-fr">${esc(t.fr)}</div><div class="cell-la">${esc(t.la)}</div></button>`).join('')}</div>
     <p class="faint" style="font-size:12px;margin:8px 0 0">Espèces pas encore dans ton Mycodex, de saison d'après leur période indicative. La liste change chaque semaine.</p></section>`;
 }
@@ -1384,7 +1746,7 @@ VIEWS.carnet = () => {
   const pending = S.specimens.filter(s => s.status !== 'identifie').sort((a, b) => b.date.localeCompare(a.date));
   const spots = [...S.spots].sort((a, b) => ((sortiesOf(b.id)[0]?.date) || b.createdAt || '').localeCompare((sortiesOf(a.id)[0]?.date) || a.createdAt || ''));
   const demo = S.spots.some(s => s.demo);
-  const here = S.lastPos;
+  const here = freshPos(15 * 60e3);
   const recent = [...S.sorties].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
   const spotCard = sp => {
     const so = sortiesOf(sp.id), last = so[0], n = so.reduce((a, s) => a + countOf(s), 0);
@@ -1408,6 +1770,7 @@ VIEWS.carnet = () => {
     <button class="li" data-act="tab" data-v="climat" style="border:0;padding:4px 0"><span class="mono" style="color:var(--rain);font-weight:600">${rs ? nf.format(rs.r10) + ' mm' : '— mm'}</span><span class="muted grow" style="font-size:13.5px">${rs ? `de pluie ces 10 derniers jours autour de toi · ${ago(new Date(S.climate.at).toISOString())}` : 'pluie récente : ouvre Climat pour la relever'}</span>${I.chev}</button>
     ${IN_CLAUDE ? `<div class="notice"><b>Aperçu claude.ai.</b> Position, fond de carte et météo sont bloqués ici. Tout fonctionne dans la version installée.</div>` : ''}
     ${bk && !bk.ok && bk.due ? `<div class="notice backup"><span class="grow"><b>${bk.at ? `Dernière sauvegarde il y a ${plural(bk.days, 'jour', 'jours')}.` : 'Aucune sauvegarde pour l’instant.'}</b> Tes relevés ne vivent que sur ce téléphone.</span><button class="btn" data-act="exportJSON" style="min-height:40px;flex:none">Sauvegarder</button></div>` : ''}
+    ${S.pendingDraft && !S.draft ? `<div class="notice pending"><span class="grow"><b>Saisie non enregistrée.</b> ${esc(draftLabel(S.pendingDraft))}, ${ago(new Date(S.pendingDraft.at).toISOString())}.</span><span class="row" style="gap:6px;flex:none"><button class="btn" data-act="draftResume" style="min-height:40px">Reprendre</button><button class="btn danger" data-act="draftDrop" style="min-height:40px;padding:0 10px" aria-label="Jeter cette saisie">${I.trash}</button></span></div>` : ''}
     ${demo ? `<div class="notice">Ce carnet contient des <b>exemples</b>. <button class="link" data-act="clearDemo">Retirer les exemples</button></div>` : ''}
   </div>
   ${huntHTML(huntList())}
@@ -1501,7 +1864,7 @@ VIEWS.codex = () => {
 };
 function dexCell(t, e) {
   const seen = !!e;
-  const art = seen && e.photo ? `<img data-photo="${e.photo}" alt="">` : seen ? shroom('var(--green)', 'var(--card)', 'var(--ink)') : shroom('none', 'none', 'var(--ink-3)', '3 3');
+  const art = seen && e.photo ? `<img data-photo="${e.photo}" alt="">` : seen ? shroom('var(--green)', 'var(--card)', 'var(--ink)', '0', 'shroom', t.g) : shroom('none', 'none', 'var(--ink-3)', '3 3', 'shroom', t.g);
   const flag = t.tox === 'mortelle' ? '<span class="pill danger">mortelle</span>' : seen && daysBetween(new Date(e.first), new Date()) < 30 ? '<span class="pill tape">nouveau</span>' : '';
   return `<button class="cell ${seen ? '' : 'no'}" data-act="taxon" data-key="${esc(t.key || norm(t.la))}" aria-label="${esc(`${num3(t.n || 0)} ${t.fr || t.la}, ${seen ? 'observée' : 'pas encore observée'}`)}">
     <div class="cell-top"><span class="cell-n">${t.n ? num3(t.n) : 'hors'}</span>${flag}</div>
@@ -1509,18 +1872,18 @@ function dexCell(t, e) {
 }
 function renderDex() {
   const box = $('#dex-list'); if (!box) return;
-  const f = S.codexF, idx = codexIndex(), q = norm(f.q), m = new Date().getMonth() + 1;
+  const f = S.codexF, idx = codexIndex(), q = fold(f.q), m = new Date().getMonth() + 1;
   const keep = t => { const e = idx.get(norm(t.la));
     if (f.mode === 'observées' && !e) return false; if (f.mode === 'à trouver' && e) return false; if (f.mode === 'de saison' && !t.months?.includes(m)) return false;
-    if (q && !norm(t.fr).includes(q) && !norm(t.la).includes(q)) return false; return true; };
+    if (q && !(t.q || fold(`${t.fr} | ${t.la}`)).includes(q)) return false; return true; };
   const cmp = f.sort === 'gb' ? (a, b) => (b.gb || 0) - (a.gb || 0) || a.n - b.n : f.sort === 'az' ? (a, b) => (a.fr || a.la).localeCompare(b.fr || b.la, 'fr') : (a, b) => a.n - b.n;
   let html = GROUPS.map(([g, name]) => {
     const all = (f.list === 'charente' ? ALL : REF).filter(t => t.g === g), list = all.filter(keep).sort(cmp); if (!list.length) return '';
     const got = all.filter(t => idx.has(norm(t.la))).length, done = got === all.length;
-    return `<section class="sec" style="margin-top:20px"><div class="sec-head"><h2 class="sec-title">${esc(name)}</h2>${done ? '<span class="ribbon">complet</span>' : `<span class="sec-meta" style="font-weight:600">${got} / ${all.length}</span>`}</div>
+    return `<section class="sec dexsec" style="margin-top:20px"><div class="sec-head"><h2 class="sec-title">${esc(name)}</h2>${done ? '<span class="ribbon">complet</span>' : `<span class="sec-meta" style="font-weight:600">${got} / ${all.length}</span>`}</div>
       <div class="dex">${list.map(t => dexCell(t, idx.get(norm(t.la)))).join('')}</div></section>`;
   }).join('');
-  const extra = [...idx.values()].filter(e => (!e.ref || (e.ref.ext && f.list !== 'charente')) && f.mode !== 'à trouver' && f.mode !== 'de saison' && (!q || norm(e.fr).includes(q) || norm(e.la).includes(q)));
+  const extra = [...idx.values()].filter(e => (!e.ref || (e.ref.ext && f.list !== 'charente')) && f.mode !== 'à trouver' && f.mode !== 'de saison' && (!q || fold(`${e.fr} | ${e.la}`).includes(q)));
   if (extra.length) html += `<section class="sec" style="margin-top:20px"><div class="sec-head"><h2 class="sec-title">Hors liste</h2><span class="sec-meta">${extra.length}</span></div>
     <div class="dex">${extra.map(e => dexCell(e.ref ? { ...e.ref, fr: e.fr } : { n: 0, key: e.key, fr: e.fr, la: e.la || e.fr }, e)).join('')}</div>
     <p class="faint" style="font-size:12px;margin:8px 0 0">Tes observations d'espèces absentes ${f.list === 'charente' ? 'des listes' : 'de la liste de départ'}. Elles s'ajoutent ici d'elles-mêmes.</p></section>`;
@@ -1549,11 +1912,12 @@ VIEWS.taxon = ({ key }) => {
   <div class="card" style="height:190px;position:relative;overflow:hidden;padding:0;background:var(--sunk)">
     ${TOPO.replace('class="topo"', 'class="topo" style="left:0;right:0;height:190px"')}
     ${e?.photo ? `<button class="ph" data-act="photo" data-id="${e.photo}" style="position:absolute;inset:0;aspect-ratio:auto;height:100%;border-radius:0"><img data-photo="${e.photo}" alt="${esc(fr || la)}"></button>`
-      : `<div style="position:absolute;inset:0;display:grid;place-items:center">${e ? shroom('var(--green)', 'var(--card)', 'var(--ink)', '0', 'shroom" style="width:150px;height:112px') : shroom('none', 'none', 'var(--ink-3)', '4 4', 'shroom" style="width:150px;height:112px')}</div>`}
+      : `<div style="position:absolute;inset:0;display:grid;place-items:center">${e ? shroom('var(--green)', 'var(--card)', 'var(--ink)', '0', 'shroom" style="width:150px;height:112px', t?.g) : shroom('none', 'none', 'var(--ink-3)', '4 4', 'shroom" style="width:150px;height:112px', t?.g)}</div>`}
     <div style="position:absolute;left:10px;bottom:10px;display:flex;gap:6px">${e ? `<span class="pill green">observée × ${e.visits}</span>` : '<span class="pill ghost" style="background:var(--card)">pas encore observée</span>'}${t?.tox ? toxPill(t.tox) : ''}</div>
   </div>
   <div style="padding-top:16px;display:flex;flex-direction:column;gap:4px">
     <h1 class="title la" style="font-size:34px">${esc(la)}</h1>${fr ? `<div class="sub">${esc(fr)}</div>` : ''}
+    ${(t?.vn || []).some(v => norm(v) !== norm(fr)) ? `<div class="muted" style="font-size:13.5px">Aussi : ${esc(t.vn.filter(v => norm(v) !== norm(fr)).join(', '))}</div>` : ''}
   </div>
   ${e ? `<div class="stats" style="--n:4;margin-top:16px"><div><b>${e.visits}</b><span>sorties</span></div><div><b>${nf.format(e.n)}</b><span>exemplaires</span></div><div><b>${e.spots.size}</b><span>spots</span></div><div><b>${fmtDots(e.first).slice(0, 5)}</b><span>1re · ${new Date(e.first).getFullYear()}</span></div></div>` : ''}
   <section class="sec"><div class="sec-head"><h2 class="sec-title">Calendrier</h2><span class="sec-meta">mois en cours souligné</span></div>
@@ -1563,6 +1927,7 @@ VIEWS.taxon = ({ key }) => {
       <span class="ml"></span>${MONTHS_S.map(l => `<span class="mm">${l}</span>`).join('')}
     </div>
     ${t?.months ? '<p class="faint" style="font-size:12px;margin:8px 0 0">Période indicative en France, à affiner avec tes propres relevés.</p>' : ''}
+    ${t?.cd ? `<p class="faint mono" style="font-size:11.5px;margin:6px 0 0">TAXREF n° ${t.cd}${t.vn.length ? '' : ' · sans nom français dans TAXREF'}</p>` : t ? '<p class="faint mono" style="font-size:11.5px;margin:6px 0 0">Pas de rattachement à TAXREF</p>' : ''}
     ${t?.gb ? `<p class="faint mono" style="font-size:11.5px;margin:6px 0 0">Charente : ${plural(t.gb, 'mention', 'mentions')} sur GBIF</p>` : t ? '<p class="faint mono" style="font-size:11.5px;margin:6px 0 0">Aucune mention sur GBIF en Charente pour l’instant</p>' : ''}
   </section>
   ${ph.length ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Par saison</h2><span class="sec-meta">première et dernière date</span></div>
@@ -1577,7 +1942,7 @@ VIEWS.taxon = ({ key }) => {
   <section class="sec"><div class="sec-head"><h2 class="sec-title">Tes critères</h2><span class="sec-meta">ton guide perso</span></div>
     <textarea class="in" data-taxnote="${esc(key)}" aria-label="Tes critères pour cette espèce" placeholder="Ce qui te permet de la reconnaître, les sosies à écarter, la page du livre…">${esc(note)}</textarea></section>
   ${e ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Tes observations</h2></div>
-    <div class="lines">${e.list.map(({ so, o, i }) => { const c = completeness(o); return `<button class="li" data-act="obs" data-sid="${so.id}" data-i="${i}">
+    <div class="lines">${e.list.map(({ so, o }) => { const c = completeness(o); return `<button class="li" data-act="obs" data-sid="${so.id}" data-oid="${esc(o.id)}">
       <span class="mark g"></span><span class="mono" style="font-size:12px;width:62px">${fmtDots(so.date)}</span><span class="grow" style="font-size:14px">${esc(spotById(so.spotId)?.name || '—')}${hasPos(o) ? ' <span class="faint mono" style="font-size:11px">· point</span>' : ''}</span>
       <span class="mono" style="font-size:11.5px;${c.full ? 'color:var(--tape);font-weight:600' : 'color:var(--ink-2)'}">${c.full ? 'complet' : c.pct + ' %'}</span><span class="mono" style="font-size:12px;font-weight:600;width:40px;text-align:right">${o.count} ex.</span></button>`; }).join('')}</div></section>` : ''}
   <div class="stack" style="margin-top:22px">
@@ -1617,7 +1982,7 @@ VIEWS.spot = ({ id }) => {
   const cur = S.spotwx[id];
   const html = `${topbar('Spot', `<button class="icon-btn" data-act="go" data-v="spotForm" data-id="${id}" aria-label="Modifier le spot">${I.edit}</button>`)}
   <div style="display:flex;flex-direction:column;gap:4px;padding-top:4px"><span class="kicker">${esc(sp.forest || 'milieu non précisé')}</span><h1 class="title">${esc(sp.name)}</h1>
-    <span class="mono faint" style="font-size:12px">${hasPos(sp) ? esc(fmtCoords(sp)) : 'sans position'}${hasAlt(sp) ? ` · alt. ${Math.round(sp.alt)} m` : ''}${S.lastPos && hasPos(sp) ? ` · à ${fmtDist(distance(S.lastPos, sp))}` : ''}</span></div>
+    <span class="mono faint" style="font-size:12px">${hasPos(sp) ? esc(fmtCoords(sp)) : 'sans position'}${hasAlt(sp) ? ` · alt. ${Math.round(sp.alt)} m` : ''}${freshPos(15 * 60e3) && hasPos(sp) ? ` · à ${fmtDist(distance(S.lastPos, sp))}` : ''}</span></div>
   <div class="stats" style="--n:3;margin-top:14px"><div><b>${so.length}</b><span>sorties</span></div><div><b>${nf.format(n)}</b><span>exemplaires</span></div><div><b>${so.length ? Math.round(frs.length / so.length * 100) : 0} %</b><span>fructueuses</span></div></div>
   <div class="btn-row" style="margin-top:14px"><button class="btn ink" data-act="newSortie" data-id="${id}">Noter une sortie</button>${hasPos(sp) ? `<button class="btn" data-act="go" data-v="retrouver" data-id="${id}">${I.compass} Retrouver</button>` : ''}</div>
   ${sp.notes ? `<section class="sec"><p style="margin:0;font-size:15px;line-height:1.5;white-space:pre-wrap">${esc(sp.notes)}</p></section>` : ''}
@@ -1648,7 +2013,7 @@ VIEWS.spotForm = ({ id, here }) => {
   const ex = id ? spotById(id) : null;
   if (!S.draft || S.draft.kind !== 'spot' || S.draft.id !== (id || null)) {
     const p = freshPos();
-    S.draft = ex ? { kind: 'spot', ...structuredClone(ex) } : { kind: 'spot', id: null, name: '', forest: '', notes: '', ...(p ? posFields(p) : {}) };
+    newDraft(ex ? { kind: 'spot', ...structuredClone(ex) } : { kind: 'spot', id: null, name: '', forest: '', notes: '', ...(p ? posFields(p) : {}) });
   }
   const d = S.draft;
   const html = `${topbar(ex ? 'Modifier le spot' : 'Nouveau spot')}
@@ -1669,32 +2034,38 @@ VIEWS.spotForm = ({ id, here }) => {
     html,
     mount() {
       const c = hasPos(d) ? d : S.lastPos || S.spots.find(hasPos) || { lat: 45.65, lng: 0.16 };
-      map = new SlipMap($('#pick'), { center: c, zoom: hasPos(d) ? 16 : 12, layer: S.settings.layer, onMove: p => { d.lat = p.lat; d.lng = p.lng; d.acc = null; delete d.alt; const el = $('#pick-coords'); if (el) el.textContent = `viseur : ${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}`; } });
-      S.pickMap = map; if (here && !hasPos(d)) ACT.pickHere();
+      map = new SlipMap($('#pick'), { center: c, zoom: hasPos(d) ? 16 : 12, layer: S.settings.layer, onMove: p => { d.lat = p.lat; d.lng = p.lng; d.acc = null; delete d.alt; const el = $('#pick-coords'); if (el) el.textContent = `viseur : ${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}`; touchDraft(); } });
+      S.pickMap = map; if (here && !hasPos(d)) ACT.pickHere(null, null, true);
     },
     unmount() { map?.destroy(); S.pickMap = null; },
   };
 };
 
 /* ----- Formulaire sortie (saisie rapide) ----- */
-const blankObs = (species = '', latin = '') => ({ species, latin, count: 1, weight: '', photos: {} });
+const blankObs = (species = '', latin = '') => ({ id: 'b' + uid(), species, latin, count: 1, weight: '', photos: {} });
 VIEWS.sortieForm = ({ id, spotId, newHere, sp, la }) => {
   const ex = id ? S.sorties.find(s => s.id === id) : null;
   if (!S.draft || S.draft.kind !== 'sortie' || S.draft.id !== (id || null)) {
-    S.draft = ex ? { kind: 'sortie', ...structuredClone(ex) } : { kind: 'sortie', id: null, spotId: spotId || '', newSpotName: '', date: localISO(), obs: [blankObs(sp || '', la || '')], photoIds: [], meteo: { sol: '', ciel: [], text: '' }, notes: '' };
-    if (!ex && newHere) S.draft.spotId = '__new';
-    if (!ex && !S.draft.spotId && S.lastPos) { const n = nearestSpot(S.lastPos); if (n) S.draft.spotId = n.spot.id; }
+    const n = newDraft(ex ? { kind: 'sortie', ...structuredClone(ex) } : { kind: 'sortie', id: null, spotId: spotId || '', newSpotName: '', date: localISO(), obs: [blankObs(sp || '', la || '')], photoIds: [], meteo: { sol: '', ciel: [], text: '' }, notes: '' });
+    n.obs = n.obs || []; n.photoIds = n.photoIds || []; n.meteo = { sol: '', ciel: [], text: '', ...(n.meteo || {}) };
+    // Le spot n'est proposé d'office que si le téléphone s'y trouve en ce moment, pas d'après une vieille position.
+    const here = freshPos(30 * 60e3);
+    if (!ex && newHere && freshPos(5 * 60e3)) n.spotId = '__new';
+    if (!ex && !n.spotId && here) { const near = nearestSpot(here); if (near) n.spotId = near.spot.id; }
   }
   const d = S.draft;
+  // « Nouveau spot à ma position » : la position est retenue au moment du choix, pas à l'enregistrement.
+  if (d.spotId !== '__new') delete d.newSpotPos;
+  else if (!hasPos(d.newSpotPos)) { const p = freshPos(5 * 60e3); if (p) d.newSpotPos = posFields(p); }
   const spots = [...S.spots].sort((a, b) => a.name.localeCompare(b.name, 'fr'));
   const html = `${topbar(ex ? 'Modifier la sortie' : 'Nouvelle sortie')}${speciesDatalist()}
   <div class="stack" style="margin-top:6px">
     <div class="field"><label class="label" for="f-spot">Spot</label>
-      <select class="in" id="f-spot" data-bind="spotId"><option value="">Choisir un spot…</option>${hasPos(S.lastPos) ? `<option value="__new" ${d.spotId === '__new' ? 'selected' : ''}>＋ Nouveau spot à ma position</option>` : ''}${spots.map(s => `<option value="${s.id}" ${d.spotId === s.id ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select>
+      <select class="in" id="f-spot" data-bind="spotId"><option value="">Choisir un spot…</option>${freshPos(5 * 60e3) || d.spotId === '__new' ? `<option value="__new" ${d.spotId === '__new' ? 'selected' : ''}>＋ Nouveau spot à ma position</option>` : ''}${spots.map(s => `<option value="${s.id}" ${d.spotId === s.id ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select>
       ${d.spotId === '__new' ? `<input class="in" data-bind="newSpotName" value="${esc(d.newSpotName)}" placeholder="Nom du nouveau spot" aria-label="Nom du nouveau spot">` : ''}</div>
     <div class="field"><label class="label" for="f-date">Date et heure</label><input class="in num" type="datetime-local" id="f-date" data-bind="date" value="${esc(d.date)}"></div>
     <div class="field"><span class="label">Observations · « Point » au pied du champignon, le détail ensuite dans chaque fiche</span>
-      ${d.obs.map((o, i) => `<div class="obs-row" data-i="${i}">
+      ${d.obs.map((o, i) => `<div class="obs-row" data-i="${i}" data-oid="${esc(o.id)}">
         <input class="in" list="species-list" data-bind="obs.${i}.species" data-sp="${i}" value="${esc(o.species)}" placeholder="Espèce, nom français ou latin" autocomplete="off" aria-label="Espèce">
         <input class="in la" data-bind="obs.${i}.latin" id="la-${i}" value="${esc(o.latin)}" placeholder="Nom latin" autocomplete="off" aria-label="Nom latin">
         <div class="obs-qty"><div class="stepper"><button type="button" data-act="obsStep" data-i="${i}" data-d="-1" aria-label="Moins">−</button><output>${o.count}</output><button type="button" data-act="obsStep" data-i="${i}" data-d="1" aria-label="Plus">+</button></div>
@@ -1728,9 +2099,9 @@ VIEWS.sortie = ({ id }) => {
     <h1 class="title">${spot ? `<button class="link" style="font:inherit;color:inherit;padding:0;text-align:left" data-act="go" data-v="spot" data-id="${spot.id}">${esc(spot.name)}</button>` : 'Spot supprimé'}</h1>
     <div><span class="pill ${fruitful(so) ? 'green' : 'tape'}">${fruitful(so) ? `${countOf(so)} ex. · ${plural((so.obs || []).length, 'espèce', 'espèces')}` : 'sortie blanche'}</span></div></div>
   ${(so.obs || []).length ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Observations</h2><span class="sec-meta">touche pour la fiche complète</span></div>
-    <div class="cards">${so.obs.map((o, i) => { const c = completeness(o); const t = taxonOf(o); return `<button class="card" data-act="obs" data-sid="${so.id}" data-i="${i}">
+    <div class="cards">${so.obs.map((o, i) => { const c = completeness(o); const t = taxonOf(o); return `<button class="card" data-act="obs" data-sid="${so.id}" data-oid="${esc(o.id)}">
       <div class="row" style="align-items:flex-start"><div class="grow"><div class="card-m">${t ? 'N° ' + num3(t.n) : 'hors liste'}${hasPos(o) ? ' · point GPS' : ''}${c.full ? '' : ` · manque : ${esc(c.miss.slice(0, 3).join(', ').toLowerCase())}${c.miss.length > 3 ? '…' : ''}`}</div>
-      <div class="card-t la" style="margin-top:2px">${esc(o.latin || o.species)}</div>${(t?.fr || o.species) && (t?.fr || o.species) !== (o.latin || o.species) ? `<div style="font-size:13.5px;color:var(--ink-2)">${esc(t?.fr || o.species)}</div>` : ''}</div>
+      <div class="card-t${o.latin ? ' la' : ''}" style="margin-top:2px">${esc(o.latin || o.species)}</div>${(t?.fr || o.species) && (t?.fr || o.species) !== (o.latin || o.species) ? `<div style="font-size:13.5px;color:var(--ink-2)">${esc(t?.fr || o.species)}</div>` : ''}</div>
       <div class="card-side"><b>${o.count}</b>ex.</div></div>
       <div class="row" style="margin-top:8px"><div class="gauge grow ${c.full ? 'full' : ''}"><i style="width:${c.pct}%"></i></div>${c.full ? '<span class="ribbon">relevé complet</span>' : `<span class="mono" style="font-size:11px;color:var(--ink-2)">${c.pct} %</span>`}</div></button>`; }).join('')}</div></section>` : ''}
   ${so.photoIds?.length ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Photos</h2></div>${photoGrid(so.photoIds, false)}</section>` : ''}
@@ -1743,29 +2114,30 @@ VIEWS.sortie = ({ id }) => {
 };
 
 /* ----- Fiche d'observation complète ----- */
-VIEWS.obs = ({ sid, i }) => {
-  const so = S.sorties.find(s => s.id === sid); const idx = Number(i);
+VIEWS.obs = ({ sid, oid, i }) => {
+  const so = S.sorties.find(s => s.id === sid);
+  const idx = !so ? -1 : oid ? (so.obs || []).findIndex(o => o.id === oid) : Number(i);
   if (!so || !so.obs?.[idx]) return VIEWS.carnet();
-  if (!S.draft || S.draft.kind !== 'obs' || S.draft.sid !== sid || S.draft.i !== idx) {
-    S.draft = { kind: 'obs', sid, i: idx, o: { methodes: [], substrat: [], stade: [], photos: {}, ...structuredClone(so.obs[idx]) } };
+  const saved = so.obs[idx];
+  if (!S.draft || S.draft.kind !== 'obs' || S.draft.sid !== sid || S.draft.oid !== saved.id) {
+    newDraft({ kind: 'obs', sid, oid: saved.id, o: { methodes: [], substrat: [], stade: [], photos: {}, ...structuredClone(saved) } });
   }
   const o = S.draft.o; const c = completeness(o); const t = taxonOf(o); const spot = spotById(so.spotId);
   const row = (label, inner, id) => `<div class="fgrid">${id ? `<label class="label" for="${id}">${label}</label>` : `<span class="label">${label}</span>`}<div>${inner}</div></div>`;
   const inp = (path, ph, cls = '', id = '', extra = '') => `<input class="in ${cls}" ${id ? `id="${id}"` : ''} data-bind="o.${path}" value="${esc(getPath(S.draft.o, path) ?? '')}" placeholder="${esc(ph)}" autocomplete="off" ${extra}>`;
   const point = hasPos(o)
     ? `<div class="stack" style="gap:8px"><span class="mono" style="font-size:13px">${esc(fmtPosLine(o))}</span><div class="btn-row"><button type="button" class="btn" data-act="oHere" style="min-height:42px">${I.locate} Reprendre</button><button type="button" class="btn" data-act="oFind" style="min-height:42px">${I.compass} Retrouver</button><button type="button" class="btn danger" data-act="oClear" style="min-height:42px;flex:0 0 auto" aria-label="Effacer le point">${I.trash}</button></div></div>`
-    : `<div class="stack" style="gap:8px"><span class="faint" style="font-size:13px">Pas de point propre : la position de la sortie sert à l'export.</span><button type="button" class="btn" data-act="oHere" style="min-height:42px;align-self:flex-start">${I.locate} Prendre le point ici</button></div>`;
-  const html = `${topbar(`Fiche · ${fmtDots(so.date)}`, `<span class="mono" style="font-size:12px;font-weight:600;width:44px;text-align:center;${c.full ? 'color:var(--tape)' : ''}">${c.pct} %</span>`)}
+    : `<div class="stack" style="gap:8px"><span class="faint" style="font-size:13px">Pas de point propre : à l'export, c'est la position du spot qui sert, avec une incertitude plus large.</span><button type="button" class="btn" data-act="oHere" style="min-height:42px;align-self:flex-start">${I.locate} Prendre le point ici</button></div>`;
+  const html = `${topbar(`Fiche · ${fmtDots(so.date)}`, `<span class="mono" id="o-pct" style="font-size:12px;font-weight:600;width:44px;text-align:center;${c.full ? 'color:var(--tape)' : ''}">${c.pct} %</span>`)}
   ${speciesDatalist()}<datalist id="hotes">${HOTES.map(h => `<option value="${h}">`).join('')}</datalist><datalist id="odeurs">${ODEURS.map(h => `<option value="${h}">`).join('')}</datalist>
   <div style="display:flex;flex-direction:column;gap:6px;padding-top:2px">
     <span class="kicker">${t ? `N° ${num3(t.n)} · ` : ''}${esc(spot?.name || 'spot supprimé')}</span>
     ${inp('latin', 'Nom latin', 'la', 'o-la', 'style="font-size:22px;font-weight:700;min-height:52px" aria-label="Nom latin"')}
     ${inp('species', 'Nom français', '', 'o-fr', 'list="species-list" aria-label="Nom français"')}
-    <div class="row"><div class="gauge grow ${c.full ? 'full' : ''}"><i style="width:${c.pct}%"></i></div>${c.full ? '<span class="ribbon">relevé complet</span>' : `<span class="mono" style="font-size:11px;color:var(--ink-2)">manque ${c.miss.length}</span>`}</div>
+    <div class="row"><div class="gauge grow ${c.full ? 'full' : ''}" id="o-gauge"><i style="width:${c.pct}%"></i></div>${c.full ? '<span class="ribbon" id="o-miss">relevé complet</span>' : `<span class="mono" id="o-miss" style="font-size:11px;color:var(--ink-2)">manque ${c.miss.length}</span>`}</div>
   </div>
   <section class="sec"><div class="sec-head"><h2 class="sec-title">Cinq plans</h2><span class="sec-meta">${PLANS.filter(([k]) => o.photos?.[k]).length} / 5</span></div>
-    <div class="plans">${PLANS.map(([k, l]) => { const p = o.photos?.[k]; return `<label class="plan ${p ? '' : 'empty'}"><span class="ph">${p ? `<img data-photo="${p}" alt="${l}">` : shroom('none', 'none', 'var(--ink-3)', '3 3', 'shroom" style="width:40px;height:30px')}</span><span>${l}</span>
-      <input type="file" class="vh" accept="image/*" capture="environment" data-photo-in="obs:${k}"></label>`; }).join('')}</div></section>
+    ${planSlots('obs', PLANS, o.photos)}</section>
   <section class="sec"><div class="sec-head"><h2 class="sec-title">Identification</h2><span class="sec-meta">01</span></div>
     ${row('Certitude', chips('o.certitude', CERT, o.certitude, false, true))}
     ${row('Méthode', chips('o.methodes', METH, o.methodes, true, true))}
@@ -1809,7 +2181,8 @@ VIEWS.specimen = ({ id }) => {
   const ex = id ? S.specimens.find(s => s.id === id) : null;
   if (!S.draft || S.draft.kind !== 'specimen' || S.draft.id !== (id || null)) {
     const p = freshPos(); const near = p ? nearestSpot(p) : null;
-    S.draft = ex ? { kind: 'specimen', ...structuredClone(ex) } : { kind: 'specimen', id: null, date: localISO(), spotId: near?.spot.id || '', photos: {}, extra: [], odeur: '', sporee: '', hypothese: '', latin: '', notes: '', status: 'a_identifier', ...(p ? posFields(p) : {}) };
+    const n = newDraft(ex ? { kind: 'specimen', ...structuredClone(ex) } : { kind: 'specimen', id: null, date: localISO(), spotId: near?.spot.id || '', photos: {}, extra: [], odeur: '', sporee: '', hypothese: '', latin: '', notes: '', status: 'a_identifier', ...(p ? posFields(p) : {}) });
+    n.photos = n.photos || {}; n.extra = n.extra || [];
   }
   const d = S.draft; const done = STEPS.filter(([k]) => d.photos[k]).length;
   const html = `${topbar(ex ? 'Spécimen' : 'Spécimen à identifier')}${speciesDatalist()}
@@ -1817,7 +2190,7 @@ VIEWS.specimen = ({ id }) => {
     <h1 class="title">${d.hypothese ? esc(d.hypothese) : 'Cinq plans, puis le livre.'}</h1>${d.latin ? `<div class="la muted" style="font-size:17px">${esc(d.latin)}</div>` : ''}</div>
   <div class="stack" style="margin-top:14px">
     <div class="row"><div class="tapebar grow"><i style="width:${done * 20}%"></i></div><span class="mono faint" style="font-size:12px">${done}/5</span></div>
-    <div class="plans">${STEPS.map(([k, t]) => { const p = d.photos[k]; return `<label class="plan ${p ? '' : 'empty'}"><span class="ph">${p ? `<img data-photo="${p}" alt="${esc(t)}">` : shroom('none', 'none', 'var(--ink-3)', '3 3', 'shroom" style="width:40px;height:30px')}</span><span>${esc(t.toLowerCase().split(' ')[0])}</span><input type="file" class="vh" accept="image/*" capture="environment" data-photo-in="step:${k}"></label>`; }).join('')}</div>
+    ${planSlots('step', STEPS.map(([k, t]) => [k, t.toLowerCase().split(' ')[0]]), d.photos)}
     <p class="faint" style="margin:0;font-size:12px">${STEPS.map(([, t, h]) => `${t} : ${h.toLowerCase()}`).join(' · ')}.</p>
     <div class="field"><span class="label">Prises libres</span>${photoGrid(d.extra, true, 'extra')}</div>
     <div style="border-top:2px solid var(--ink)">
@@ -1856,7 +2229,7 @@ VIEWS.carte = () => {
   const color = s => { const m = markOfSpot(s); return m === 'g' ? 'var(--green)' : m === 'o' ? 'var(--tape)' : 'var(--ink-3)'; };
   const marks = () => {
     const list = pts.map(s => ({ cls: `pin${S.mapSel === s.id ? ' sel' : ''}`, style: `--pc:${color(s)}`, html: '<span></span>', id: s.id, pos: s, label: s.name }));
-    if (S.settings.mapObs !== false) allObs().filter(x => hasPos(x.o)).forEach(({ so, o, i }) => { const mid = `o:${so.id}:${i}`; list.push({ cls: `pt${S.mapSel === mid ? ' sel' : ''}`, id: mid, pos: o, label: nameOf(o) }); });
+    if (S.settings.mapObs !== false) allObs().filter(x => hasPos(x.o)).forEach(({ so, o }) => { const mid = `o|${so.id}|${o.id}`; list.push({ cls: `pt${S.mapSel === mid ? ' sel' : ''}`, id: mid, pos: o, label: nameOf(o) }); });
     if (S.lastPos) list.push({ tag: 'div', cls: 'me', pos: S.lastPos });
     map.setMarks(list);
   };
@@ -1883,19 +2256,19 @@ VIEWS.carte = () => {
 };
 function showCard(id) {
   const box = $('#map-card'); if (!box) return;
-  if (id && id.startsWith('o:')) {
-    const [, sid, i] = id.split(':'); const so = S.sorties.find(s => s.id === sid); const o = so?.obs?.[+i];
+  if (id && id.startsWith('o|')) {
+    const [, sid, oid] = id.split('|'); const so = S.sorties.find(s => s.id === sid); const o = so?.obs?.find(x => x.id === oid);
     if (!o) { box.hidden = true; return; }
     box.hidden = false;
     box.innerHTML = `<div class="card"><div class="row"><span class="mark g"></span><div class="grow"><div class="card-t">${esc(nameOf(o))}</div>
-      <div class="card-m">${fmtDots(so.date)} · ${esc(spotById(so.spotId)?.name || '—')} · ${o.count} ex.${S.lastPos ? ` · ${fmtDist(distance(S.lastPos, o))}` : ''}</div></div></div>
-      <div class="btn-row" style="margin-top:10px"><button class="btn" data-act="obs" data-sid="${sid}" data-i="${i}">Fiche</button><button class="btn ink" data-act="findObs" data-sid="${sid}" data-i="${i}">${I.compass} Retrouver</button></div></div>`;
+      <div class="card-m">${fmtDots(so.date)} · ${esc(spotById(so.spotId)?.name || '—')} · ${o.count} ex.${freshPos(15 * 60e3) ? ` · ${fmtDist(distance(S.lastPos, o))}` : ''}</div></div></div>
+      <div class="btn-row" style="margin-top:10px"><button class="btn" data-act="obs" data-sid="${esc(sid)}" data-oid="${esc(oid)}">Fiche</button><button class="btn ink" data-act="findObs" data-sid="${esc(sid)}" data-oid="${esc(oid)}">${I.compass} Retrouver</button></div></div>`;
     return;
   }
   const sp = id && spotById(id); if (!sp) { box.hidden = true; return; }
   const last = sortiesOf(id)[0]; box.hidden = false;
   box.innerHTML = `<div class="card"><div class="row"><span class="mark ${markOfSpot(sp)}"></span><div class="grow"><div class="card-t">${esc(sp.name)}</div>
-    <div class="card-m">${esc(sp.forest || 'milieu non précisé')}${S.lastPos ? ` · ${fmtDist(distance(S.lastPos, sp))}` : ''} · ${last ? 'dernière sortie ' + ago(last.date) : 'jamais visité'}</div></div></div>
+    <div class="card-m">${esc(sp.forest || 'milieu non précisé')}${freshPos(15 * 60e3) ? ` · ${fmtDist(distance(S.lastPos, sp))}` : ''} · ${last ? 'dernière sortie ' + ago(last.date) : 'jamais visité'}</div></div></div>
     <div class="btn-row" style="margin-top:10px"><button class="btn" data-act="go" data-v="spot" data-id="${id}">Ouvrir</button><button class="btn ink" data-act="go" data-v="retrouver" data-id="${id}">${I.compass} Retrouver</button></div></div>`;
 }
 
@@ -1967,7 +2340,7 @@ function reperesHTML() {
 VIEWS.retrouver = params => {
   let target = null, name = '', kind = 'spot';
   if (params.sid != null) {
-    const so = S.sorties.find(s => s.id === params.sid); const o = so?.obs?.[Number(params.i)];
+    const so = S.sorties.find(s => s.id === params.sid); const o = params.oid ? so?.obs?.find(x => x.id === params.oid) : so?.obs?.[Number(params.i)];
     if (o && hasPos(o)) { target = o; name = nameOf(o); kind = 'obs'; }
   } else {
     const sp = spotById(params.id); if (sp && hasPos(sp)) { target = sp; name = sp.name; }
@@ -2022,9 +2395,9 @@ VIEWS.reglages = () => {
   <section class="sec"><div class="sec-head"><h2 class="sec-title">Sauvegarde et export</h2></div><div class="stack">
     <p class="muted" style="margin:0;font-size:14px">${bk?.ok ? `Dernière sauvegarde le ${fmtDots(bk.at)}, à jour.` : bk?.at ? `Dernière sauvegarde le ${fmtDots(bk.at)}. Des relevés ont changé depuis.` : 'Tes données ne vivent que sur ce téléphone. Exporte une sauvegarde après tes sorties.'}</p>
     <button class="btn ink block" data-act="exportJSON">Sauvegarde complète (photos comprises)</button>
-    <label class="btn block">Restaurer une sauvegarde<input type="file" class="vh" accept="application/json,.json" data-import="1"></label>
+    <label class="btn block">Restaurer une sauvegarde<input type="file" class="vh" accept=".zip,.json,application/zip,application/json" data-import="1"></label>
     <div class="btn-row"><button class="btn" data-act="exportDwC">Darwin Core (CSV)</button><button class="btn" data-act="exportGPX">Spots et points (GPX)</button></div>
-    <p class="faint" style="margin:0;font-size:12px">L'export Darwin Core te laisse choisir : coordonnées floutées à environ 1 km pour un dépôt public, ou exactes pour toi.</p>
+    <p class="faint" style="margin:0;font-size:12px">La sauvegarde est une archive .zip : tes relevés et tes photos en fichiers, lisibles sans Mycota. L'export Darwin Core te laisse choisir : coordonnées floutées à environ 1 km pour un dépôt public, ou exactes pour toi.</p>
     <div class="faint mono" id="storage-info" style="font-size:11.5px"></div></div></section>
   ${!standalone && !IN_CLAUDE ? `<section class="sec"><div class="sec-head"><h2 class="sec-title">Installer</h2></div><p class="muted" style="margin:0;font-size:14px">Sur iPhone : Partager, puis « Sur l'écran d'accueil ». Installée, l'app s'ouvre sans réseau et Safari ne vide plus ses données.</p></section>` : ''}
   <section class="sec"><div class="sec-head"><h2 class="sec-title">Données</h2></div><div class="stack">
@@ -2032,7 +2405,8 @@ VIEWS.reglages = () => {
       ${S.spots.some(s => s.demo) ? '<button class="btn" data-act="clearDemo">Retirer les exemples</button>' : '<button class="btn" data-act="loadDemo">Exemples</button>'}</div>
     <button class="btn danger block" data-act="wipe">Tout effacer sur ce téléphone</button></div></section>
   <p class="faint mono" style="text-align:center;font-size:11px;margin:22px 0 0">Mycota ${APP_VERSION} · météo Open-Meteo · fonds © IGN, © OpenStreetMap</p>
-  <p class="faint mono" style="text-align:center;font-size:11px;margin:6px 0 0">Liste Charente : <a href="${CH_SRC.url}" target="_blank" rel="noopener" style="color:inherit">${esc(CH_SRC.label)}</a></p>`;
+  <p class="faint mono" style="text-align:center;font-size:11px;margin:6px 0 0">Liste Charente : <a href="${CH_SRC.url}" target="_blank" rel="noopener" style="color:inherit">${esc(CH_SRC.label)}</a></p>
+  <p class="faint mono" style="text-align:center;font-size:11px;margin:6px 0 0">Noms français : <a href="${TX_SRC.url}" target="_blank" rel="noopener" style="color:inherit">${esc(TX_SRC.label)}</a></p>`;
   return { html, async mount() { try { const est = await navigator.storage?.estimate?.(); const per = await navigator.storage?.persisted?.(); const el = $('#storage-info'); if (el && est) el.textContent = `${nf.format((est.usage || 0) / 1048576)} Mo utilisés · stockage ${per ? 'protégé' : 'non protégé : installe l’app et exporte régulièrement'}`; } catch { /* rien */ } } };
 };
 
@@ -2045,22 +2419,32 @@ VIEWS.lock = () => ({
 /* ==========================================================================
    EXPORTS
    ========================================================================== */
+/** Date et heure locales avec leur décalage UTC, comme l'attend Darwin Core (2026-11-16T10:30:00+01:00). */
+const isoTZ = s => {
+  if (!/^\d{4}-\d\d-\d\dT\d\d:\d\d$/.test(s || '')) return s || '';
+  const off = -new Date(s).getTimezoneOffset(), a = Math.abs(off);
+  return `${s}:00${off < 0 ? '-' : '+'}${pad(Math.floor(a / 60))}:${pad(a % 60)}`;
+};
 function buildDwC(exact) {
   const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  const cols = ['occurrenceID', 'basisOfRecord', 'occurrenceStatus', 'eventDate', 'scientificName', 'vernacularName', 'individualCount', 'recordedBy', 'identifiedBy', 'identificationQualifier', 'identificationReferences', 'identificationRemarks', 'recordNumber', 'preparations',
-    'decimalLatitude', 'decimalLongitude', 'geodeticDatum', 'coordinateUncertaintyInMeters', 'minimumElevationInMeters', 'maximumElevationInMeters', 'locality', 'habitat', 'associatedTaxa', 'substrate', 'lifeStage', 'occurrenceRemarks', 'country', 'countryCode', 'stateProvince'];
+  const cols = ['occurrenceID', 'basisOfRecord', 'occurrenceStatus', 'eventDate', 'scientificName', 'taxonConceptID', 'nameAccordingTo', 'vernacularName', 'individualCount', 'recordedBy', 'identifiedBy', 'identificationQualifier', 'identificationReferences', 'identificationRemarks', 'recordNumber', 'preparations',
+    'decimalLatitude', 'decimalLongitude', 'geodeticDatum', 'coordinateUncertaintyInMeters', 'georeferenceRemarks', 'minimumElevationInMeters', 'maximumElevationInMeters', 'locality', 'habitat', 'associatedTaxa', 'substrate', 'lifeStage', 'occurrenceRemarks', 'country', 'countryCode', 'stateProvince'];
   const rows = [cols];
-  allObs().sort((a, b) => a.so.date.localeCompare(b.so.date)).forEach(({ so, o, i }) => {
-    const sp = spotById(so.spotId) || {}, p = posOfObs(so, o) || {};
+  [...allObs()].sort((a, b) => a.so.date.localeCompare(b.so.date)).forEach(({ so, o }) => {
+    const sp = spotById(so.spotId) || {}, own = hasPos(o), p = posOfObs(so, o) || {};
     const hide = S.settings.mask || !hasPos(p);
+    // Sans point propre, les coordonnées sont celles du spot : l'incertitude le dit (250 m, le rayon d'un spot).
+    const unc = hide ? '' : !exact ? 1000 : own ? (o.acc ? Math.max(5, Math.round(o.acc)) : '') : 250;
+    const geo = hide ? '' : !exact ? 'coordonnées arrondies à 0,01 degré' : own ? 'point GPS pris au pied du champignon' : 'position du spot, pas celle du champignon';
     const rem = [o.capMin || o.capMax ? `chapeau ${o.capMin || '?'}-${o.capMax || '?'} mm` : '', o.piedH || o.piedD ? `pied ${o.piedH || '?'} x ${o.piedD || '?'} mm` : '', o.sporee ? `sporée ${o.sporee.toLowerCase()}` : '', o.odeur ? `odeur ${o.odeur.toLowerCase()}` : '', o.chair ? `chair ${o.chair}` : '', o.reactions ? `réactions ${o.reactions}` : '', o.repart ? o.repart.toLowerCase() : '', o.prelev ? o.prelev.toLowerCase() : '', so.wx ? `pluie 10 j ${so.wx.mm} mm` : '', typeof so.wx?.t === 'number' ? `température moyenne 10 j ${so.wx.t} °C` : '', o.notes || ''].filter(Boolean).join(' ; ');
     const alt = hasAlt(p) ? Math.round(p.alt) : '';
-    rows.push([`mycota:${so.id}:${i}`, 'HumanObservation', 'present', so.date, taxonOf(o)?.la || o.latin || o.species, nameOf(o), o.count, S.settings.observer || '', S.settings.observer || '', o.certitude === 'Certaine' ? '' : (o.certitude || ''), o.ouvrage || '', o.verif ? `vérifiée par ${o.verif}` : '', o.recnum || '', o.recnum ? 'exsiccatum' : '',
-      hide ? '' : exact ? p.lat.toFixed(6) : p.lat.toFixed(2), hide ? '' : exact ? p.lng.toFixed(6) : p.lng.toFixed(2), hide ? '' : 'WGS84', hide ? '' : exact ? (p.acc ? Math.max(5, Math.round(p.acc)) : '') : 1000, alt, alt,
+    const tx = taxonOf(o);
+    rows.push([`mycota:${o.id}`, 'HumanObservation', 'present', isoTZ(so.date), tx?.la || o.latin || o.species, tx?.cd ? `https://taxref.mnhn.fr/taxref-web/taxa/${tx.cd}` : '', tx?.cd ? 'TAXREF v18' : '', nameOf(o), o.count, S.settings.observer || '', S.settings.observer || '', o.certitude === 'Certaine' ? '' : (o.certitude || ''), o.ouvrage || '', o.verif ? `vérifiée par ${o.verif}` : '', o.recnum || '', o.recnum ? 'exsiccatum' : '',
+      hide ? '' : exact ? p.lat.toFixed(6) : p.lat.toFixed(2), hide ? '' : exact ? p.lng.toFixed(6) : p.lng.toFixed(2), hide ? '' : 'WGS84', unc, geo, alt, alt,
       exact ? sp.name || '' : '', [sp.forest, o.soltype ? 'sol ' + o.soltype.toLowerCase() : ''].filter(Boolean).join(', '),
       o.hote || '', (o.substrat || []).join(' | '), (o.stade || []).join(' | '), rem, 'France', 'FR', 'Charente']);
   });
-  return '﻿' + rows.map(r => r.map(q).join(',')).join('\r\n');
+  return '\uFEFF' + rows.map(r => r.map(q).join(',')).join('\r\n');
 }
 function buildGPX() {
   const wpt = (p, name, desc) => `  <wpt lat="${p.lat.toFixed(6)}" lon="${p.lng.toFixed(6)}">${hasAlt(p) ? `<ele>${Math.round(p.alt)}</ele>` : ''}<name>${esc(name)}</name>${desc ? `<desc>${esc(desc)}</desc>` : ''}</wpt>`;
@@ -2072,25 +2456,68 @@ function buildGPX() {
 /* ==========================================================================
    ACTIONS
    ========================================================================== */
+/** Enregistre la fiche d'observation ouverte dans sa sortie. Les photos qu'elle ne contient plus sont effacées à ce moment-là, pas avant. */
 async function persistObs() {
   syncDraft(); const d = S.draft; const so = S.sorties.find(s => s.id === d?.sid); if (!so) return null;
+  const k = (so.obs || []).findIndex(x => x.id === d.oid); if (k < 0) return null;
   const o = d.o; o.species = (o.species || '').trim(); o.latin = (o.latin || '').trim(); o.count = Math.max(0, Number(o.count) || 0);
+  if (!o.species && !o.latin) { toast('Donne un nom à cette observation, même provisoire.'); $('#o-la')?.focus(); return null; }
   if (!o.latin) { const m = matchLatin(o.species); if (m) o.latin = m.la; }
-  const was = completeness(so.obs[d.i]).full;
-  so.obs[d.i] = structuredClone(o); await saveRec('sortie', so);
-  return { so, was, now: completeness(o).full };
+  const old = so.obs[k], was = completeness(old).full, kept = Object.values(o.photos || {});
+  const gone = Object.values(old.photos || {}).filter(id => id && !kept.includes(id));
+  const next = { ...so, obs: so.obs.map((x, j) => j === k ? structuredClone(o) : x) };
+  await saveRec('sortie', next);
+  gone.forEach(id => DB.del('photos', id).catch(() => {}));
+  S.draftBase = canon(S.draft); if (S.pendingDraft && S.pendingDraft.key === S.draftKey) storeDraft(null);
+  return { so: next, was, now: completeness(o).full };
 }
+/** Enregistre la fiche spécimen ouverte. Un point loin du spot choisi n'est gardé que si tu le confirmes ;
+    la réponse vaut tant que ni le spot ni le point ne changent. */
+const farSig = d => `${d.spotId}|${d.lat}|${d.lng}`;
+async function persistSpecimen() {
+  syncDraft(); const d = S.draft; const ex = d.id ? S.specimens.find(s => s.id === d.id) : null;
+  const spot = spotById(d.spotId);
+  if (!farFrom(d, spot)) delete d.farOk;
+  else if (d.farOk !== farSig(d)) {
+    const keep = await confirmFar(d, spot, true);
+    if (keep === null) return null;
+    if (keep) d.farOk = farSig(d); else { POS_KEYS.forEach(k => delete d[k]); delete d.farOk; }
+  }
+  const { kind, ...rest } = d;
+  if (!rest.latin) { const m = matchLatin(rest.hypothese); if (m) rest.latin = m.la; }
+  const gone = ex ? photosOfRec(ex).filter(id => !photosOfRec(rest).includes(id)) : [];
+  const rec = await saveRec('specimen', { ...(ex ? omit(ex, [...POS_KEYS, 'farOk']) : {}), ...rest, id: d.id || 'm' + uid() });
+  gone.forEach(id => DB.del('photos', id).catch(() => {}));
+  return rec;
+}
+function leaveView() { if (history.state?.depth > 0) history.back(); else { S.draft = null; go('carnet', {}, { replace: true }); } }
+const photoErr = e => e?.message === 'store' ? 'Photo non enregistrée : le stockage du téléphone est plein ou indisponible.' : "Cette image n'a pas pu être lue. Essaie une photo prise par l'appareil.";
 const ACT = {
-  back() { if (history.state?.depth > 0) history.back(); else { S.draft = null; go('carnet', {}, { replace: true }); } },
-  go(t) { const p = {}; if (t.dataset.id) p.id = t.dataset.id; S.draft = null; go(t.dataset.v, p); },
-  tab(t) { S.draft = null; go(t.dataset.v, {}, { replace: TABS.includes(S.view) }); },
-  taxon(t) { S.draft = null; go('taxon', { key: t.dataset.key }); },
-  obs(t) { S.draft = null; go('obs', { sid: t.dataset.sid, i: Number(t.dataset.i) }); },
-  findObs(t) { go('retrouver', { sid: t.dataset.sid, i: Number(t.dataset.i) }); },
+  back() {
+    if (S.draft && FORM_VIEWS.includes(S.view)) {
+      syncDraft();
+      if (isDirty()) {
+        const s = openSheet(`<div class="stack"><h2 class="title" style="font-size:28px">Quitter sans enregistrer ?</h2><p class="muted" style="margin:0">Ce que tu viens de saisir ne sera pas gardé.</p>
+          <div class="btn-row"><button class="btn ink" data-x="stay">Continuer la saisie</button><button class="btn danger" data-x="leave">Quitter</button></div></div>`);
+        $('[data-x="stay"]', s).onclick = closeSheet;
+        $('[data-x="leave"]', s).onclick = () => { closeSheet(); dropDraft(); leaveView(); };
+        return;
+      }
+      dropDraft();
+    }
+    leaveView();
+  },
+  go(t) { const p = {}; if (t.dataset.id) p.id = t.dataset.id; parkDraft(); go(t.dataset.v, p); },
+  tab(t) { parkDraft(); go(t.dataset.v, {}, { replace: TABS.includes(S.view) }); },
+  taxon(t) { parkDraft(); go('taxon', { key: t.dataset.key }); },
+  obs(t) { parkDraft(); go('obs', { sid: t.dataset.sid, oid: t.dataset.oid }); },
+  findObs(t) { go('retrouver', { sid: t.dataset.sid, oid: t.dataset.oid }); },
   photo(t) { viewPhoto(t.dataset.id); },
   bilanYear(t) { go('bilan', { y: Number(t.dataset.val) }, { replace: true }); },
   dexList(t) { S.codexF.list = t.dataset.val; render(); },
   dexMode(t) { S.codexF.mode = t.dataset.val; $$('[data-act="dexMode"]').forEach(b => b.setAttribute('aria-pressed', b === t)); renderDex(); },
+  draftResume() { resumeDraft(); },
+  draftDrop() { confirmSheet({ title: 'Jeter cette saisie ?', text: 'Ce que tu avais saisi sans l’enregistrer sera perdu.', ok: 'Jeter', onOk: async () => { await storeDraft(null); render(); toast('Saisie jetée.'); } }); },
   async note() {
     const s = openSheet(`<div class="stack"><div><span class="kicker">Sur le terrain</span><h2 class="title" style="font-size:28px;margin-top:4px">Que veux-tu noter ?</h2><div class="mono faint" id="note-pos" style="font-size:12px;margin-top:6px">recherche de ta position…</div></div>
       <label class="card" style="cursor:pointer"><div class="choice"><span class="ic">${I.camera}</span><div class="grow"><div class="card-t">Photo rapide</div><div class="card-m">une photo et le point GPS, le reste ce soir</div></div></div><input type="file" class="vh" accept="image/*" capture="environment" data-quick="1"></label>
@@ -2098,16 +2525,20 @@ const ACT = {
       <button class="card" data-x="spot"><div class="choice"><span class="ic">${I.pin}</span><div class="grow"><div class="card-t">Un nouveau spot</div><div class="card-m">marquer ce coin pour le retrouver</div></div></div></button>
       <button class="card" data-x="specimen"><div class="choice"><span class="ic">${I.lens}</span><div class="grow"><div class="card-t">Un spécimen à identifier</div><div class="card-m">cinq plans guidés pour le livre, ce soir</div></div></div></button></div>`);
     let near = null;
-    $('[data-x="sortie"]', s).onclick = () => { closeSheet(); S.draft = null; go('sortieForm', near ? { spotId: near.spot.id } : (hasPos(S.lastPos) ? { newHere: true } : {})); };
-    $('[data-x="spot"]', s).onclick = () => { closeSheet(); S.draft = null; go('spotForm', { here: true }); };
-    $('[data-x="specimen"]', s).onclick = () => { closeSheet(); S.draft = null; go('specimen', {}); };
-    const p = await getPos(12000); const el = $('#note-pos'); if (!el) return;
-    if (p.error) { el.textContent = posError(p.error); return; }
-    near = nearestSpot(p); el.textContent = `position trouvée · ±${Math.round(p.acc)} m${hasAlt(p) ? ` · alt. ${p.alt} m` : ''}`;
-    const nn = $('#note-near'); if (nn) nn.textContent = near ? `à ${fmtDist(near.d)} de « ${near.spot.name} »` : 'aucun spot à moins de 250 m : un nouveau sera créé';
+    $('[data-x="sortie"]', s).onclick = () => { closeSheet(); parkDraft(); go('sortieForm', near ? { spotId: near.spot.id } : (freshPos(5 * 60e3) ? { newHere: true } : {})); };
+    $('[data-x="spot"]', s).onclick = () => { closeSheet(); parkDraft(); go('spotForm', { here: true }); };
+    $('[data-x="specimen"]', s).onclick = () => { closeSheet(); parkDraft(); go('specimen', {}); };
+    const show = p => {
+      near = nearestSpot(p);
+      const el = $('#note-pos'); if (!el) return;
+      el.textContent = `position à ±${Math.round(p.acc)} m${hasAlt(p) ? ` · alt. ${p.alt} m` : ''}`;
+      const nn = $('#note-near'); if (nn) nn.textContent = near ? `à ${fmtDist(near.d)} de « ${near.spot.name} »` : 'aucun spot à moins de 250 m : un nouveau sera créé';
+    };
+    const p = await bestPos({ maxMs: 12000, good: 6, onUpdate: show });
+    if (p.error) { const el = $('#note-pos'); if (el) el.textContent = posError(p.error); }
   },
-  newSortie(t) { S.draft = null; go('sortieForm', t.dataset.id ? { spotId: t.dataset.id } : { sp: t.dataset.sp, la: t.dataset.la }); },
-  editSortie(t) { S.draft = null; go('sortieForm', { id: t.dataset.id }); },
+  newSortie(t) { parkDraft(); go('sortieForm', t.dataset.id ? { spotId: t.dataset.id } : { sp: t.dataset.sp, la: t.dataset.la }); },
+  editSortie(t) { parkDraft(); go('sortieForm', { id: t.dataset.id }); },
   fchip(t) {
     const d = S.draft; if (!d) return;
     syncDraft();
@@ -2115,92 +2546,148 @@ const ACT = {
     if (path === 'statusLabel') d.status = v === 'Identifié' ? 'identifie' : 'a_identifier';
     else if (multi) { const cur = getPath(d, path) || []; setPath(d, path, cur.includes(v) ? cur.filter(x => x !== v) : [...cur, v]); }
     else setPath(d, path, getPath(d, path) === v ? '' : v);
-    if (d.kind === 'obs') { render(); return; }
     $$(`.chip[data-path="${path}"]`).forEach(c => { const val = path === 'statusLabel' ? (d.status === 'identifie' ? 'Identifié' : 'À identifier') : getPath(d, path); c.setAttribute('aria-pressed', multi ? (val || []).includes(c.dataset.val) : val === c.dataset.val); });
+    refreshMeter();
   },
   obsStep(t) { syncDraft(); const o = S.draft.obs[+t.dataset.i]; o.count = Math.max(0, (Number(o.count) || 0) + Number(t.dataset.d)); const out = t.parentElement.querySelector('output'); if (out) out.textContent = o.count; },
   oStep(t) { syncDraft(); const o = S.draft.o; o.count = Math.max(0, (Number(o.count) || 0) + Number(t.dataset.d)); $('#o-count').textContent = o.count; },
   obsAdd() { syncDraft(); S.draft.obs.push(blankObs()); render(); const rows = $$('.obs-row'); rows[rows.length - 1]?.querySelector('input')?.focus(); },
-  obsDel(t) { syncDraft(); S.draft.obs.splice(+t.dataset.i, 1); render(); },
+  obsDel(t) {
+    syncDraft(); const o = S.draft.obs[+t.dataset.i]; if (!o) return;
+    const cut = () => { const k = S.draft?.obs ? S.draft.obs.indexOf(o) : -1; if (k >= 0) { S.draft.obs.splice(k, 1); render(); saveDraftNow(); } };
+    // Une observation qui a déjà sa fiche, son point ou ses photos ne part pas sur un toucher malheureux.
+    const rich = hasPos(o) || Object.values(o.photos || {}).some(Boolean) || CHECKS.some(([l, f]) => l !== 'Nom latin' && f(o));
+    if (rich) confirmSheet({ title: 'Retirer cette observation ?', text: 'Sa fiche, son point GPS et ses photos seront effacés à l’enregistrement de la sortie.', ok: 'Retirer', onOk: cut }); else cut();
+  },
   async obsPin(t) {
-    syncDraft(); const i = +t.dataset.i; const span = t.querySelector('span'); if (span) span.textContent = '…';
-    const p = await getPos(12000);
-    if (p.error) { toast(posError(p.error)); if (span) span.textContent = 'Point'; return; }
-    const o = S.draft?.obs?.[i]; if (!o) return;
-    Object.assign(o, posFields(p));
-    t.setAttribute('aria-pressed', 'true'); if (span) span.textContent = `±${Math.round(p.acc)} m`;
+    syncDraft(); const row = S.draft?.obs?.[+t.dataset.i]; if (!row) return;
+    const oid = row.id, job = 'pin:' + oid;
+    if (posJob[job]) { posJob[job](); return; }
+    const paint = txt => {
+      const b = $(`.obs-row[data-oid="${oid}"] .pinbtn`), o = S.draft?.obs?.find(x => x.id === oid); if (!b || !o) return;
+      b.setAttribute('aria-pressed', hasPos(o)); b.querySelector('span').textContent = txt || (hasPos(o) ? `±${Math.round(o.acc || 0)} m` : 'Point');
+    };
+    paint('…'); toast('Je cherche le meilleur point. Touche encore pour le prendre tout de suite.');
+    const p = await bestPos({ job, onUpdate: v => paint(`±${Math.round(v.acc)} m…`) });
+    hideToast();
+    if (S.draft?.kind !== 'sortie' || S.view !== 'sortieForm') return;
+    if (p.error) { toast(posError(p.error)); paint(); return; }
+    if (!(await confirmFar(p, spotById(S.draft.spotId)))) { paint(); return; }
+    syncDraft(); const o = S.draft.obs.find(x => x.id === oid); if (!o) return;
+    Object.assign(o, posFields(p)); paint(); saveDraftNow();
     toast(`Point pris à ±${Math.round(p.acc)} m.`);
+  },
+  planSlot(t) {
+    const [kind, k] = t.dataset.target.split(':'), id = t.dataset.id;
+    const s = openSheet(`<div class="stack"><div><span class="kicker">Plan photo</span><h2 class="title" style="font-size:28px;margin-top:4px;text-transform:capitalize">${esc(t.dataset.label)}</h2></div>
+      <button class="btn block" data-x="view">${I.image} Voir en grand</button>
+      <label class="btn block">${I.camera} Reprendre la photo<input type="file" class="vh" accept="image/*" capture="environment" data-photo-in="${kind}:${k}"></label>
+      <label class="btn block">${I.image} Choisir dans la photothèque<input type="file" class="vh" accept="image/*" data-photo-in="${kind}:${k}"></label>
+      <button class="btn danger block" data-x="del">${I.trash} Retirer cette photo</button></div>`);
+    $('[data-x="view"]', s).onclick = () => { closeSheet(); viewPhoto(id); };
+    $('[data-x="del"]', s).onclick = () => {
+      closeSheet(); syncDraft();
+      const photos = kind === 'obs' ? S.draft?.o?.photos : S.draft?.photos; if (!photos) return;
+      delete photos[k]; render(); saveDraftNow();
+    };
   },
   photoDel(t) {
     syncDraft(); const d = S.draft;
     if (t.dataset.target === 'extra') d.extra = d.extra.filter(x => x !== t.dataset.id); else d.photoIds = d.photoIds.filter(x => x !== t.dataset.id);
-    DB.del('photos', t.dataset.id).catch(() => {}); render();
+    render(); saveDraftNow();
   },
   async saveSortie() {
     syncDraft(); const d = S.draft;
     if (!d.spotId) { toast('Choisis un spot pour cette sortie.'); $('#f-spot')?.focus(); return; }
+    if (!d.date || Number.isNaN(new Date(d.date).getTime())) { toast('Indique la date de la sortie.'); $('#f-date')?.focus(); return; }
+    const lost = d.obs.findIndex(o => !(o.species || '').trim() && !(o.latin || '').trim() && hasPos(o));
+    if (lost >= 0) { toast('Une observation a son point GPS mais pas de nom. Donne-lui un nom, même provisoire.'); $(`[data-sp="${lost}"]`)?.focus(); return; }
     let spotId = d.spotId;
     if (spotId === '__new') {
-      if (!hasPos(S.lastPos)) { toast('Position indisponible pour créer le spot.'); return; }
-      spotId = (await saveRec('spot', { id: 's' + uid(), name: d.newSpotName.trim() || `Spot du ${fmtDayNoYear(d.date)}`, forest: '', notes: '', ...posFields(S.lastPos) })).id;
+      // Le spot est créé là où la saisie a commencé, pas là où le téléphone se trouve au moment d'enregistrer.
+      let p = hasPos(d.newSpotPos) ? d.newSpotPos : freshPos(5 * 60e3);
+      if (!p) { const g = await getPos(8000); p = g.error ? null : g; }
+      if (!p) { toast('Position indisponible. Choisis un spot existant, ou crée d’abord le spot depuis le Carnet.'); return; }
+      spotId = (await saveRec('spot', { id: 's' + uid(), name: (d.newSpotName || '').trim() || `Spot du ${fmtDayNoYear(d.date)}`, forest: '', notes: '', ...posFields(p) })).id;
+      d.spotId = spotId;
     }
     const obs = d.obs.map(o => ({ ...o, species: (o.species || '').trim(), latin: (o.latin || '').trim(), count: Math.max(0, Number(o.count) || 0) })).filter(o => o.species || o.latin);
     const ex = d.id ? S.sorties.find(s => s.id === d.id) : null;
     const rec = { ...(ex || {}), id: d.id || 'o' + uid(), spotId, date: d.date, obs, photoIds: d.photoIds, meteo: d.meteo, notes: (d.notes || '').trim() };
-    const p = freshPos(30 * 60e3);
-    if (!ex && p) Object.assign(rec, posFields(p));
+    // La position du téléphone ne devient celle de la sortie que si la saisie se fait sur place et sur le moment.
+    const here = freshPos(30 * 60e3), live = Math.abs(new Date(d.date) - Date.now()) < 45 * 60e3;
+    if (!ex && here && live && !farFrom(here, spotById(spotId))) Object.assign(rec, posFields(here));
     if (ex && ex.date !== rec.date) delete rec.wx;
+    const gone = ex ? photosOfRec(ex).filter(id => !photosOfRec(rec).includes(id)) : [];
     const before = codexIndex();
-    await saveRec('sortie', rec); S.draft = null;
+    await saveRec('sortie', rec); dropDraft();
+    gone.forEach(id => DB.del('photos', id).catch(() => {}));
     const fresh = [...new Map(obs.map(taxonOf).filter(t => t && !before.has(norm(t.la))).map(t => [t.la, t])).values()];
-    if (fresh.length) toast(`Nouvelle case au Mycodex : ${fresh.map(t => 'N° ' + num3(t.n) + ' ' + (t.fr || t.la)).join(', ')}`, true);
-    else toast(obs.length ? 'Sortie enregistrée.' : 'Sortie blanche enregistrée.');
     go('sortie', { id: rec.id }, { replace: true });
+    if (fresh.length) revealNew(fresh, rec); else toast(obs.length ? 'Sortie enregistrée.' : 'Sortie blanche enregistrée.');
     syncWeather().then(() => { if (S.view === 'sortie' && S.params.id === rec.id) render(); });
   },
   async saveObs() {
     const r = await persistObs(); if (!r) return;
-    S.draft = null;
+    dropDraft();
     toast(!r.was && r.now ? 'Relevé complet. Le ruban est noué.' : 'Fiche enregistrée.', !r.was && r.now);
     if (history.state?.depth > 0) history.back(); else go('sortie', { id: r.so.id }, { replace: true });
   },
   async oHere() {
-    syncDraft(); toast('Recherche de ta position…');
-    const p = await getPos(12000);
+    if (posJob.o) { posJob.o(); return; }
+    syncDraft(); toast('Je cherche le meilleur point. Touche encore pour le prendre tout de suite.');
+    const p = await bestPos({ job: 'o', onUpdate: v => toast(`±${Math.round(v.acc)} m, j'affine… touche encore pour le garder`) });
+    hideToast();
+    if (S.draft?.kind !== 'obs' || S.view !== 'obs') return;
     if (p.error) { toast(posError(p.error)); return; }
-    if (S.draft?.kind !== 'obs') return;
-    Object.assign(S.draft.o, posFields(p)); render(); toast(`Point pris à ±${Math.round(p.acc)} m.`);
+    const so = S.sorties.find(s => s.id === S.draft.sid);
+    if (!(await confirmFar(p, spotById(so?.spotId)))) return;
+    syncDraft(); Object.assign(S.draft.o, posFields(p)); render(); saveDraftNow(); toast(`Point pris à ±${Math.round(p.acc)} m.`);
   },
   oClear() { syncDraft(); POS_KEYS.forEach(k => delete S.draft.o[k]); render(); },
-  async oFind() { const r = await persistObs(); if (!r) return; const { sid, i } = S.draft; S.draft = null; go('retrouver', { sid, i }); },
+  async oFind() { const r = await persistObs(); if (!r) return; const { sid, oid } = S.draft; dropDraft(); go('retrouver', { sid, oid }); },
   async avisObs() { const r = await persistObs(); if (!r) return; const o = S.draft.o, so = r.so; avisSheet(opts => avisFromObs(so, o, opts)); },
   avisSpec() { syncDraft(); const d = S.draft; avisSheet(opts => avisFromSpecimen(d, opts)); },
   async specHere() {
-    syncDraft(); const p = await getPos(12000);
+    if (posJob.spec) { posJob.spec(); return; }
+    syncDraft(); toast('Je cherche le meilleur point. Touche encore pour le prendre tout de suite.');
+    const p = await bestPos({ job: 'spec', onUpdate: v => toast(`±${Math.round(v.acc)} m, j'affine… touche encore pour le garder`) });
+    hideToast();
+    if (S.draft?.kind !== 'specimen' || S.view !== 'specimen') return;
     if (p.error) { toast(posError(p.error)); return; }
-    if (S.draft?.kind !== 'specimen') return;
-    Object.assign(S.draft, posFields(p)); render(); toast(`Point pris à ±${Math.round(p.acc)} m.`);
+    syncDraft();
+    const spot = spotById(S.draft.spotId);
+    if (!(await confirmFar(p, spot))) return;
+    Object.assign(S.draft, posFields(p)); if (farFrom(p, spot)) S.draft.farOk = farSig(S.draft); else delete S.draft.farOk;
+    render(); saveDraftNow(); toast(`Point pris à ±${Math.round(p.acc)} m.`);
   },
-  delSortie(t) { confirmSheet({ title: 'Supprimer cette sortie ?', text: 'Ses observations, ses fiches et ses photos seront effacées de ce téléphone.', ok: 'Supprimer', onOk: async () => { await deleteRec('sortie', t.dataset.id); S.draft = null; toast('Sortie supprimée.'); go('carnet', {}, { replace: true }); } }); },
+  delSortie(t) { confirmSheet({ title: 'Supprimer cette sortie ?', text: 'Ses observations, ses fiches et ses photos seront effacées de ce téléphone.', ok: 'Supprimer', onOk: async () => { await deleteRec('sortie', t.dataset.id); dropDraft(); toast('Sortie supprimée.'); go('carnet', {}, { replace: true }); } }); },
   async saveSpot() {
     syncDraft(); const d = S.draft; d.name = (d.name || '').trim();
     if (!d.name) { toast('Donne un nom à ce spot.'); $('#f-name').focus(); return; }
     if (!hasPos(d)) { toast('Place le spot sur la carte ou saisis ses coordonnées.'); return; }
     const ex = d.id ? spotById(d.id) : null; const { kind, ...rest } = d;
     const rec = await saveRec('spot', { ...(ex ? omit(ex, POS_KEYS) : {}), ...rest, id: d.id || 's' + uid() });
-    S.draft = null; toast(ex ? 'Spot mis à jour.' : 'Spot créé.'); go('spot', { id: rec.id }, { replace: true });
+    dropDraft(); toast(ex ? 'Spot mis à jour.' : 'Spot créé.'); go('spot', { id: rec.id }, { replace: true });
   },
   delSpot(t) {
     const n = sortiesOf(t.dataset.id).length;
     confirmSheet({ title: 'Supprimer ce spot ?', text: n ? `Ses ${n} sorties et leurs photos seront aussi effacées.` : 'Il sera effacé de ce téléphone.', ok: 'Supprimer', onOk: async () => {
       for (const so of sortiesOf(t.dataset.id)) await deleteRec('sortie', so.id);
-      await deleteRec('spot', t.dataset.id); S.draft = null; toast('Spot supprimé.'); go('carnet', {}, { replace: true }); } });
+      await deleteRec('spot', t.dataset.id); dropDraft(); toast('Spot supprimé.'); go('carnet', {}, { replace: true }); } });
   },
-  async pickHere() {
-    toast('Recherche de ta position…'); const p = await getPos();
-    if (p.error) { toast(posError(p.error)); return; }
-    S.pickMap?.setView(p, 17); if (S.draft) Object.assign(S.draft, posFields(p));
-    const el = $('#pick-coords'); if (el) el.textContent = `ta position : ${p.lat.toFixed(5)}, ${p.lng.toFixed(5)} · GPS ±${Math.round(p.acc)} m${hasAlt(p) ? ` · alt. ${p.alt} m` : ''}`;
+  async pickHere(t, e, auto) {
+    if (posJob.pick) { posJob.pick(); return; }
+    const say = txt => { const el = $('#pick-coords'); if (el) el.textContent = txt; };
+    say('recherche de ta position…');
+    const p = await bestPos({ job: 'pick', onUpdate: v => say(`±${Math.round(v.acc)} m, j'affine… touche encore la cible pour garder ce point`) });
+    if (S.draft?.kind !== 'spot' || S.view !== 'spotForm') return;
+    if (p.error) { if (!auto) toast(posError(p.error)); say(hasPos(S.draft) ? `viseur : ${S.draft.lat.toFixed(5)}, ${S.draft.lng.toFixed(5)}` : 'Fais glisser la carte pour placer le viseur, ou utilise ta position.'); return; }
+    S.pickMap?.setView(p, 17); Object.assign(S.draft, posFields(p));
+    say(`ta position : ${p.lat.toFixed(5)}, ${p.lng.toFixed(5)} · GPS ±${Math.round(p.acc)} m${hasAlt(p) ? ` · alt. ${p.alt} m` : ''}`);
+    // Position prise toute seule à l'ouverture : elle ne compte pas comme une modification de ta part.
+    if (auto && S.draftBase) { const b = JSON.parse(S.draftBase); POS_KEYS.forEach(k => delete b[k]); Object.assign(b, posFields(p)); S.draftBase = canon(b); }
+    saveDraftNow();
   },
   pickManual() {
     const lat = parseFloat(($('#f-lat').value || '').replace(',', '.')), lng = parseFloat(($('#f-lng').value || '').replace(',', '.'));
@@ -2249,23 +2736,26 @@ const ACT = {
     };
   },
   async saveSpecimen() {
-    syncDraft(); const d = S.draft; const ex = d.id ? S.specimens.find(s => s.id === d.id) : null; const { kind, ...rest } = d;
-    if (!rest.latin) { const m = matchLatin(rest.hypothese); if (m) rest.latin = m.la; }
-    const rec = await saveRec('specimen', { ...(ex || {}), ...rest, id: d.id || 'm' + uid() });
-    S.draft = null; toast('Spécimen enregistré.'); go('specimen', { id: rec.id }, { replace: true });
+    const rec = await persistSpecimen(); if (!rec) return;
+    dropDraft(); toast('Spécimen enregistré.'); go('specimen', { id: rec.id }, { replace: true });
   },
   async specToSortie(t) {
+    if (S.draft?.kind === 'specimen' && S.draft.id === t.dataset.id) { syncDraft(); if (isDirty() && !(await persistSpecimen())) return; }
     const sp = S.specimens.find(s => s.id === t.dataset.id); if (!sp) return;
     if (!sp.spotId) { toast("Indique d'abord le spot où il a été récolté."); return; }
+    const spot = spotById(sp.spotId);
+    let point = hasPos(sp);
+    if (point && farFrom(sp, spot) && sp.farOk !== farSig(sp)) { const keep = await confirmFar(sp, spot, true); if (keep === null) return; point = keep; }
     const day = sp.date.slice(0, 10);
-    let so = S.sorties.find(s => s.spotId === sp.spotId && s.date.slice(0, 10) === day);
-    const ob = { ...blankObs(sp.hypothese || 'Espèce identifiée', sp.latin || ''), photos: { ...sp.photos }, odeur: sp.odeur, sporee: sp.sporee, notes: sp.notes, methodes: ['Macroscopie', ...(sp.sporee ? ['Sporée'] : [])], certitude: 'Probable', prelev: 'Prélevé pour détermination', ...(hasPos(sp) ? pick(sp, POS_KEYS) : {}) };
-    if (so) so.obs = [...(so.obs || []), ob]; else so = { id: 'o' + uid(), spotId: sp.spotId, date: sp.date, obs: [ob], photoIds: [...(sp.extra || [])], meteo: { sol: '', ciel: [], text: '' }, notes: '' };
-    await saveRec('sortie', so); sp.sortieId = so.id; sp.photos = {}; sp.extra = []; await saveRec('specimen', sp);
-    toast('Versé dans la sortie du ' + fmtDayNoYear(so.date) + '. Complète la fiche.');
-    go('obs', { sid: so.id, i: so.obs.length - 1 });
+    const cur = S.sorties.find(s => s.spotId === sp.spotId && s.date.slice(0, 10) === day);
+    const ob = { ...blankObs(sp.hypothese || 'Espèce identifiée', sp.latin || ''), photos: { ...sp.photos }, odeur: sp.odeur, sporee: sp.sporee, notes: sp.notes, methodes: ['Macroscopie', ...(sp.sporee ? ['Sporée'] : [])], certitude: 'Probable', prelev: 'Prélevé pour détermination', ...(point ? pick(sp, POS_KEYS) : {}) };
+    const so = cur ? { ...cur, obs: [...(cur.obs || []), ob], photoIds: [...(cur.photoIds || []), ...(sp.extra || [])] }
+      : { id: 'o' + uid(), spotId: sp.spotId, date: sp.date, obs: [ob], photoIds: [...(sp.extra || [])], meteo: { sol: '', ciel: [], text: '' }, notes: '' };
+    await saveRec('sortie', so); await saveRec('specimen', { ...sp, sortieId: so.id, photos: {}, extra: [] });
+    dropDraft(); toast('Versé dans la sortie du ' + fmtDayNoYear(so.date) + '. Complète la fiche.');
+    go('obs', { sid: so.id, oid: ob.id });
   },
-  delSpecimen(t) { confirmSheet({ title: 'Supprimer ce spécimen ?', text: 'Ses photos seront effacées.', ok: 'Supprimer', onOk: async () => { await deleteRec('specimen', t.dataset.id); S.draft = null; toast('Spécimen supprimé.'); go('carnet', {}, { replace: true }); } }); },
+  delSpecimen(t) { confirmSheet({ title: 'Supprimer ce spécimen ?', text: 'Ses photos seront effacées.', ok: 'Supprimer', onOk: async () => { await deleteRec('specimen', t.dataset.id); dropDraft(); toast('Spécimen supprimé.'); go('carnet', {}, { replace: true }); } }); },
   async mapLocate() { const p = await getPos(); if (p.error) { toast(posError(p.error)); return; } S.bigMap?.setView(p, 15); S.mapMarks?.(); },
   mapFit() { const pts = S.spots.filter(hasPos); const all = pts.length ? pts : allObs().filter(x => hasPos(x.o)).map(x => x.o); if (all.length) S.bigMap?.fit(all); },
   mapZoom(t) { const m = S.bigMap; if (m) m.zoomAbout(Math.round(m.z) + Number(t.dataset.d), m.W / 2, m.H / 2); },
@@ -2299,30 +2789,37 @@ const ACT = {
       const salt = crypto.getRandomValues(new Uint8Array(16)); Vault.key = await Vault.derive(a, salt);
       S.vault = { salt: b64(salt), check: await Vault.enc({ ok: 'mycota' }) }; await metaPut('vault', S.vault);
       for (const k of ['spot', 'sortie', 'specimen']) for (const r of S[STORE_OF[k]]) await DB.put(STORE_OF[k], await pack(r));
+      if (S.pendingDraft) await storeDraft(S.pendingDraft);
       closeSheet(); toast('Positions chiffrées.'); render();
     };
   },
   vaultOff() { confirmSheet({ title: 'Retirer le code ?', text: 'Les positions seront à nouveau stockées en clair sur ce téléphone.', ok: 'Retirer le code', onOk: async () => {
     Vault.key = null; S.vault = null; await DB.del('meta', 'vault');
     for (const k of ['spot', 'sortie', 'specimen']) for (const r of S[STORE_OF[k]]) await DB.put(STORE_OF[k], r);
+    if (S.pendingDraft) await storeDraft(S.pendingDraft);
     toast('Code retiré.'); render(); } }); },
   async unlock() {
     const pass = $('#unlock-pass').value, err = $('#unlock-err');
-    try { Vault.key = await Vault.derive(pass, unb64(S.vault.salt)); await Vault.dec(S.vault.check); await loadAll(); go('carnet', {}, { replace: true }); afterBoot(); }
-    catch { Vault.key = null; err.textContent = 'Code incorrect.'; }
+    try { Vault.key = await Vault.derive(pass, unb64(S.vault.salt)); await Vault.dec(S.vault.check); } catch { Vault.key = null; err.textContent = 'Code incorrect.'; return; }
+    await loadAll(); go('carnet', {}, { replace: true }); afterBoot();
   },
   async exportJSON() {
     toast('Préparation de la sauvegarde…');
-    const photos = await DB.all('photos').catch(() => []);
-    const toData = b => new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.onerror = () => r(null); fr.readAsDataURL(b); });
-    const out = { app: 'Mycota', format: 3, exportedAt: new Date().toISOString(), note: 'Contient les coordonnées de tes spots et de tes observations en clair.', spots: S.spots, sorties: S.sorties, specimens: S.specimens, settings: omit(S.settings, ['tms']), seen: S.seen, taxnotes: S.taxnotes,
-      photos: await Promise.all(photos.map(async p => ({ id: p.id, createdAt: p.createdAt, blob: await toData(p.blob), thumb: p.thumb ? await toData(p.thumb) : null }))) };
-    const blob = new Blob([JSON.stringify(out)], { type: 'application/json' });
-    offerFile(`mycota-sauvegarde-${dayISO(new Date())}.json`, blob, { title: 'Sauvegarde prête', onDone() { S.backup = { at: new Date().toISOString() }; metaPut('backup', S.backup); if (S.view === 'carnet' || S.view === 'reglages') render(); } });
+    try {
+      const photos = await DB.all('photos');
+      const data = { app: 'Mycota', format: 4, exportedAt: new Date().toISOString(), note: 'Contient les coordonnées de tes spots et de tes observations en clair.',
+        spots: S.spots, sorties: S.sorties, specimens: S.specimens, settings: omit(S.settings, ['tms']), seen: S.seen, taxnotes: S.taxnotes,
+        photos: photos.map(p => ({ id: p.id, createdAt: p.createdAt })) };
+      const files = [{ name: 'mycota.json', blob: new Blob([JSON.stringify(data)], { type: 'application/json' }) }];
+      photos.forEach(p => { if (p.blob) files.push({ name: `photos/${p.id}.jpg`, blob: p.blob }); if (p.thumb) files.push({ name: `thumbs/${p.id}.jpg`, blob: p.thumb }); });
+      const zip = await zipStore(files, (n, total) => { if (total > 40 && n % 20 === 0) toast(`Préparation de la sauvegarde… ${n} / ${total} fichiers`); });
+      offerFile(`mycota-sauvegarde-${dayISO(new Date())}.zip`, zip, { title: 'Sauvegarde prête', onDone() { S.backup = { at: new Date().toISOString() }; metaPut('backup', S.backup); if (S.view === 'carnet' || S.view === 'reglages') render(); } });
+    } catch (e) { toast(e?.message === 'zip-too-big' ? 'Sauvegarde trop volumineuse pour un seul fichier (plus de 4 Go).' : "La sauvegarde n'a pas pu être préparée."); }
   },
   exportDwC() {
     const s = openSheet(`<div class="stack"><h2 class="title" style="font-size:28px">Export Darwin Core</h2>
       <p class="muted" style="margin:0">Une ligne par observation, lisible par GBIF, l'INPN ou un tableur. ${S.settings.mask ? 'Le masquage est activé : aucune coordonnée ne sera exportée.' : 'Choisis la précision des coordonnées.'}</p>
+      ${S.settings.observer ? '' : '<p class="faint" style="margin:0;font-size:12.5px">Ton nom n’est pas renseigné dans Réglages : la colonne « recordedBy » restera vide.</p>'}
       <button class="btn ink big block" id="dwc-blur">Floutées à ~1 km · dépôt public</button>
       <button class="btn block" id="dwc-exact">Exactes · usage personnel</button></div>`);
     const run = async exact => { closeSheet(); const ok = await saveFile(`mycota-darwin-core-${exact ? 'exact' : 'floute'}-${dayISO(new Date())}.csv`, new Blob([buildDwC(exact)], { type: 'text/csv' })); if (ok) toast('Export prêt.'); };
@@ -2333,29 +2830,47 @@ const ACT = {
   loadDemo() { confirmSheet({ title: 'Charger des exemples ?', text: 'Trois spots fictifs et quelques sorties sur deux saisons, marqués comme exemples. Tu pourras les retirer en un geste.', ok: 'Charger', danger: false, onOk: async () => { await loadDemo(); toast('Exemples chargés.'); go('carnet', {}, { replace: true }); } }); },
   async clearDemo() { for (const k of ['sortie', 'specimen', 'spot']) for (const r of [...S[STORE_OF[k]]]) if (r.demo) await deleteRec(k, r.id); toast('Exemples retirés.'); render(); },
   wipe() { confirmSheet({ title: 'Tout effacer ?', text: 'Spots, sorties, spécimens, photos et carte hors ligne seront supprimés de ce téléphone. Sans sauvegarde, rien ne pourra être récupéré.', ok: 'Tout effacer', onOk: async () => {
+    clearTimeout(draftT); await draftQ;
     for (const s of STORES) await DB.clear(s).catch(() => {});
     try { await caches.delete(OFFLINE_CACHE); } catch { /* rien */ }
-    Object.assign(S, { spots: [], sorties: [], specimens: [], climate: null, settings: { mask: false, layer: 'plan', observer: '', tms: {}, mapObs: true }, vault: null, seen: {}, taxnotes: {}, backup: null, offline: null, spotwx: {} }); Vault.key = null;
+    Object.assign(S, { spots: [], sorties: [], specimens: [], climate: null, settings: { mask: false, layer: 'plan', observer: '', tms: {}, mapObs: true }, vault: null, seen: {}, taxnotes: {}, backup: null, offline: null, spotwx: {},
+      draft: null, draftBase: null, draftKey: null, draftFresh: false, pendingDraft: null }); Vault.key = null; touchData();
     toast('Carnet effacé.'); go('carnet', {}, { replace: true }); } }); },
 };
 
 /* ---------- évènements ---------- */
+/* Un enregistrement en cours n'est pas relancé par un deuxième toucher : pas de sortie en double. */
+const ONCE = ['saveSortie', 'saveObs', 'saveSpot', 'saveSpecimen', 'specToSortie', 'oFind', 'avisObs', 'exportJSON'];
+const running = new Set();
 document.addEventListener('click', e => {
+  // Avant l'appareil photo ou la photothèque : iOS peut recharger l'app pendant la prise de vue, la saisie est donc gardée d'abord.
+  if (e.target.closest('label')?.querySelector('input[type="file"]')) saveDraftNow();
   const t = e.target.closest('[data-act]'); if (!t || t.closest('.map-marks')) return;
-  const f = ACT[t.dataset.act]; if (f) { e.preventDefault(); f(t, e); }
+  const name = t.dataset.act, f = ACT[name]; if (!f) return;
+  e.preventDefault();
+  if (running.has(name)) return;
+  const r = f(t, e);
+  if (r && typeof r.then === 'function') {
+    const once = ONCE.includes(name); if (once) running.add(name);
+    // Un enregistrement refusé par le téléphone a déjà été annoncé à l'écran : l'action s'arrête là, le formulaire reste ouvert.
+    r.then(() => { if (once) running.delete(name); }, err => { if (once) running.delete(name); console.warn('[Mycota]', name, err); });
+  }
+  touchDraft();
 });
-let noteT = null;
+let noteT = null, dexT = null;
 document.addEventListener('input', e => {
   const t = e.target;
   if (t.id === 'c-q') { S.chronoF.q = t.value; renderChronoList(); }
-  if (t.id === 'dex-q') { S.codexF.q = t.value; renderDex(); }
+  if (t.id === 'dex-q') { S.codexF.q = t.value; clearTimeout(dexT); dexT = setTimeout(renderDex, 140); }
   if (t.dataset.taxnote !== undefined) {
     const k = t.dataset.taxnote; if (t.value.trim()) S.taxnotes[k] = t.value; else delete S.taxnotes[k];
     clearTimeout(noteT); noteT = setTimeout(() => metaPut('taxnotes', S.taxnotes), 400);
   }
+  if (S.draft && t.dataset.bind) { if (S.draft.kind === 'obs') { syncDraft(); refreshMeter(); } touchDraft(); }
 });
 document.addEventListener('change', async e => {
   const t = e.target;
+  touchDraft();
   if (t.id === 'c-spot' || t.id === 'c-sp') { S.chronoF[t.id === 'c-spot' ? 'spot' : 'sp'] = t.value; renderChronoList(); return; }
   if (t.id === 'dex-sort') { S.codexF.sort = t.value; renderDex(); return; }
   if (t.id === 'set-obs') { S.settings.observer = t.value.trim(); saveSettings(); toast('Nom enregistré.'); return; }
@@ -2364,53 +2879,99 @@ document.addEventListener('change', async e => {
     const m = matchLatin(t.value);
     const la = t.dataset.sp !== undefined ? $(`#la-${t.dataset.sp}`) : t.id === 'o-fr' ? $('#o-la') : $('#f-latin');
     if (m && la) { if (!la.value) la.value = m.la; if (m.viaLatin) { la.value = m.la; t.value = m.fr || ''; } }
+    if (S.draft?.kind === 'obs') { syncDraft(); refreshMeter(); }
     return;
   }
   if (t.dataset.import) { await importFile(t.files[0]); t.value = ''; return; }
   if (t.dataset.quick && t.files?.length) { closeSheet(); await quickPhoto(t.files[0]); return; }
-  if (t.dataset.photoIn && t.files?.length) {
-    const target = t.dataset.photoIn, files = [...t.files], d = S.draft; if (!d) return;
-    syncDraft(); toast(files.length > 1 ? `Ajout de ${files.length} photos…` : 'Ajout de la photo…');
-    try {
-      for (const f of files) {
-        const id = await addPhoto(f);
-        if (target === 'draft') d.photoIds.push(id);
-        else if (target === 'extra') d.extra.push(id);
-        else if (target.startsWith('step:')) { const k = target.slice(5); if (d.photos[k]) DB.del('photos', d.photos[k]).catch(() => {}); d.photos[k] = id; }
-        else if (target.startsWith('obs:')) { const k = target.slice(4); d.o.photos = d.o.photos || {}; if (d.o.photos[k]) DB.del('photos', d.o.photos[k]).catch(() => {}); d.o.photos[k] = id; }
-      }
-      if (d.kind === 'specimen' && !hasPos(d) && freshPos()) Object.assign(d, posFields(freshPos()));
-      render(); const tt = $('.toast'); if (tt) tt.hidden = true;
-    } catch { toast("Cette image n'a pas pu être lue. Essaie une photo prise par l'appareil."); }
-  }
+  if (t.dataset.photoIn && t.files?.length) await addPhotos(t);
 });
-/** Photo rapide : une photo, la position, un spécimen « à identifier » créé d'un geste. */
-async function quickPhoto(file) {
-  toast('Photo gardée, création de la fiche…');
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveDraftNow(); });
+window.addEventListener('pagehide', saveDraftNow);
+/** Photos d'une saisie : ambiance, prises libres, un plan précis, ou plusieurs photos de la photothèque rangées dans les plans vides. */
+async function addPhotos(input) {
+  const [kind, k] = input.dataset.photoIn.split(':'), files = [...input.files], d = S.draft; if (!d) return;
+  if (input.closest('#scrim')) closeSheet();
+  syncDraft(); toast(files.length > 1 ? `Ajout de ${files.length} photos…` : 'Ajout de la photo…');
+  let ignored = 0, failed = null;
   try {
-    const id = await addPhoto(file);
-    const p = freshPos(15 * 60e3); const near = p ? nearestSpot(p) : null;
-    const rec = await saveRec('specimen', { id: 'm' + uid(), date: localISO(), spotId: near?.spot.id || '', photos: { chapeau: id }, extra: [], odeur: '', sporee: '', hypothese: '', latin: '', notes: '', status: 'a_identifier', quick: true, ...(p ? posFields(p) : {}) });
-    S.draft = null; toast(p ? 'Fiche créée avec le point GPS. Complète-la quand tu veux.' : 'Fiche créée. La position n’était pas disponible.');
-    go('specimen', { id: rec.id });
-  } catch { toast("Cette image n'a pas pu être lue. Essaie une photo prise par l'appareil."); }
+    if (kind === 'draft') for (const f of files) d.photoIds.push(await addPhoto(f));
+    else if (kind === 'extra') for (const f of files) d.extra.push(await addPhoto(f));
+    else {
+      const photos = kind === 'obs' ? (d.o.photos = d.o.photos || {}) : (d.photos = d.photos || {});
+      if (k === '*') {
+        const empty = (kind === 'obs' ? PLANS : STEPS).map(x => x[0]).filter(key => !photos[key]);
+        for (const f of files) {
+          if (empty.length) photos[empty.shift()] = await addPhoto(f);
+          else if (kind === 'step') d.extra.push(await addPhoto(f));
+          else ignored++;
+        }
+      } else photos[k] = await addPhoto(files[0]);
+    }
+    // Le point n'est ajouté tout seul que pour une photo prise à l'instant, pas pour une photo sortie de la photothèque.
+    if (d.kind === 'specimen' && !hasPos(d) && input.hasAttribute('capture') && freshPos()) Object.assign(d, posFields(freshPos()));
+  } catch (e) { failed = e; }
+  if (S.draft === d) { render(); saveDraftNow(); }
+  if (failed) toast(photoErr(failed));
+  else if (ignored) toast(`Les cinq plans sont remplis : ${plural(ignored, 'photo laissée de côté', 'photos laissées de côté')}.`);
+  else { const tt = $('.toast'); if (tt) tt.hidden = true; }
+}
+/** Photo rapide : une photo, le point GPS, un spécimen « à identifier » créé d'un geste. */
+async function quickPhoto(file) {
+  toast('Photo gardée…');
+  let id; try { id = await addPhoto(file); } catch (e) { toast(photoErr(e)); return; }
+  // Le point : celui que la feuille « Noter » vient de trouver s'il est bon, sinon quelques secondes d'écoute, pas plus.
+  let p = freshPos(60e3);
+  if (!p || p.acc > 20) {
+    toast('Photo gardée, je prends le point…');
+    const g = await bestPos({ maxMs: 4000, good: 12, giveUp: 6000, onUpdate: v => toast(`Photo gardée, point à ±${Math.round(v.acc)} m…`) });
+    if (!g.error) p = g;
+  }
+  p = p || freshPos(15 * 60e3);
+  const near = p ? nearestSpot(p) : null;
+  const rec = await saveRec('specimen', { id: 'm' + uid(), date: localISO(), spotId: near?.spot.id || '', photos: { chapeau: id }, extra: [], odeur: '', sporee: '', hypothese: '', latin: '', notes: '', status: 'a_identifier', quick: true, ...(p ? posFields(p) : {}) });
+  parkDraft(); toast(p ? `Fiche créée avec le point GPS (±${Math.round(p.acc)} m). Complète-la quand tu veux.` : 'Fiche créée. La position n’était pas disponible.');
+  go('specimen', { id: rec.id });
 }
 
 /* ---------- import ---------- */
 function dataURLtoBlob(d) { const [h, b] = d.split(','); const mime = (h.match(/data:(.*?);/) || [])[1] || 'image/jpeg'; const bin = atob(b); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new Blob([u], { type: mime }); }
+/** Restaure une sauvegarde : archive .zip (photos en fichiers) ou ancien fichier .json (photos incluses dans le texte). */
 async function importFile(file) {
-  if (!file) return; let j;
-  try { j = JSON.parse(await file.text()); } catch { toast("Ce fichier n'est pas une sauvegarde lisible."); return; }
-  if (j.app !== 'Mycota') { toast("Ce fichier n'est pas une sauvegarde Mycota."); return; }
+  if (!file) return;
+  let j, zip = null, prefix = '';
+  try {
+    const head = new Uint8Array(await file.slice(0, 2).arrayBuffer());
+    if (head[0] === 0x50 && head[1] === 0x4B) {
+      zip = await zipRead(file);
+      const main = zip.names.find(n => n.endsWith('mycota.json') && !n.startsWith('__MACOSX'));
+      if (!main) throw new Error('zip');
+      prefix = main.slice(0, -'mycota.json'.length);
+      j = JSON.parse(await (await zip.get(main)).text());
+    } else j = JSON.parse(await file.text());
+  } catch { toast("Ce fichier n'est pas une sauvegarde lisible."); return; }
+  if (!j || j.app !== 'Mycota') { toast("Ce fichier n'est pas une sauvegarde Mycota."); return; }
   toast('Restauration…');
-  for (const p of j.photos || []) if (p.blob) await DB.put('photos', { id: p.id, createdAt: p.createdAt, blob: dataURLtoBlob(p.blob), thumb: p.thumb ? dataURLtoBlob(p.thumb) : null });
-  for (const r of j.spots || []) await saveRec('spot', r);
-  for (const r of j.sorties || []) await saveRec('sortie', r);
-  for (const r of j.specimens || []) await saveRec('specimen', r);
+  const hadData = [...S.spots, ...S.sorties, ...S.specimens].some(r => !r.demo);
+  let miss = 0;
+  try {
+    for (const p of j.photos || []) {
+      try {
+        const blob = zip ? await zip.get(`${prefix}photos/${p.id}.jpg`, 'image/jpeg') : (p.blob ? dataURLtoBlob(p.blob) : null);
+        const thumb = zip ? await zip.get(`${prefix}thumbs/${p.id}.jpg`, 'image/jpeg') : (typeof p.thumb === 'string' ? dataURLtoBlob(p.thumb) : null);
+        if (blob) await DB.put('photos', { id: p.id, createdAt: p.createdAt, blob, thumb }); else miss++;
+      } catch { miss++; }
+    }
+    for (const r of j.spots || []) await saveRec('spot', r);
+    for (const r of j.sorties || []) { ensureObsIds(r); await saveRec('sortie', r); }
+    for (const r of j.specimens || []) await saveRec('specimen', r);
+  } catch { toast('Restauration interrompue : le stockage du téléphone est plein ou indisponible.'); render(); return; }
   if (j.seen) { S.seen = { ...j.seen, ...S.seen }; metaPut('seen', S.seen); }
   if (j.taxnotes) { S.taxnotes = { ...j.taxnotes, ...S.taxnotes }; metaPut('taxnotes', S.taxnotes); }
   if (j.settings?.observer && !S.settings.observer) { S.settings.observer = j.settings.observer; saveSettings(); }
-  toast(`Restauré : ${plural((j.spots || []).length, 'spot', 'spots')}, ${plural((j.sorties || []).length, 'sortie', 'sorties')}.`);
+  // Sur un carnet vide, le fichier qu'on vient de restaurer est déjà la sauvegarde de ce qui s'affiche.
+  if (!hadData && !miss) { S.backup = { at: new Date().toISOString() }; metaPut('backup', S.backup); }
+  toast(`Restauré : ${plural((j.spots || []).length, 'spot', 'spots')}, ${plural((j.sorties || []).length, 'sortie', 'sorties')}${miss ? `. ${plural(miss, 'photo illisible', 'photos illisibles')}` : ''}.`);
   go('carnet', {}, { replace: true });
 }
 
@@ -2432,7 +2993,7 @@ async function loadDemo() {
     { spotId: 'demo-s1', date: back(33), obs: [O('Girolle', 41), O('Russule charbonnière', 6)], meteo: { sol: 'Humide', ciel: ['Pluie'], text: 'Bruine continue' }, notes: '', wx: W(48.5, 13.8) },
     { spotId: 'demo-s1', date: back(366), obs: [O('Cèpe de Bordeaux', 5), O('Girolle', 12)], meteo: { sol: 'Frais', ciel: ['Nuageux'], text: '' }, notes: 'Première poussée de la saison au pied des chênes jumeaux.', wx: W(27.9, 12.6) },
     { spotId: 'demo-s2', date: back(372), obs: [O('Trompette de la mort', 120), O('Pied-de-mouton', 15)], meteo: { sol: 'Détrempé', ciel: ['Brouillard', 'Gelée'], text: 'Premier coup de gel la veille' }, notes: 'Poussée le long du ru.', wx: W(62.0, 8.9) },
-  ].map((s, i) => ({ id: 'demo-o' + i, photoIds: [], demo: true, ...s }));
+  ].map((s, i) => ({ id: 'demo-o' + i, photoIds: [], demo: true, ...s, obs: s.obs.map((o, k) => ({ ...o, id: `demo-o${i}:${k}` })) }));
   const specimens = [{ id: 'demo-m1', date: back(4, 16), spotId: 'demo-s1', photos: {}, extra: [], odeur: 'Farine', sporee: 'Rose', hypothese: 'Clitocybe nébuleux', latin: 'Clitocybe nebularis', notes: "Lames décurrentes serrées. À comparer avec l'entolome livide avant tout.", status: 'a_identifier', demo: true }];
   for (const s of spots) await saveRec('spot', s);
   for (const s of sorties) await saveRec('sortie', s);
@@ -2440,7 +3001,7 @@ async function loadDemo() {
 }
 
 /* ---------- démarrage ---------- */
-function afterBoot() { try { navigator.storage?.persist?.(); } catch { /* sans effet */ } syncWeather(); refreshClimateQuiet(); window.addEventListener('online', () => { syncWeather(); refreshClimateQuiet(); }); }
+function afterBoot() { try { navigator.storage?.persist?.(); } catch { /* sans effet */ } syncWeather(); refreshClimateQuiet(); window.addEventListener('online', () => { syncWeather(); refreshClimateQuiet(); }); setTimeout(sweepPhotos, 6000); }
 (async () => {
   await DB.open();
   if (DB.mem) setTimeout(() => toast('Stockage indisponible : rien ne sera conservé après fermeture.'), 600);
@@ -2449,10 +3010,11 @@ function afterBoot() { try { navigator.storage?.persist?.(); } catch { /* sans e
   if (vault) { S.vault = vault.value; S.view = 'lock'; render(); return; }
   await loadAll();
   const st = history.state;
-  if (st && st.view && st.view !== 'lock' && VIEWS[st.view]) { S.view = st.view; S.params = st.params || {}; }
-  if (S.view === 'chrono' && !st) S.view = 'carnet';
+  // L'app a pu être rechargée par iOS en pleine saisie (pendant une photo, par exemple) : on rouvre le formulaire tel qu'il était.
+  const back = !!(st && st.view && st.view !== 'lock' && VIEWS[st.view]) && landOn(st);
   try { history.replaceState({ view: S.view, params: S.params, depth: st?.depth || 0 }, ''); } catch { /* cadre restreint */ }
   render(); afterBoot();
+  if (back) toast('Ta saisie en cours a été retrouvée.');
 })();
 </script>
 </body>

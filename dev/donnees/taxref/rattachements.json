@@ -1,0 +1,3187 @@
+{
+ "absent": [
+  "Tricholomopsis sulphureoides",
+  "Hydnellum cristatum",
+  "Hydnum magnorufescens",
+  "Inocybe dryadiana",
+  "Inocybe jacobssonii",
+  "Inocybe pyriodora",
+  "Leucocoprinus leucothites",
+  "Ophiocordyceps larvicola",
+  "Pisolithus capsulifer"
+ ],
+ "conflit": [],
+ "tx": {
+  "Boletus edulis": {
+   "cd": 29388,
+   "valid": "Boletus edulis",
+   "vern": [
+    "Cèpe de Bordeaux",
+    "Cèpe du Périgord"
+   ],
+   "via": "nom"
+  },
+  "Boletus aereus": {
+   "cd": 29357,
+   "valid": "Boletus aereus",
+   "vern": [
+    "Cèpe bronzé"
+   ],
+   "via": "nom"
+  },
+  "Boletus reticulatus": {
+   "cd": 29362,
+   "valid": "Boletus reticulatus",
+   "vern": [
+    "Cèpe d'été"
+   ],
+   "via": "nom"
+  },
+  "Boletus pinophilus": {
+   "cd": 29436,
+   "valid": "Boletus pinophilus",
+   "vern": [
+    "Cèpe des pins"
+   ],
+   "via": "nom"
+  },
+  "Imleria badia": {
+   "cd": 971206,
+   "valid": "Imleria badia",
+   "vern": [
+    "Bolet bai"
+   ],
+   "via": "nom"
+  },
+  "Neoboletus luridiformis": {
+   "cd": 967890,
+   "valid": "Neoboletus erythropus",
+   "vern": [
+    "Bolet à pied rouge"
+   ],
+   "via": "nom"
+  },
+  "Suillellus luridus": {
+   "cd": 968047,
+   "valid": "Suillellus luridus",
+   "vern": [
+    "Bolet blafard"
+   ],
+   "via": "nom"
+  },
+  "Rubroboletus satanas": {
+   "cd": 942438,
+   "valid": "Rubroboletus satanas",
+   "vern": [
+    "Bolet satan",
+    "Cèpe du diable",
+    "Bolet diabolique"
+   ],
+   "via": "nom"
+  },
+  "Xerocomellus chrysenteron": {
+   "cd": 520743,
+   "valid": "Xerocomellus chrysenteron",
+   "vern": [
+    "Bolet à chair jaune"
+   ],
+   "via": "nom"
+  },
+  "Leccinum scabrum": {
+   "cd": 29628,
+   "valid": "Leccinum scabrum",
+   "vern": [
+    "Bolet rude"
+   ],
+   "via": "nom"
+  },
+  "Tylopilus felleus": {
+   "cd": 29768,
+   "valid": "Tylopilus felleus",
+   "vern": [
+    "Bolet chicotin",
+    "Bolet amer",
+    "Bolet de fiel",
+    "Chicotin",
+    "Faux cèpe"
+   ],
+   "via": "nom"
+  },
+  "Suillus luteus": {
+   "cd": 29729,
+   "valid": "Suillus luteus",
+   "vern": [
+    "Nonnette voilée"
+   ],
+   "via": "nom"
+  },
+  "Suillus granulatus": {
+   "cd": 29712,
+   "valid": "Suillus granulatus",
+   "vern": [
+    "Bolet granuleux"
+   ],
+   "via": "nom"
+  },
+  "Cantharellus cibarius": {
+   "cd": 29904,
+   "valid": "Cantharellus cibarius",
+   "vern": [
+    "Girolle"
+   ],
+   "via": "nom"
+  },
+  "Craterellus cornucopioides": {
+   "cd": 29937,
+   "valid": "Craterellus cornucopioides",
+   "vern": [
+    "Trompette des morts"
+   ],
+   "via": "nom"
+  },
+  "Craterellus tubaeformis": {
+   "cd": 462065,
+   "valid": "Craterellus tubaeformis",
+   "vern": [
+    "Chanterelle en tube"
+   ],
+   "via": "nom"
+  },
+  "Craterellus lutescens": {
+   "cd": 462055,
+   "valid": "Craterellus lutescens",
+   "vern": [
+    "Chanterelle jaune"
+   ],
+   "via": "nom"
+  },
+  "Hydnum repandum": {
+   "cd": 42792,
+   "valid": "Hydnum repandum",
+   "vern": [
+    "Pied de mouton"
+   ],
+   "via": "nom"
+  },
+  "Hydnum rufescens": {
+   "cd": 42796,
+   "valid": "Hydnum rufescens",
+   "vern": [],
+   "via": "nom"
+  },
+  "Amanita caesarea": {
+   "cd": 38993,
+   "valid": "Amanita caesarea",
+   "vern": [
+    "Amanite des césars"
+   ],
+   "via": "nom"
+  },
+  "Amanita phalloides": {
+   "cd": 39106,
+   "valid": "Amanita phalloides",
+   "vern": [
+    "Amanite phalloïde",
+    "Oronge verte",
+    "Calice de la mort",
+    "Agaric bulbeux",
+    "Oronge ciguë"
+   ],
+   "via": "nom"
+  },
+  "Amanita virosa": {
+   "cd": 39179,
+   "valid": "Amanita virosa",
+   "vern": [
+    "Amanite vireuse",
+    "Ange de la mort",
+    "Ange destructeur"
+   ],
+   "via": "nom"
+  },
+  "Amanita muscaria": {
+   "cd": 39079,
+   "valid": "Amanita muscaria",
+   "vern": [
+    "Amanite tue-mouches",
+    "Fausse oronge"
+   ],
+   "via": "nom"
+  },
+  "Amanita pantherina": {
+   "cd": 39099,
+   "valid": "Amanita pantherina",
+   "vern": [
+    "Amanite panthère"
+   ],
+   "via": "nom"
+  },
+  "Amanita rubescens": {
+   "cd": 39128,
+   "valid": "Amanita rubescens",
+   "vern": [
+    "Amanite rougissante",
+    "Oronge vineuse"
+   ],
+   "via": "nom"
+  },
+  "Amanita citrina": {
+   "cd": 39001,
+   "valid": "Amanita citrina",
+   "vern": [
+    "Amanite citrine"
+   ],
+   "via": "nom"
+  },
+  "Amanita crocea": {
+   "cd": 39168,
+   "valid": "Amanita crocea",
+   "vern": [
+    "Amanite safran"
+   ],
+   "via": "nom"
+  },
+  "Amanita vaginata": {
+   "cd": 39155,
+   "valid": "Amanita vaginata",
+   "vern": [
+    "Grisette",
+    "Coulemelle",
+    "Amanite vaginee"
+   ],
+   "via": "nom"
+  },
+  "Russula cyanoxantha": {
+   "cd": 39680,
+   "valid": "Russula cyanoxantha",
+   "vern": [
+    "Russule charbonnière"
+   ],
+   "via": "nom"
+  },
+  "Russula virescens": {
+   "cd": 40139,
+   "valid": "Russula virescens",
+   "vern": [
+    "Palomet"
+   ],
+   "via": "nom"
+  },
+  "Russula vesca": {
+   "cd": 40110,
+   "valid": "Russula vesca",
+   "vern": [
+    "Russule vieux-rose"
+   ],
+   "via": "nom"
+  },
+  "Russula emetica": {
+   "cd": 39707,
+   "valid": "Russula emetica",
+   "vern": [
+    "Russule émétique"
+   ],
+   "via": "nom"
+  },
+  "Russula nigricans": {
+   "cd": 39925,
+   "valid": "Russula nigricans",
+   "vern": [
+    "Russule noircissante"
+   ],
+   "via": "nom"
+  },
+  "Lactarius deliciosus": {
+   "cd": 39288,
+   "valid": "Lactarius deliciosus",
+   "vern": [
+    "Lactaire délicieuse"
+   ],
+   "via": "nom"
+  },
+  "Lactarius piperatus": {
+   "cd": 994907,
+   "valid": "Lactifluus piperatus",
+   "vern": [
+    "Lactaire poivré"
+   ],
+   "via": "nom"
+  },
+  "Lactarius quietus": {
+   "cd": 39415,
+   "valid": "Lactarius quietus",
+   "vern": [
+    "Lactaire tranquille"
+   ],
+   "via": "nom"
+  },
+  "Lactarius torminosus": {
+   "cd": 39489,
+   "valid": "Lactarius torminosus",
+   "vern": [
+    "Lactaire à toison",
+    "Lactaire aux coliques",
+    "Lactaire aux tranchées"
+   ],
+   "via": "nom"
+  },
+  "Lepista nuda": {
+   "cd": 32276,
+   "valid": "Lepista nuda",
+   "vern": [
+    "Pied bleu",
+    "Tout-bleu"
+   ],
+   "via": "nom"
+  },
+  "Clitocybe nebularis": {
+   "cd": 32274,
+   "valid": "Clitocybe nebularis",
+   "vern": [
+    "Clitocybe nébuleux"
+   ],
+   "via": "nom"
+  },
+  "Calocybe gambosa": {
+   "cd": 30809,
+   "valid": "Calocybe gambosa",
+   "vern": [
+    "Tricholome de la Saint-Georges",
+    "Mousseron de la Saint-Georges"
+   ],
+   "via": "nom"
+  },
+  "Tricholoma terreum": {
+   "cd": 33401,
+   "valid": "Tricholoma terreum",
+   "vern": [
+    "Tricholome terreux",
+    "Petit-gris"
+   ],
+   "via": "nom"
+  },
+  "Tricholoma equestre": {
+   "cd": 33189,
+   "valid": "Tricholoma equestre",
+   "vern": [
+    "Tricholome équestre",
+    "Chevalier",
+    "Tricholome chevalier",
+    "Tricholome des chevaliers",
+    "Canari",
+    "Jaunet"
+   ],
+   "via": "nom"
+  },
+  "Tricholoma pardinum": {
+   "cd": 33303,
+   "valid": "Tricholoma pardinum",
+   "vern": [
+    "Tricholome tigré",
+    "Tricholome moucheté",
+    "Tricholome rayé",
+    "Tricholome léopard",
+    "Faux griset",
+    "Faux petit-gris",
+    "Grivelé"
+   ],
+   "via": "nom"
+  },
+  "Infundibulicybe geotropa": {
+   "cd": 31754,
+   "valid": "Clitocybe geotropa",
+   "vern": [
+    "Clitocybe géotrope"
+   ],
+   "via": "nom"
+  },
+  "Laccaria amethystina": {
+   "cd": 32178,
+   "valid": "Laccaria amethystina",
+   "vern": [
+    "Laque améthyste"
+   ],
+   "via": "nom"
+  },
+  "Marasmius oreades": {
+   "cd": 31038,
+   "valid": "Marasmius oreades",
+   "vern": [
+    "Faux mousseron"
+   ],
+   "via": "nom"
+  },
+  "Gymnopus dryophilus": {
+   "cd": 30606,
+   "valid": "Collybia dryophila",
+   "vern": [
+    "Collybie des chênes"
+   ],
+   "via": "nom"
+  },
+  "Paxillus involutus": {
+   "cd": 29879,
+   "valid": "Paxillus involutus",
+   "vern": [
+    "Paxille enroulé",
+    "Paxille à bords enroulés",
+    "Paxille involuté",
+    "Bolet à lamelles",
+    "Chanterelle brune"
+   ],
+   "via": "nom"
+  },
+  "Cortinarius orellanus": {
+   "cd": 35315,
+   "valid": "Cortinarius orellanus",
+   "vern": [
+    "Cortinaire à couleur de rocou",
+    "Cortinaire des montagnes"
+   ],
+   "via": "nom"
+  },
+  "Entoloma sinuatum": {
+   "cd": 33741,
+   "valid": "Entoloma sinuatum",
+   "vern": [
+    "Entolome livide"
+   ],
+   "via": "nom"
+  },
+  "Galerina marginata": {
+   "cd": 36003,
+   "valid": "Galerina marginata",
+   "vern": [
+    "Galère marginée",
+    "Pholiote marginée"
+   ],
+   "via": "nom"
+  },
+  "Agaricus campestris": {
+   "cd": 462638,
+   "valid": "Agaricus campestris",
+   "vern": [
+    "Rosé des prés",
+    "Agaric champêtre",
+    "Psalliote champêtre"
+   ],
+   "via": "nom"
+  },
+  "Agaricus xanthodermus": {
+   "cd": 38130,
+   "valid": "Agaricus xanthodermus",
+   "vern": [
+    "Agaric (psalliote) jaunissant"
+   ],
+   "via": "nom"
+  },
+  "Macrolepiota procera": {
+   "cd": 38682,
+   "valid": "Macrolepiota procera",
+   "vern": [
+    "Lépiote élevée",
+    "Grande coulemelle"
+   ],
+   "via": "nom"
+  },
+  "Chlorophyllum rhacodes": {
+   "cd": 462359,
+   "valid": "Chlorophyllum rhacodes",
+   "vern": [
+    "Lépiote déguenillée"
+   ],
+   "via": "nom"
+  },
+  "Lepiota cristata": {
+   "cd": 38323,
+   "valid": "Lepiota cristata",
+   "vern": [
+    "Lépiote crêtée",
+    "Lépiote puante",
+    "Lépiote crêpue"
+   ],
+   "via": "nom"
+  },
+  "Coprinus comatus": {
+   "cd": 37248,
+   "valid": "Coprinus comatus",
+   "vern": [
+    "Coprin chevelu"
+   ],
+   "via": "nom"
+  },
+  "Lycoperdon perlatum": {
+   "cd": 40561,
+   "valid": "Lycoperdon perlatum",
+   "vern": [
+    "Vesse de loup perlée"
+   ],
+   "via": "nom"
+  },
+  "Pleurotus ostreatus": {
+   "cd": 34488,
+   "valid": "Pleurotus ostreatus",
+   "vern": [
+    "Pleurote en huître"
+   ],
+   "via": "nom"
+  },
+  "Laetiporus sulphureus": {
+   "cd": 43216,
+   "valid": "Laetiporus sulphureus",
+   "vern": [
+    "Polypore soufré"
+   ],
+   "via": "nom"
+  },
+  "Fistulina hepatica": {
+   "cd": 42445,
+   "valid": "Fistulina hepatica",
+   "vern": [
+    "Langue de bœuf",
+    "Fistuline hépatique"
+   ],
+   "via": "nom"
+  },
+  "Armillaria mellea": {
+   "cd": 31682,
+   "valid": "Armillaria mellea",
+   "vern": [
+    "Armillaire couleur de miel",
+    "Armillaire des feuillus"
+   ],
+   "via": "nom"
+  },
+  "Flammulina velutipes": {
+   "cd": 30705,
+   "valid": "Flammulina velutipes",
+   "vern": [
+    "Collybie à pied velouté"
+   ],
+   "via": "nom"
+  },
+  "Hypholoma fasciculare": {
+   "cd": 36977,
+   "valid": "Hypholoma fasciculare",
+   "vern": [
+    "Hypholome en touffes",
+    "Hypholome fasciculé",
+    "Géophile",
+    "Nématolome en touffes"
+   ],
+   "via": "nom"
+  },
+  "Kuehneromyces mutabilis": {
+   "cd": 37002,
+   "valid": "Kuehneromyces mutabilis",
+   "vern": [
+    "Pholiote changeante"
+   ],
+   "via": "nom"
+  },
+  "Omphalotus olearius": {
+   "cd": 32832,
+   "valid": "Omphalotus olearius",
+   "vern": [
+    "Pleurote de l'olivier",
+    "Clitocybe de l'olivier"
+   ],
+   "via": "nom"
+  },
+  "Sparassis crispa": {
+   "cd": 44557,
+   "valid": "Sparassis crispa",
+   "vern": [
+    "Sparassis crépu"
+   ],
+   "via": "nom"
+  },
+  "Hericium erinaceus": {
+   "cd": 461885,
+   "valid": "Hericium erinaceus",
+   "vern": [
+    "Hydne hérisson"
+   ],
+   "via": "nom"
+  },
+  "Trametes versicolor": {
+   "cd": 44911,
+   "valid": "Trametes versicolor",
+   "vern": [
+    "Tramète versicolore",
+    "Tramète à couleur changeante"
+   ],
+   "via": "nom"
+  },
+  "Fomes fomentarius": {
+   "cd": 42504,
+   "valid": "Fomes fomentarius",
+   "vern": [
+    "Amadouvier",
+    "Polypore allume-feu"
+   ],
+   "via": "nom"
+  },
+  "Auricularia auricula-judae": {
+   "cd": 41571,
+   "valid": "Auricularia auricula-judae",
+   "vern": [
+    "Oreille de Judas"
+   ],
+   "via": "nom"
+  },
+  "Morchella esculenta": {
+   "cd": 48691,
+   "valid": "Morchella esculenta",
+   "vern": [
+    "Morille ronde",
+    "Morille grise"
+   ],
+   "via": "nom"
+  },
+  "Morchella elata": {
+   "cd": 48683,
+   "valid": "Morchella elata",
+   "vern": [
+    "Morille élevée"
+   ],
+   "via": "nom"
+  },
+  "Gyromitra esculenta": {
+   "cd": 47646,
+   "valid": "Gyromitra esculenta",
+   "vern": [
+    "Fausse morille",
+    "Gyromitre fausse morille",
+    "Moricaude",
+    "Cervelot",
+    "Gyromitre commune"
+   ],
+   "via": "nom"
+  },
+  "Helvella crispa": {
+   "cd": 47723,
+   "valid": "Helvella crispa",
+   "vern": [
+    "Helvelle crêpue"
+   ],
+   "via": "nom"
+  },
+  "Aleuria aurantia": {
+   "cd": 45328,
+   "valid": "Aleuria aurantia",
+   "vern": [
+    "Pézize orangée"
+   ],
+   "via": "nom"
+  },
+  "Phallus impudicus": {
+   "cd": 40654,
+   "valid": "Phallus impudicus",
+   "vern": [
+    "Satyre puant",
+    "Phallus impudique",
+    "Morille du diable"
+   ],
+   "via": "nom"
+  },
+  "Clathrus ruber": {
+   "cd": 40260,
+   "valid": "Clathrus ruber",
+   "vern": [
+    "Clathre rouge",
+    "Clathre grillagé",
+    "Cœur de sorcière",
+    "Cage grillagée"
+   ],
+   "via": "nom"
+  },
+  "Coprinopsis picacea": {
+   "cd": 510325,
+   "valid": "Coprinopsis picacea",
+   "vern": [
+    "Coprin pie",
+    "Coprin noir et blanc"
+   ],
+   "via": "nom"
+  },
+  "Volvopluteus gloiocephalus": {
+   "cd": 989308,
+   "valid": "Volvopluteus gloiocephalus",
+   "vern": [
+    "Volvaire gluante"
+   ],
+   "via": "nom"
+  },
+  "Lentinus tigrinus": {
+   "cd": 34286,
+   "valid": "Lentinus tigrinus",
+   "vern": [
+    "Lentin tigré"
+   ],
+   "via": "nom"
+  },
+  "Amanita excelsa": {
+   "cd": 39025,
+   "valid": "Amanita excelsa",
+   "vern": [
+    "Amanite élevée"
+   ],
+   "via": "nom"
+  },
+  "Clathrus archeri": {
+   "cd": 40256,
+   "valid": "Clathrus archeri",
+   "vern": [
+    "Anthurus étoilé",
+    "Anthurus d'Archer",
+    "Doigts du diable",
+    "Pieuvre des bois"
+   ],
+   "via": "nom"
+  },
+  "Tremella mesenterica": {
+   "cd": 44992,
+   "valid": "Tremella mesenterica",
+   "vern": [
+    "Trémelle mésentérique"
+   ],
+   "via": "choix documenté"
+  },
+  "Suillellus queletii": {
+   "cd": 967886,
+   "valid": "Suillellus queletii",
+   "vern": [
+    "Bolet de Quélet"
+   ],
+   "via": "nom"
+  },
+  "Terana coerulea": {
+   "cd": 44192,
+   "valid": "Terana caerulea",
+   "vern": [],
+   "via": "noms saisis"
+  },
+  "Auricularia mesenterica": {
+   "cd": 41575,
+   "valid": "Auricularia mesenterica",
+   "vern": [
+    "Oreille poilue"
+   ],
+   "via": "nom"
+  },
+  "Bolbitius titubans": {
+   "cd": 36773,
+   "valid": "Bolbitius titubans",
+   "vern": [],
+   "via": "nom"
+  },
+  "Cortinarius violaceus": {
+   "cd": 35841,
+   "valid": "Cortinarius violaceus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Phellinus pomaceus": {
+   "cd": 37652,
+   "valid": "Phellinus pomaceus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Caloboletus radicans": {
+   "cd": 971180,
+   "valid": "Caloboletus radicans",
+   "vern": [
+    "Bolet radicant"
+   ],
+   "via": "nom"
+  },
+  "Cyclocybe cylindracea": {
+   "cd": 993698,
+   "valid": "Cyclocybe cylindracea",
+   "vern": [
+    "Pholiote du peuplier"
+   ],
+   "via": "nom"
+  },
+  "Daedaleopsis confragosa": {
+   "cd": 42189,
+   "valid": "Daedaleopsis confragosa",
+   "vern": [
+    "Tramète rougissante"
+   ],
+   "via": "nom"
+  },
+  "Geopora sumneriana": {
+   "cd": 47544,
+   "valid": "Geopora sumneriana",
+   "vern": [
+    "Pézize du cèdre"
+   ],
+   "via": "nom"
+  },
+  "Gliophorus psittacinus": {
+   "cd": 30280,
+   "valid": "Hygrocybe psittacina",
+   "vern": [
+    "Hygrophore perroquet"
+   ],
+   "via": "nom"
+  },
+  "Helvella lacunosa": {
+   "cd": 47753,
+   "valid": "Helvella lacunosa",
+   "vern": [
+    "Helvelle lacuneuse"
+   ],
+   "via": "nom"
+  },
+  "Leccinum aurantiacum": {
+   "cd": 29545,
+   "valid": "Leccinum aurantiacum",
+   "vern": [
+    "Bolet orangé"
+   ],
+   "via": "nom"
+  },
+  "Macrolepiota mastoidea": {
+   "cd": 38670,
+   "valid": "Macrolepiota mastoidea",
+   "vern": [
+    "Lépiote mamelonnée"
+   ],
+   "via": "nom"
+  },
+  "Mycena rosea": {
+   "cd": 31456,
+   "valid": "Mycena rosea",
+   "vern": [
+    "Mycène pure forme rose"
+   ],
+   "via": "nom"
+  },
+  "Russula violeipes": {
+   "cd": 40133,
+   "valid": "Russula violeipes",
+   "vern": [
+    "Russule à pied violet"
+   ],
+   "via": "nom"
+  },
+  "Sarcoscypha coccinea": {
+   "cd": 49776,
+   "valid": "Sarcoscypha coccinea",
+   "vern": [
+    "Pézize écarlate"
+   ],
+   "via": "nom"
+  },
+  "Schizophyllum commune": {
+   "cd": 34527,
+   "valid": "Schizophyllum commune",
+   "vern": [
+    "Schizophylle commun"
+   ],
+   "via": "nom"
+  },
+  "Scleroderma citrinum": {
+   "cd": 40716,
+   "valid": "Scleroderma citrinum",
+   "vern": [
+    "Scléroderme vulgaire",
+    "Scléroderme commun",
+    "Scléroderme citron",
+    "Scléroderme orangé"
+   ],
+   "via": "nom"
+  },
+  "Tricholoma atrosquamosum": {
+   "cd": 33180,
+   "valid": "Tricholoma atrosquamosum",
+   "vern": [],
+   "via": "nom"
+  },
+  "Xylaria polymorpha": {
+   "cd": 50344,
+   "valid": "Xylaria polymorpha",
+   "vern": [
+    "Xylaire polymorphe",
+    "Doigt de Satan",
+    "Doigt du mort"
+   ],
+   "via": "nom"
+  },
+  "Amanita subnudipes": {
+   "cd": 39009,
+   "valid": "Amanita crocea var. subnudipes",
+   "vern": [],
+   "via": "nom"
+  },
+  "Apioperdon pyriforme": {
+   "cd": 973132,
+   "valid": "Apioperdon pyriforme",
+   "vern": [
+    "Vesse de loup en poire"
+   ],
+   "via": "nom"
+  },
+  "Artomyces pyxidatus": {
+   "cd": 40826,
+   "valid": "Clavicorona pyxidata",
+   "vern": [
+    "Clavaire en chandelier"
+   ],
+   "via": "nom"
+  },
+  "Calocera cornea": {
+   "cd": 41746,
+   "valid": "Calocera cornea",
+   "vern": [
+    "Calocère petite-corne"
+   ],
+   "via": "nom"
+  },
+  "Calocera viscosa": {
+   "cd": 41755,
+   "valid": "Calocera viscosa",
+   "vern": [
+    "Calocère visqueuse"
+   ],
+   "via": "nom"
+  },
+  "Candolleomyces candolleanus": {
+   "cd": 1043522,
+   "valid": "Candolleomyces candolleanus",
+   "vern": [
+    "Hypholome de De Candolle"
+   ],
+   "via": "nom"
+  },
+  "Cantharellus pallens": {
+   "cd": 471675,
+   "valid": "Cantharellus pallens",
+   "vern": [
+    "Girolle pruineuse"
+   ],
+   "via": "nom"
+  },
+  "Clavulina rugosa": {
+   "cd": 40912,
+   "valid": "Clavulina rugosa",
+   "vern": [
+    "Clavaire rugueuse"
+   ],
+   "via": "nom"
+  },
+  "Clitocybe odora": {
+   "cd": 31916,
+   "valid": "Clitocybe odora",
+   "vern": [
+    "Clitocybe odorant"
+   ],
+   "via": "nom"
+  },
+  "Coprinellus disseminatus": {
+   "cd": 510243,
+   "valid": "Coprinellus disseminatus",
+   "vern": [
+    "Coprin grégaire",
+    "Coprin disséminé"
+   ],
+   "via": "nom"
+  },
+  "Coprinopsis lagopus": {
+   "cd": 901577,
+   "valid": "Coprinopsis lagopus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Cuphophyllus virgineus": {
+   "cd": 30058,
+   "valid": "Cuphophyllus virgineus",
+   "vern": [
+    "Hygrophore blanc de neige"
+   ],
+   "via": "nom"
+  },
+  "Cyathus striatus": {
+   "cd": 40281,
+   "valid": "Cyathus striatus",
+   "vern": [
+    "Cyathe strié"
+   ],
+   "via": "nom"
+  },
+  "Daedaleopsis tricolor": {
+   "cd": 42194,
+   "valid": "Daedaleopsis tricolor",
+   "vern": [
+    "Lenzite tricolore"
+   ],
+   "via": "nom"
+  },
+  "Echinoderma asperum": {
+   "cd": 38251,
+   "valid": "Echinoderma asperum",
+   "vern": [],
+   "via": "nom"
+  },
+  "Heterobasidion annosum": {
+   "cd": 42721,
+   "valid": "Heterobasidion annosum",
+   "vern": [
+    "Polypore du rond des pins"
+   ],
+   "via": "nom"
+  },
+  "Hygrocybe coccinea": {
+   "cd": 30126,
+   "valid": "Hygrocybe coccinea",
+   "vern": [
+    "Hygrophore cocciné"
+   ],
+   "via": "nom"
+  },
+  "Hygrocybe conica": {
+   "cd": 30136,
+   "valid": "Hygrocybe conica",
+   "vern": [
+    "Hygrophore conique"
+   ],
+   "via": "nom"
+  },
+  "Hygrocybe punicea": {
+   "cd": 30286,
+   "valid": "Hygrocybe punicea",
+   "vern": [
+    "Hygrocybe ponceau"
+   ],
+   "via": "nom"
+  },
+  "Hygrophoropsis aurantiaca": {
+   "cd": 32158,
+   "valid": "Hygrophoropsis aurantiaca",
+   "vern": [
+    "Fausse girolle"
+   ],
+   "via": "nom"
+  },
+  "Imperator rhodopurpureus": {
+   "cd": 971198,
+   "valid": "Imperator rhodopurpureus",
+   "vern": [
+    "Bolet vieux rose"
+   ],
+   "via": "nom"
+  },
+  "Infundibulicybe gibba": {
+   "cd": 509740,
+   "valid": "Infundibulicybe gibba",
+   "vern": [
+    "Clitocybe en entonnoir"
+   ],
+   "via": "nom"
+  },
+  "Leotia lubrica": {
+   "cd": 48407,
+   "valid": "Leotia lubrica",
+   "vern": [],
+   "via": "nom"
+  },
+  "Lycoperdon pratense": {
+   "cd": 40808,
+   "valid": "Vascellum pratense",
+   "vern": [
+    "Vesse de loup des prés"
+   ],
+   "via": "nom"
+  },
+  "Meripilus giganteus": {
+   "cd": 43385,
+   "valid": "Meripilus giganteus",
+   "vern": [
+    "Polypore géant"
+   ],
+   "via": "nom"
+  },
+  "Mitrula paludosa": {
+   "cd": 48551,
+   "valid": "Mitrula paludosa",
+   "vern": [
+    "Mitrule des marais"
+   ],
+   "via": "nom"
+  },
+  "Nemania confluens": {
+   "cd": 856894,
+   "valid": "Nemania confluens",
+   "vern": [],
+   "via": "nom"
+  },
+  "Pisolithus arhizus": {
+   "cd": 465278,
+   "valid": "Pisolithus arhizus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Pluteus chrysophaeus": {
+   "cd": 38815,
+   "valid": "Pluteus chrysophaeus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Pseudoclitocybe cyathiformis": {
+   "cd": 32865,
+   "valid": "Pseudoclitocybe cyathiformis",
+   "vern": [
+    "Clitocybe en coupe"
+   ],
+   "via": "nom"
+  },
+  "Ramaria stricta": {
+   "cd": 41107,
+   "valid": "Ramaria stricta",
+   "vern": [
+    "Clavaire dressée"
+   ],
+   "via": "nom"
+  },
+  "Rubroboletus lupinus": {
+   "cd": 967902,
+   "valid": "Rubroboletus lupinus",
+   "vern": [
+    "Bolet de loup"
+   ],
+   "via": "nom"
+  },
+  "Russula rosea": {
+   "cd": 39870,
+   "valid": "Russula lepida",
+   "vern": [
+    "Russule jolie"
+   ],
+   "via": "noms saisis"
+  },
+  "Scleroderma polyrhizum": {
+   "cd": 40718,
+   "valid": "Scleroderma geaster",
+   "vern": [
+    "Scléroderme en forme d'étoile"
+   ],
+   "via": "nom"
+  },
+  "Stereum hirsutum": {
+   "cd": 44622,
+   "valid": "Stereum hirsutum",
+   "vern": [
+    "Stérée hirsute"
+   ],
+   "via": "nom"
+  },
+  "Stereum subtomentosum": {
+   "cd": 44641,
+   "valid": "Stereum subtomentosum",
+   "vern": [
+    "Stérée remarquable"
+   ],
+   "via": "nom"
+  },
+  "Suillus bovinus": {
+   "cd": 29694,
+   "valid": "Suillus bovinus",
+   "vern": [
+    "Bolet des bouviers"
+   ],
+   "via": "nom"
+  },
+  "Tricholoma acerbum": {
+   "cd": 33157,
+   "valid": "Tricholoma acerbum",
+   "vern": [
+    "Tricholome acerbe"
+   ],
+   "via": "nom"
+  },
+  "Tulostoma brumale": {
+   "cd": 40790,
+   "valid": "Tulostoma brumale",
+   "vern": [],
+   "via": "nom"
+  },
+  "Abortiporus biennis": {
+   "cd": 41255,
+   "valid": "Abortiporus biennis",
+   "vern": [
+    "Polypore bisannuel"
+   ],
+   "via": "nom"
+  },
+  "Agaricus arvensis": {
+   "cd": 37905,
+   "valid": "Agaricus arvensis",
+   "vern": [
+    "Agaric des jachères",
+    "Psalliote des jachères"
+   ],
+   "via": "nom"
+  },
+  "Agaricus augustus": {
+   "cd": 462625,
+   "valid": "Agaricus augustus",
+   "vern": [
+    "Agaric impérial",
+    "Psalliote impérial"
+   ],
+   "via": "nom"
+  },
+  "Agaricus devoniensis": {
+   "cd": 37964,
+   "valid": "Agaricus devoniensis",
+   "vern": [
+    "Agaric des dunes",
+    "Psalliote des dunes"
+   ],
+   "via": "nom"
+  },
+  "Agaricus impudicus": {
+   "cd": 38118,
+   "valid": "Agaricus impudicus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Agaricus sylvaticus": {
+   "cd": 901371,
+   "valid": "Agaricus sylvaticus",
+   "vern": [
+    "Psalliote des bois",
+    "Agaric des forêts",
+    "Psalliote des forêts"
+   ],
+   "via": "nom"
+  },
+  "Agaricus sylvicola": {
+   "cd": 37972,
+   "valid": "Agaricus essettei",
+   "vern": [
+    "Agaric à pied bulbeux",
+    "Psalliote à pied bulbeux"
+   ],
+   "via": "nom"
+  },
+  "Amanita ceciliae": {
+   "cd": 38997,
+   "valid": "Amanita ceciliae",
+   "vern": [
+    "Amanite impériale"
+   ],
+   "via": "nom"
+  },
+  "Amanita echinocephala": {
+   "cd": 39017,
+   "valid": "Amanita echinocephala",
+   "vern": [
+    "Amanite épineuse"
+   ],
+   "via": "nom"
+  },
+  "Amanita franchetii": {
+   "cd": 39031,
+   "valid": "Amanita franchetii",
+   "vern": [
+    "Amanite à voile jaune"
+   ],
+   "via": "nom"
+  },
+  "Amanita fulva": {
+   "cd": 39040,
+   "valid": "Amanita fulva",
+   "vern": [
+    "Amanite fauve"
+   ],
+   "via": "nom"
+  },
+  "Amanita gemmata": {
+   "cd": 39055,
+   "valid": "Amanita junquillea",
+   "vern": [
+    "Amanite jonquille"
+   ],
+   "via": "nom"
+  },
+  "Amanita lividopallescens": {
+   "cd": 39066,
+   "valid": "Amanita lividopallescens",
+   "vern": [],
+   "via": "nom"
+  },
+  "Amanita mairei": {
+   "cd": 39069,
+   "valid": "Amanita mairei",
+   "vern": [
+    "Amanite argentée"
+   ],
+   "via": "nom"
+  },
+  "Amanita porphyria": {
+   "cd": 39119,
+   "valid": "Amanita porphyria",
+   "vern": [
+    "Amanite porphyre"
+   ],
+   "via": "nom"
+  },
+  "Amanita submembranacea": {
+   "cd": 39150,
+   "valid": "Amanita submembranacea",
+   "vern": [
+    "Amanite à volve grise"
+   ],
+   "via": "nom"
+  },
+  "Ampulloclitocybe clavipes": {
+   "cd": 462560,
+   "valid": "Ampulloclitocybe clavipes",
+   "vern": [
+    "Tête de moine",
+    "Clitocybe à pied en massue"
+   ],
+   "via": "nom"
+  },
+  "Anthracobia melaloma": {
+   "cd": 45450,
+   "valid": "Anthracobia melaloma",
+   "vern": [],
+   "via": "nom"
+  },
+  "Anthracobia tristis": {
+   "cd": 45455,
+   "valid": "Anthracobia tristis",
+   "vern": [],
+   "via": "nom"
+  },
+  "Antrodiella serpula": {
+   "cd": 462751,
+   "valid": "Antrodiella serpula",
+   "vern": [
+    "Polypore vorace"
+   ],
+   "via": "nom"
+  },
+  "Armillaria cepistipes": {
+   "cd": 31670,
+   "valid": "Armillaria cepistipes",
+   "vern": [
+    "Armillaire pied-bot"
+   ],
+   "via": "nom"
+  },
+  "Astraeus hygrometricus": {
+   "cd": 40179,
+   "valid": "Astraeus hygrometricus",
+   "vern": [
+    "Géastre hygrométrique"
+   ],
+   "via": "nom"
+  },
+  "Atheniella flavoalba": {
+   "cd": 995503,
+   "valid": "Atheniella flavoalba",
+   "vern": [],
+   "via": "nom"
+  },
+  "Aureoboletus gentilis": {
+   "cd": 29336,
+   "valid": "Aureoboletus gentilis",
+   "vern": [
+    "Bolet cramoisi"
+   ],
+   "via": "nom"
+  },
+  "Balsamia vulgaris": {
+   "cd": 45734,
+   "valid": "Balsamia vulgaris",
+   "vern": [],
+   "via": "nom"
+  },
+  "Bjerkandera adusta": {
+   "cd": 41622,
+   "valid": "Bjerkandera adusta",
+   "vern": [
+    "Tramète brûlée"
+   ],
+   "via": "nom"
+  },
+  "Bovista plumbea": {
+   "cd": 40208,
+   "valid": "Bovista plumbea",
+   "vern": [],
+   "via": "nom"
+  },
+  "Britzelmayria multipedata": {
+   "cd": 37692,
+   "valid": "Psathyrella multipedata",
+   "vern": [],
+   "via": "nom"
+  },
+  "Bulgaria inquinans": {
+   "cd": 45908,
+   "valid": "Bulgaria inquinans",
+   "vern": [
+    "Bulgarie salissante"
+   ],
+   "via": "nom"
+  },
+  "Calocybe obscurissima": {
+   "cd": 31895,
+   "valid": "Rugosomyces obscurissimus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Cantharellus cinereus": {
+   "cd": 29963,
+   "valid": "Craterellus cinereus",
+   "vern": [
+    "Chanterelle cendrée"
+   ],
+   "via": "nom"
+  },
+  "Cerioporus leptocephalus": {
+   "cd": 966674,
+   "valid": "Cerioporus leptocephalus",
+   "vern": [
+    "Polypore variable"
+   ],
+   "via": "nom"
+  },
+  "Cerioporus squamosus": {
+   "cd": 44088,
+   "valid": "Polyporus squamosus",
+   "vern": [
+    "Polypore écailleux"
+   ],
+   "via": "nom"
+  },
+  "Chlorociboria aeruginascens": {
+   "cd": 46239,
+   "valid": "Chlorociboria aeruginascens",
+   "vern": [],
+   "via": "nom"
+  },
+  "Choiromyces venosus": {
+   "cd": 46261,
+   "valid": "Choiromyces venosus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Chroogomphus rutilus": {
+   "cd": 29848,
+   "valid": "Chroogomphus rutilus",
+   "vern": [
+    "Gomphide visqueux"
+   ],
+   "via": "nom"
+  },
+  "Clavaria acuta": {
+   "cd": 40848,
+   "valid": "Clavaria acuta",
+   "vern": [],
+   "via": "nom"
+  },
+  "Clavariadelphus pistillaris": {
+   "cd": 40883,
+   "valid": "Clavariadelphus pistillaris",
+   "vern": [
+    "Clavaire en pilon"
+   ],
+   "via": "nom"
+  },
+  "Clavulina coralloides": {
+   "cd": 40905,
+   "valid": "Clavulina coralloides",
+   "vern": [
+    "Clavaire crêtée"
+   ],
+   "via": "nom"
+  },
+  "Clavulinopsis corniculata": {
+   "cd": 40925,
+   "valid": "Clavulinopsis corniculata",
+   "vern": [
+    "Clavaire cornue"
+   ],
+   "via": "nom"
+  },
+  "Clitocybe costata": {
+   "cd": 30893,
+   "valid": "Clitocybe costata",
+   "vern": [
+    "Clitocybe côtelé"
+   ],
+   "via": "nom"
+  },
+  "Clitocybe fragrans": {
+   "cd": 31742,
+   "valid": "Clitocybe fragrans",
+   "vern": [
+    "Clitocybe anisé strié"
+   ],
+   "via": "nom"
+  },
+  "Clitocybe phaeophthalma": {
+   "cd": 31931,
+   "valid": "Clitocybe phaeophthalma",
+   "vern": [
+    "Clitocybe à odeur de poulailler"
+   ],
+   "via": "nom"
+  },
+  "Collybia tuberosa": {
+   "cd": 30683,
+   "valid": "Collybia tuberosa",
+   "vern": [
+    "Collybie à sclérote noir"
+   ],
+   "via": "nom"
+  },
+  "Collybiopsis confluens": {
+   "cd": 30593,
+   "valid": "Collybia confluens",
+   "vern": [],
+   "via": "nom"
+  },
+  "Coltricia perennis": {
+   "cd": 42002,
+   "valid": "Coltricia perennis",
+   "vern": [
+    "Polypore vivace"
+   ],
+   "via": "nom"
+  },
+  "Coprinellus micaceus": {
+   "cd": 510311,
+   "valid": "Coprinellus micaceus",
+   "vern": [
+    "Coprin micacé"
+   ],
+   "via": "nom"
+  },
+  "Cordyceps militaris": {
+   "cd": 46486,
+   "valid": "Cordyceps militaris",
+   "vern": [
+    "Cordyceps militaire"
+   ],
+   "via": "nom"
+  },
+  "Cortinarius aleuriosmus": {
+   "cd": 34605,
+   "valid": "Cortinarius aleuriosmus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Cortinarius caperatus": {
+   "cd": 36627,
+   "valid": "Rozites caperatus",
+   "vern": [
+    "Pholiote ridée"
+   ],
+   "via": "nom"
+  },
+  "Cortinarius infractus": {
+   "cd": 35071,
+   "valid": "Cortinarius infractus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Cortinarius mucifluoides": {
+   "cd": 35213,
+   "valid": "Cortinarius mucifluoides",
+   "vern": [],
+   "via": "nom"
+  },
+  "Cortinarius uliginosus": {
+   "cd": 35783,
+   "valid": "Cortinarius uliginosus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Crepidotus cesatii": {
+   "cd": 33087,
+   "valid": "Crepidotus cesatii",
+   "vern": [],
+   "via": "nom"
+  },
+  "Crepidotus epibryus": {
+   "cd": 33097,
+   "valid": "Crepidotus epibryus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Crucibulum laeve": {
+   "cd": 40268,
+   "valid": "Crucibulum laeve",
+   "vern": [
+    "Crucibule lisse"
+   ],
+   "via": "nom"
+  },
+  "Cudoniella clavus": {
+   "cd": 46668,
+   "valid": "Cudoniella clavus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Cuphophyllus fornicatus": {
+   "cd": 987229,
+   "valid": "Cuphophyllus fornicatus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Cuphophyllus russocoriaceus": {
+   "cd": 30045,
+   "valid": "Cuphophyllus russocoriaceus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Cyanoboletus pulverulentus": {
+   "cd": 967881,
+   "valid": "Cyanoboletus pulverulentus",
+   "vern": [
+    "Bolet pulvérulent"
+   ],
+   "via": "nom"
+  },
+  "Cyanosporus subcaesius": {
+   "cd": 996356,
+   "valid": "Cyanosporus subcaesius",
+   "vern": [
+    "Polypore bleuté des feuillus"
+   ],
+   "via": "nom"
+  },
+  "Cystoderma amianthinum": {
+   "cd": 38156,
+   "valid": "Cystoderma amianthinum",
+   "vern": [
+    "Cystoderme furfuracé"
+   ],
+   "via": "nom"
+  },
+  "Cystodermella cinnabarina": {
+   "cd": 38192,
+   "valid": "Cystoderma cinnabarinum",
+   "vern": [
+    "Cystoderme rouge cinabre"
+   ],
+   "via": "nom"
+  },
+  "Cystolepiota seminuda": {
+   "cd": 38242,
+   "valid": "Cystolepiota seminuda",
+   "vern": [],
+   "via": "nom"
+  },
+  "Daedalea quercina": {
+   "cd": 42185,
+   "valid": "Daedalea quercina",
+   "vern": [
+    "Lenzite du chêne",
+    "Dédalée du chêne"
+   ],
+   "via": "nom"
+  },
+  "Daedaleopsis nitida": {
+   "cd": 44328,
+   "valid": "Hexagonia nitida",
+   "vern": [
+    "Polypore nid d'abeilles"
+   ],
+   "via": "noms saisis"
+  },
+  "Daldinia concentrica": {
+   "cd": 46706,
+   "valid": "Daldinia concentrica",
+   "vern": [
+    "Daldinie concentrique"
+   ],
+   "via": "nom"
+  },
+  "Deconica crobula": {
+   "cd": 464876,
+   "valid": "Psilocybe crobula",
+   "vern": [],
+   "via": "nom"
+  },
+  "Delicatula integrella": {
+   "cd": 32044,
+   "valid": "Delicatula integrella",
+   "vern": [],
+   "via": "nom"
+  },
+  "Dermoloma pseudocuneifolium": {
+   "cd": 32063,
+   "valid": "Dermoloma pseudocuneifolium",
+   "vern": [],
+   "via": "nom"
+  },
+  "Dissingia leucomelaena": {
+   "cd": 993955,
+   "valid": "Dissingia leucomelaena",
+   "vern": [
+    "Helvelle blanche et noire"
+   ],
+   "via": "nom"
+  },
+  "Entoloma aprile": {
+   "cd": 33484,
+   "valid": "Entoloma aprile",
+   "vern": [
+    "Entolome d'avril"
+   ],
+   "via": "nom"
+  },
+  "Entoloma araneosum": {
+   "cd": 462153,
+   "valid": "Entoloma aranaeosum",
+   "vern": [],
+   "via": "nom"
+  },
+  "Entoloma bloxamii": {
+   "cd": 33509,
+   "valid": "Entoloma bloxamii",
+   "vern": [],
+   "via": "nom"
+  },
+  "Entoloma chalybeum": {
+   "cd": 462146,
+   "valid": "Entoloma chalybaeum",
+   "vern": [],
+   "via": "nom"
+  },
+  "Entoloma clandestinum": {
+   "cd": 33538,
+   "valid": "Entoloma clandestinum",
+   "vern": [],
+   "via": "nom"
+  },
+  "Entoloma lividoalbum": {
+   "cd": 33733,
+   "valid": "Entoloma lividoalbum",
+   "vern": [],
+   "via": "nom"
+  },
+  "Entoloma mutabilipes": {
+   "cd": 33770,
+   "valid": "Entoloma mutabilipes",
+   "vern": [],
+   "via": "nom"
+  },
+  "Entoloma rhodocylix": {
+   "cd": 33898,
+   "valid": "Entoloma rhodocylix",
+   "vern": [],
+   "via": "nom"
+  },
+  "Entoloma sepium": {
+   "cd": 33942,
+   "valid": "Entoloma sepium",
+   "vern": [],
+   "via": "nom"
+  },
+  "Exidia glandulosa": {
+   "cd": 42331,
+   "valid": "Exidia glandulosa",
+   "vern": [
+    "Exidie glanduleuse"
+   ],
+   "via": "nom"
+  },
+  "Fomitopsis betulina": {
+   "cd": 44020,
+   "valid": "Piptoporus betulinus",
+   "vern": [
+    "Polypore du bouleau"
+   ],
+   "via": "nom"
+  },
+  "Fomitopsis pinicola": {
+   "cd": 42514,
+   "valid": "Fomitopsis pinicola",
+   "vern": [
+    "Polypore marginé"
+   ],
+   "via": "nom"
+  },
+  "Fuscoporia ferruginosa": {
+   "cd": 461808,
+   "valid": "Fuscoporia ferruginosa",
+   "vern": [
+    "Polypore ferrugineux"
+   ],
+   "via": "nom"
+  },
+  "Galerina graminea": {
+   "cd": 35996,
+   "valid": "Galerina graminea",
+   "vern": [],
+   "via": "nom"
+  },
+  "Galerina vittiformis": {
+   "cd": 36092,
+   "valid": "Galerina vittiformis",
+   "vern": [],
+   "via": "nom"
+  },
+  "Ganoderma applanatum": {
+   "cd": 42549,
+   "valid": "Ganoderma applanatum",
+   "vern": [
+    "Ganoderme plat",
+    "Ganoderme aplani"
+   ],
+   "via": "nom"
+  },
+  "Ganoderma lucidum": {
+   "cd": 42551,
+   "valid": "Ganoderma lucidum",
+   "vern": [
+    "Ganoderme luisant"
+   ],
+   "via": "nom"
+  },
+  "Gliophorus laetus": {
+   "cd": 30198,
+   "valid": "Hygrocybe laeta",
+   "vern": [],
+   "via": "nom"
+  },
+  "Gloeophyllum sepiarium": {
+   "cd": 42614,
+   "valid": "Gloeophyllum sepiarium",
+   "vern": [
+    "Lenzite des clôtures"
+   ],
+   "via": "nom"
+  },
+  "Grifola frondosa": {
+   "cd": 42644,
+   "valid": "Grifola frondosa",
+   "vern": [
+    "Polypore en touffes"
+   ],
+   "via": "nom"
+  },
+  "Gymnopilus junonius": {
+   "cd": 36923,
+   "valid": "Gymnopilus junonius",
+   "vern": [
+    "Pholiote remarquable"
+   ],
+   "via": "nom"
+  },
+  "Gymnopilus penetrans": {
+   "cd": 36933,
+   "valid": "Gymnopilus penetrans",
+   "vern": [
+    "Gymnopile pénétrant",
+    "Pholiote pénétrante"
+   ],
+   "via": "nom"
+  },
+  "Gymnopus erythropus": {
+   "cd": 462473,
+   "valid": "Collybia erythropus",
+   "vern": [
+    "Collybie à pied rouge"
+   ],
+   "via": "nom"
+  },
+  "Gymnopus foetidus": {
+   "cd": 1015036,
+   "valid": "Gymnopus foetidus",
+   "vern": [
+    "Marasme fétide"
+   ],
+   "via": "nom"
+  },
+  "Gymnopus fusipes": {
+   "cd": 30626,
+   "valid": "Collybia fusipes",
+   "vern": [
+    "Souchette"
+   ],
+   "via": "nom"
+  },
+  "Gyrodon lividus": {
+   "cd": 29523,
+   "valid": "Gyrodon lividus",
+   "vern": [
+    "Bolet livide"
+   ],
+   "via": "nom"
+  },
+  "Gyroporus castaneus": {
+   "cd": 29528,
+   "valid": "Gyroporus castaneus",
+   "vern": [
+    "Bolet châtain"
+   ],
+   "via": "nom"
+  },
+  "Hapalopilus rutilans": {
+   "cd": 42667,
+   "valid": "Hapalopilus rutilans",
+   "vern": [
+    "Polypore rutilant"
+   ],
+   "via": "nom"
+  },
+  "Hebeloma radicosum": {
+   "cd": 36182,
+   "valid": "Hebeloma radicosum",
+   "vern": [
+    "Hébélome radicant"
+   ],
+   "via": "nom"
+  },
+  "Hebeloma sinapizans": {
+   "cd": 36191,
+   "valid": "Hebeloma sinapizans",
+   "vern": [
+    "Hébélome brûlant",
+    "Hébélome couleur moutarde"
+   ],
+   "via": "nom"
+  },
+  "Helvella solitaria": {
+   "cd": 47802,
+   "valid": "Helvella solitaria",
+   "vern": [
+    "Helvelle solitaire"
+   ],
+   "via": "nom"
+  },
+  "Hemileccinum impolitum": {
+   "cd": 508990,
+   "valid": "Hemileccinum impolitum",
+   "vern": [
+    "Bolet dépoli"
+   ],
+   "via": "nom"
+  },
+  "Homophron spadiceum": {
+   "cd": 971482,
+   "valid": "Homophron spadiceum",
+   "vern": [],
+   "via": "nom"
+  },
+  "Hortiboletus bubalinus": {
+   "cd": 971210,
+   "valid": "Hortiboletus bubalinus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Hydnellum ioeides": {
+   "cd": 975245,
+   "valid": "Sarcodon ioeides",
+   "vern": [],
+   "via": "nom"
+  },
+  "Hydnoporia tabacina": {
+   "cd": 42820,
+   "valid": "Hymenochaete tabacina",
+   "vern": [],
+   "via": "nom"
+  },
+  "Hygrocybe acutoconica": {
+   "cd": 30208,
+   "valid": "Hygrocybe acutoconica",
+   "vern": [],
+   "via": "nom"
+  },
+  "Hygrocybe chlorophana": {
+   "cd": 30111,
+   "valid": "Hygrocybe chlorophana",
+   "vern": [],
+   "via": "nom"
+  },
+  "Hygrocybe citrinovirens": {
+   "cd": 30122,
+   "valid": "Hygrocybe citrinovirens",
+   "vern": [],
+   "via": "nom"
+  },
+  "Hygrocybe intermedia": {
+   "cd": 30185,
+   "valid": "Hygrocybe intermedia",
+   "vern": [],
+   "via": "nom"
+  },
+  "Hygrocybe mucronella": {
+   "cd": 30232,
+   "valid": "Hygrocybe mucronella",
+   "vern": [],
+   "via": "nom"
+  },
+  "Hygrocybe quieta": {
+   "cd": 30291,
+   "valid": "Hygrocybe quieta",
+   "vern": [],
+   "via": "nom"
+  },
+  "Hygrocybe reidii": {
+   "cd": 30300,
+   "valid": "Hygrocybe reidii",
+   "vern": [],
+   "via": "nom"
+  },
+  "Hygrophorus discoxanthus": {
+   "cd": 30384,
+   "valid": "Hygrophorus discoxanthus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Hygrophorus eburneus": {
+   "cd": 30389,
+   "valid": "Hygrophorus eburneus",
+   "vern": [
+    "Hygrophore blanc d'ivoire"
+   ],
+   "via": "nom"
+  },
+  "Hygrophorus persoonii": {
+   "cd": 30462,
+   "valid": "Hygrophorus persoonii",
+   "vern": [
+    "Hygrophore bicolore"
+   ],
+   "via": "nom"
+  },
+  "Hygrophorus russula": {
+   "cd": 30496,
+   "valid": "Hygrophorus russula",
+   "vern": [
+    "Hygrophore russule"
+   ],
+   "via": "nom"
+  },
+  "Imperator luteocupreus": {
+   "cd": 971196,
+   "valid": "Imperator luteocupreus",
+   "vern": [
+    "Bolet cuivré"
+   ],
+   "via": "nom"
+  },
+  "Imperator torosus": {
+   "cd": 971200,
+   "valid": "Imperator torosus",
+   "vern": [
+    "Bolet de plomb",
+    "Bolet massif"
+   ],
+   "via": "nom"
+  },
+  "Inocybe geophylla": {
+   "cd": 36338,
+   "valid": "Inocybe geophylla",
+   "vern": [
+    "Inocybe à lames couleur de terre",
+    "Inocybe terreux"
+   ],
+   "via": "nom"
+  },
+  "Inocybe griseolilacina": {
+   "cd": 36364,
+   "valid": "Inocybe griseolilacina",
+   "vern": [],
+   "via": "nom"
+  },
+  "Inocybe haemacta": {
+   "cd": 36368,
+   "valid": "Inocybe haemacta",
+   "vern": [],
+   "via": "nom"
+  },
+  "Inocybe mixtilis": {
+   "cd": 36435,
+   "valid": "Inocybe mixtilis",
+   "vern": [],
+   "via": "nom"
+  },
+  "Inocybe terrifera": {
+   "cd": 36519,
+   "valid": "Inocybe terrifera",
+   "vern": [],
+   "via": "nom"
+  },
+  "Inonotus hispidus": {
+   "cd": 43103,
+   "valid": "Inonotus hispidus",
+   "vern": [
+    "Polypore herissé"
+   ],
+   "via": "nom"
+  },
+  "Inosperma bongardii": {
+   "cd": 1043643,
+   "valid": "Inosperma bongardii",
+   "vern": [],
+   "via": "nom"
+  },
+  "Laccaria laccata": {
+   "cd": 32192,
+   "valid": "Laccaria laccata",
+   "vern": [
+    "Clitocybe laqué"
+   ],
+   "via": "nom"
+  },
+  "Laccaria proxima": {
+   "cd": 32204,
+   "valid": "Laccaria proxima",
+   "vern": [],
+   "via": "nom"
+  },
+  "Laccaria tortilis": {
+   "cd": 32219,
+   "valid": "Laccaria tortilis",
+   "vern": [],
+   "via": "nom"
+  },
+  "Lacrymaria lacrymabunda": {
+   "cd": 37550,
+   "valid": "Lacrymaria lacrymabunda",
+   "vern": [
+    "Lacrymaire velouté"
+   ],
+   "via": "nom"
+  },
+  "Lactarius acerrimus": {
+   "cd": 39216,
+   "valid": "Lactarius acerrimus",
+   "vern": [
+    "Lactaire à lames interveinées"
+   ],
+   "via": "nom"
+  },
+  "Lactarius camphoratus": {
+   "cd": 39261,
+   "valid": "Lactarius camphoratus",
+   "vern": [
+    "Lactaire à odeur de chicorée"
+   ],
+   "via": "nom"
+  },
+  "Lactarius circellatus": {
+   "cd": 39268,
+   "valid": "Lactarius circellatus",
+   "vern": [
+    "Lactaire cerclé"
+   ],
+   "via": "nom"
+  },
+  "Lactarius controversus": {
+   "cd": 39279,
+   "valid": "Lactarius controversus",
+   "vern": [
+    "Lactaire des peupliers"
+   ],
+   "via": "nom"
+  },
+  "Lactarius flavidus": {
+   "cd": 39299,
+   "valid": "Lactarius flavidus",
+   "vern": [
+    "Lactaire jaunâtre"
+   ],
+   "via": "nom"
+  },
+  "Lactarius fluens": {
+   "cd": 39302,
+   "valid": "Lactarius fluens",
+   "vern": [
+    "Lactaire pisse-lait"
+   ],
+   "via": "nom"
+  },
+  "Lactarius fulvissimus": {
+   "cd": 39310,
+   "valid": "Lactarius fulvissimus",
+   "vern": [
+    "Lactaire fauve"
+   ],
+   "via": "nom"
+  },
+  "Lactarius pubescens": {
+   "cd": 39404,
+   "valid": "Lactarius pubescens",
+   "vern": [
+    "Lactaire pubescent"
+   ],
+   "via": "nom"
+  },
+  "Lactarius quieticolor": {
+   "cd": 39413,
+   "valid": "Lactarius quieticolor",
+   "vern": [
+    "Lactaire orangé gris"
+   ],
+   "via": "nom"
+  },
+  "Lactarius ruginosus": {
+   "cd": 39442,
+   "valid": "Lactarius ruginosus",
+   "vern": [
+    "Lactaire festonné"
+   ],
+   "via": "nom"
+  },
+  "Lactarius semisanguifluus": {
+   "cd": 39455,
+   "valid": "Lactarius semisanguifluus",
+   "vern": [
+    "Lactaire semi-sanguin"
+   ],
+   "via": "nom"
+  },
+  "Lactarius uvidus": {
+   "cd": 39494,
+   "valid": "Lactarius uvidus",
+   "vern": [
+    "Lactaire humide"
+   ],
+   "via": "nom"
+  },
+  "Lactarius zonarius": {
+   "cd": 39522,
+   "valid": "Lactarius zonarius",
+   "vern": [
+    "Lactaire zoné"
+   ],
+   "via": "nom"
+  },
+  "Lactifluus volemus": {
+   "cd": 969743,
+   "valid": "Lactifluus volemus",
+   "vern": [
+    "Lactaire à lait abondant"
+   ],
+   "via": "nom"
+  },
+  "Laxitextum bicolor": {
+   "cd": 43242,
+   "valid": "Laxitextum bicolor",
+   "vern": [],
+   "via": "nom"
+  },
+  "Leccinellum crocipodium": {
+   "cd": 1031559,
+   "valid": "Leccinellum crocipodium",
+   "vern": [
+    "Bolet craquelé"
+   ],
+   "via": "nom"
+  },
+  "Leccinellum pseudoscabrum": {
+   "cd": 973593,
+   "valid": "Leccinellum pseudoscabrum",
+   "vern": [],
+   "via": "nom"
+  },
+  "Leccinum floccopus": {
+   "cd": 29649,
+   "valid": "Leccinum versipelle",
+   "vern": [
+    "Bolet roux"
+   ],
+   "via": "nom"
+  },
+  "Lentinus brumalis": {
+   "cd": 973094,
+   "valid": "Lentinus brumalis",
+   "vern": [
+    "Polypore d'hiver"
+   ],
+   "via": "nom"
+  },
+  "Lentinus substrictus": {
+   "cd": 44070,
+   "valid": "Polyporus ciliatus",
+   "vern": [
+    "Polypore cilié"
+   ],
+   "via": "nom"
+  },
+  "Lenzites betulinus": {
+   "cd": 43251,
+   "valid": "Lenzites betulinus",
+   "vern": [
+    "Lenzite du bouleau",
+    "Tramète du bouleau"
+   ],
+   "via": "nom"
+  },
+  "Lepiota clypeolaria": {
+   "cd": 38310,
+   "valid": "Lepiota clypeolaria",
+   "vern": [
+    "Lépiote en bouclier"
+   ],
+   "via": "nom"
+  },
+  "Lepiota magnispora": {
+   "cd": 38454,
+   "valid": "Lepiota ventriosospora",
+   "vern": [],
+   "via": "noms saisis"
+  },
+  "Lepiota ochraceodisca": {
+   "cd": 38404,
+   "valid": "Lepiota ochraceodisca",
+   "vern": [],
+   "via": "nom"
+  },
+  "Lepiota pseudolilacea": {
+   "cd": 38418,
+   "valid": "Lepiota pseudolilacea",
+   "vern": [],
+   "via": "nom"
+  },
+  "Lepiota subincarnata": {
+   "cd": 38448,
+   "valid": "Lepiota subincarnata",
+   "vern": [],
+   "via": "nom"
+  },
+  "Lepista personata": {
+   "cd": 32294,
+   "valid": "Lepista personata",
+   "vern": [
+    "Pied-violet",
+    "Tricholome sinistre",
+    "Tricholome des Oies"
+   ],
+   "via": "nom"
+  },
+  "Leucocortinarius bulbiger": {
+   "cd": 32316,
+   "valid": "Leucocortinarius bulbiger",
+   "vern": [
+    "Leucocortinaire bulbeux"
+   ],
+   "via": "nom"
+  },
+  "Lycoperdon echinatum": {
+   "cd": 40525,
+   "valid": "Lycoperdon echinatum",
+   "vern": [
+    "Vesse de loup hérisson"
+   ],
+   "via": "nom"
+  },
+  "Lycoperdon excipuliforme": {
+   "cd": 40234,
+   "valid": "Calvatia excipuliformis",
+   "vern": [],
+   "via": "nom"
+  },
+  "Lycoperdon mammaeforme": {
+   "cd": 464310,
+   "valid": "Lycoperdon mammaeforme",
+   "vern": [],
+   "via": "nom"
+  },
+  "Lycoperdon nigrescens": {
+   "cd": 40534,
+   "valid": "Lycoperdon foetidum",
+   "vern": [],
+   "via": "nom"
+  },
+  "Lyophyllum helvella": {
+   "cd": 32379,
+   "valid": "Lyophyllum helvella",
+   "vern": [],
+   "via": "nom"
+  },
+  "Macrolepiota excoriata": {
+   "cd": 38647,
+   "valid": "Macrolepiota excoriata",
+   "vern": [
+    "Lépiote excoriée"
+   ],
+   "via": "nom"
+  },
+  "Macrolepiota fuliginosa": {
+   "cd": 38689,
+   "valid": "Macrolepiota fuliginosa",
+   "vern": [],
+   "via": "nom"
+  },
+  "Marasmiellus candidus": {
+   "cd": 30946,
+   "valid": "Marasmiellus candidus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Marasmius bulliardii": {
+   "cd": 30988,
+   "valid": "Marasmius bulliardii",
+   "vern": [],
+   "via": "nom"
+  },
+  "Marasmius curreyi": {
+   "cd": 31009,
+   "valid": "Marasmius curreyi",
+   "vern": [],
+   "via": "nom"
+  },
+  "Meottomyces dissimulans": {
+   "cd": 464514,
+   "valid": "Meottomyces dissimulans",
+   "vern": [],
+   "via": "nom"
+  },
+  "Metacampanella tricolor": {
+   "cd": 30968,
+   "valid": "Marasmiellus tricolor",
+   "vern": [],
+   "via": "noms saisis"
+  },
+  "Morchella semilibera": {
+   "cd": 48547,
+   "valid": "Morchella semilibera",
+   "vern": [
+    "Morillon"
+   ],
+   "via": "nom"
+  },
+  "Mucidula mucida": {
+   "cd": 31604,
+   "valid": "Mucidula mucida",
+   "vern": [
+    "Collybie visqueuse"
+   ],
+   "via": "nom"
+  },
+  "Mycena capillaripes": {
+   "cd": 31194,
+   "valid": "Mycena capillaripes",
+   "vern": [],
+   "via": "nom"
+  },
+  "Mycena galericulata": {
+   "cd": 31292,
+   "valid": "Mycena galericulata",
+   "vern": [
+    "Mycène casquée"
+   ],
+   "via": "nom"
+  },
+  "Mycena inclinata": {
+   "cd": 30788,
+   "valid": "Mycena inclinata",
+   "vern": [
+    "Mycène inclinée"
+   ],
+   "via": "nom"
+  },
+  "Mycena leptocephala": {
+   "cd": 31206,
+   "valid": "Mycena leptocephala",
+   "vern": [],
+   "via": "nom"
+  },
+  "Mycena renati": {
+   "cd": 465104,
+   "valid": "Mycena renatii",
+   "vern": [],
+   "via": "nom"
+  },
+  "Mycena sanguinolenta": {
+   "cd": 31468,
+   "valid": "Mycena sanguinolenta",
+   "vern": [
+    "Mycène sanguinolent"
+   ],
+   "via": "nom"
+  },
+  "Mycena seynesii": {
+   "cd": 31479,
+   "valid": "Mycena seynii",
+   "vern": [],
+   "via": "nom"
+  },
+  "Naematelia aurantia": {
+   "cd": 464239,
+   "valid": "Tremella aurantia",
+   "vern": [],
+   "via": "noms saisis"
+  },
+  "Nectria cinnabarina": {
+   "cd": 48765,
+   "valid": "Nectria cinnabarina",
+   "vern": [],
+   "via": "nom"
+  },
+  "Otidea alutacea": {
+   "cd": 48989,
+   "valid": "Otidea alutacea",
+   "vern": [],
+   "via": "nom"
+  },
+  "Panaeolina foenisecii": {
+   "cd": 37033,
+   "valid": "Panaeolus foenisecii",
+   "vern": [],
+   "via": "nom"
+  },
+  "Panaeolus papilionaceus": {
+   "cd": 37043,
+   "valid": "Panaeolus papilionaceus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Panellus stipticus": {
+   "cd": 34332,
+   "valid": "Panellus stipticus",
+   "vern": [
+    "Panelle astringente"
+   ],
+   "via": "nom"
+  },
+  "Paragalactinia succosa": {
+   "cd": 1002432,
+   "valid": "Paragalactinia succosa",
+   "vern": [],
+   "via": "nom"
+  },
+  "Paralepista flaccida": {
+   "cd": 32234,
+   "valid": "Lepista flaccida",
+   "vern": [
+    "Clitocybe inverse des feuillus"
+   ],
+   "via": "nom"
+  },
+  "Parasola plicatilis": {
+   "cd": 510329,
+   "valid": "Parasola plicatilis",
+   "vern": [
+    "Coprin parasol"
+   ],
+   "via": "nom"
+  },
+  "Phaeolus schweinitzii": {
+   "cd": 465040,
+   "valid": "Phaeolus schweinitzii",
+   "vern": [
+    "Polypore éponge",
+    "Phéole de schweinitz"
+   ],
+   "via": "nom"
+  },
+  "Phaeotremella foliacea": {
+   "cd": 994198,
+   "valid": "Phaeotremella foliacea",
+   "vern": [
+    "Trémelle foliacée"
+   ],
+   "via": "nom"
+  },
+  "Phlebia radiata": {
+   "cd": 43906,
+   "valid": "Phlebia merismoides",
+   "vern": [],
+   "via": "nom"
+  },
+  "Phloeomana speirea": {
+   "cd": 994015,
+   "valid": "Phloeomana speirea",
+   "vern": [],
+   "via": "nom"
+  },
+  "Pholiota gummosa": {
+   "cd": 37108,
+   "valid": "Pholiota gummosa",
+   "vern": [],
+   "via": "nom"
+  },
+  "Picipes badius": {
+   "cd": 517085,
+   "valid": "Polyporus picipes",
+   "vern": [
+    "Polypore bai"
+   ],
+   "via": "nom"
+  },
+  "Pleuroflammula tuberculosa": {
+   "cd": 37160,
+   "valid": "Pholiota tuberculosa",
+   "vern": [],
+   "via": "nom"
+  },
+  "Pleurotus cornucopiae": {
+   "cd": 34373,
+   "valid": "Pleurotus cornucopiae",
+   "vern": [
+    "Corne d'abondance"
+   ],
+   "via": "nom"
+  },
+  "Pleurotus pulmonarius": {
+   "cd": 34495,
+   "valid": "Pleurotus pulmonarius",
+   "vern": [],
+   "via": "nom"
+  },
+  "Plicaturopsis crispa": {
+   "cd": 44033,
+   "valid": "Plicaturopsis crispa",
+   "vern": [],
+   "via": "nom"
+  },
+  "Pluteus atromarginatus": {
+   "cd": 38799,
+   "valid": "Pluteus atromarginatus",
+   "vern": [
+    "Plutée à arêtes noires"
+   ],
+   "via": "nom"
+  },
+  "Pluteus aurantiorugosus": {
+   "cd": 38803,
+   "valid": "Pluteus aurantiorugosus",
+   "vern": [
+    "Plutée orangé"
+   ],
+   "via": "nom"
+  },
+  "Pluteus leoninus": {
+   "cd": 465266,
+   "valid": "Pluteus leoninus",
+   "vern": [
+    "Pluté couleur de lion"
+   ],
+   "via": "nom"
+  },
+  "Pluteus nanus": {
+   "cd": 38868,
+   "valid": "Pluteus nanus",
+   "vern": [
+    "Plutée nain"
+   ],
+   "via": "nom"
+  },
+  "Pluteus plautus": {
+   "cd": 38880,
+   "valid": "Pluteus plautus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Pluteus romellii": {
+   "cd": 38891,
+   "valid": "Pluteus romellii",
+   "vern": [],
+   "via": "nom"
+  },
+  "Polyporus lipsiensis": {
+   "cd": 42549,
+   "valid": "Ganoderma applanatum",
+   "vern": [
+    "Ganoderme plat",
+    "Ganoderme aplani"
+   ],
+   "via": "nom"
+  },
+  "Postia tephroleuca": {
+   "cd": 43580,
+   "valid": "Postia tephroleuca",
+   "vern": [
+    "Polypore souris"
+   ],
+   "via": "nom"
+  },
+  "Psathyrella cotonea": {
+   "cd": 37476,
+   "valid": "Psathyrella cotonea",
+   "vern": [],
+   "via": "nom"
+  },
+  "Psathyrella spadiceogrisea": {
+   "cd": 37825,
+   "valid": "Psathyrella spadiceogrisea",
+   "vern": [],
+   "via": "nom"
+  },
+  "Pseudoboletus parasiticus": {
+   "cd": 464866,
+   "valid": "Pseudoboletus parasiticus",
+   "vern": [
+    "Bolet parasite"
+   ],
+   "via": "nom"
+  },
+  "Pseudosperma squamatum": {
+   "cd": 1043683,
+   "valid": "Pseudosperma squamatum",
+   "vern": [],
+   "via": "nom"
+  },
+  "Rhodocollybia butyracea": {
+   "cd": 509948,
+   "valid": "Rhodocollybia butyracea",
+   "vern": [
+    "Collybie beurrée"
+   ],
+   "via": "nom"
+  },
+  "Rhodocybe gemina": {
+   "cd": 972016,
+   "valid": "Clitopilus geminus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Rickenella swartzii": {
+   "cd": 31855,
+   "valid": "Rickenella swartzii",
+   "vern": [],
+   "via": "nom"
+  },
+  "Rigidoporus ulmarius": {
+   "cd": 44264,
+   "valid": "Rigidoporus ulmarius",
+   "vern": [
+    "Polypore de l'orme"
+   ],
+   "via": "nom"
+  },
+  "Roridomyces roridus": {
+   "cd": 463334,
+   "valid": "Roridomyces roridus",
+   "vern": [],
+   "via": "nom"
+  },
+  "Rubroboletus dupainii": {
+   "cd": 967900,
+   "valid": "Rubroboletus dupainii",
+   "vern": [
+    "Bolet de dupain"
+   ],
+   "via": "nom"
+  },
+  "Rubroboletus legaliae": {
+   "cd": 967901,
+   "valid": "Rubroboletus legaliae",
+   "vern": [
+    "Bolet chicorée"
+   ],
+   "via": "nom"
+  },
+  "Russula acrifolia": {
+   "cd": 39532,
+   "valid": "Russula acrifolia",
+   "vern": [
+    "Russule à lames âcres"
+   ],
+   "via": "nom"
+  },
+  "Russula aeruginea": {
+   "cd": 39545,
+   "valid": "Russula aeruginea",
+   "vern": [
+    "Russule verdâtre"
+   ],
+   "via": "nom"
+  },
+  "Russula albonigra": {
+   "cd": 39548,
+   "valid": "Russula albonigra",
+   "vern": [
+    "Russule blanche et noire"
+   ],
+   "via": "nom"
+  },
+  "Russula alutacea": {
+   "cd": 39558,
+   "valid": "Russula alutacea",
+   "vern": [
+    "Russule alutacée"
+   ],
+   "via": "nom"
+  },
+  "Russula amoena": {
+   "cd": 39569,
+   "valid": "Russula amoena",
+   "vern": [
+    "Russule veloutée"
+   ],
+   "via": "nom"
+  },
+  "Russula amoenicolor": {
+   "cd": 39573,
+   "valid": "Russula amoenicolor",
+   "vern": [
+    "Russule panachée"
+   ],
+   "via": "nom"
+  },
+  "Russula amoenolens": {
+   "cd": 39579,
+   "valid": "Russula amoenolens",
+   "vern": [
+    "Russule à odeur de topinambour"
+   ],
+   "via": "nom"
+  },
+  "Russula anthracina": {
+   "cd": 39587,
+   "valid": "Russula anthracina",
+   "vern": [
+    "Russule anthracite"
+   ],
+   "via": "nom"
+  },
+  "Russula atropurpurea": {
+   "cd": 39841,
+   "valid": "Russula atropurpurea",
+   "vern": [
+    "Russule pourpre et noire"
+   ],
+   "via": "nom"
+  },
+  "Russula aurea": {
+   "cd": 39605,
+   "valid": "Russula aurea",
+   "vern": [
+    "Russule dorée"
+   ],
+   "via": "nom"
+  },
+  "Russula brunneoviolacea": {
+   "cd": 39636,
+   "valid": "Russula brunneoviolacea",
+   "vern": [
+    "Russule brun violacé"
+   ],
+   "via": "nom"
+  },
+  "Russula caerulea": {
+   "cd": 39560,
+   "valid": "Russula amara",
+   "vern": [
+    "Russule mamelonnée"
+   ],
+   "via": "nom"
+  },
+  "Russula cuprea": {
+   "cd": 39671,
+   "valid": "Russula cuprea",
+   "vern": [
+    "Russule cuivrée"
+   ],
+   "via": "nom"
+  },
+  "Russula decipiens": {
+   "cd": 39683,
+   "valid": "Russula decipiens",
+   "vern": [
+    "Russule trompeuse"
+   ],
+   "via": "nom"
+  },
+  "Russula exalbicans": {
+   "cd": 39726,
+   "valid": "Russula exalbicans",
+   "vern": [
+    "Russule pâlissante"
+   ],
+   "via": "nom"
+  },
+  "Russula foetens": {
+   "cd": 39751,
+   "valid": "Russula foetens",
+   "vern": [
+    "Russule fétide"
+   ],
+   "via": "nom"
+  },
+  "Russula fragilis": {
+   "cd": 39756,
+   "valid": "Russula fragilis",
+   "vern": [
+    "Russule fragile"
+   ],
+   "via": "nom"
+  },
+  "Russula lilacea": {
+   "cd": 39877,
+   "valid": "Russula lilacea",
+   "vern": [
+    "Russule lilas"
+   ],
+   "via": "nom"
+  },
+  "Russula luteotacta": {
+   "cd": 39887,
+   "valid": "Russula luteotacta",
+   "vern": [
+    "Russule jaunissante"
+   ],
+   "via": "nom"
+  },
+  "Russula olivacea": {
+   "cd": 39948,
+   "valid": "Russula olivacea",
+   "vern": [
+    "Russule olivacée"
+   ],
+   "via": "nom"
+  },
+  "Russula pseudointegra": {
+   "cd": 39994,
+   "valid": "Russula pseudointegra",
+   "vern": [
+    "Russule coccinée"
+   ],
+   "via": "nom"
+  },
+  "Russula risigallina": {
+   "cd": 463479,
+   "valid": "Russula risigallina",
+   "vern": [
+    "Russule caméléon"
+   ],
+   "via": "nom"
+  },
+  "Russula solaris": {
+   "cd": 40060,
+   "valid": "Russula solaris",
+   "vern": [
+    "Russule soleil"
+   ],
+   "via": "nom"
+  },
+  "Russula turci": {
+   "cd": 40089,
+   "valid": "Russula turci",
+   "vern": [
+    "Russule cocardée"
+   ],
+   "via": "nom"
+  },
+  "Russula xerampelina": {
+   "cd": 40147,
+   "valid": "Russula xerampelina",
+   "vern": [
+    "Russule écrevisse"
+   ],
+   "via": "nom"
+  },
+  "Scleroderma bovista": {
+   "cd": 40710,
+   "valid": "Scleroderma bovista",
+   "vern": [],
+   "via": "nom"
+  },
+  "Scutellinia peloponnesiaca": {
+   "cd": 861655,
+   "valid": "Scutellinia peloponnesiaca",
+   "vern": [],
+   "via": "nom"
+  },
+  "Stereum gausapatum": {
+   "cd": 44619,
+   "valid": "Stereum gausapatum",
+   "vern": [],
+   "via": "nom"
+  },
+  "Stereum insignitum": {
+   "cd": 44625,
+   "valid": "Stereum insignitum",
+   "vern": [
+    "Stérée remarquable"
+   ],
+   "via": "nom"
+  },
+  "Strobilomyces strobilaceus": {
+   "cd": 29679,
+   "valid": "Strobilomyces strobilaceus",
+   "vern": [
+    "Bolet pomme de pin"
+   ],
+   "via": "nom"
+  },
+  "Stropharia caerulea": {
+   "cd": 37194,
+   "valid": "Stropharia caerulea",
+   "vern": [],
+   "via": "nom"
+  },
+  "Stropharia inuncta": {
+   "cd": 37205,
+   "valid": "Stropharia inuncta",
+   "vern": [],
+   "via": "nom"
+  },
+  "Suillus collinitus": {
+   "cd": 29704,
+   "valid": "Suillus collinitus",
+   "vern": [
+    "Bolet à base rose"
+   ],
+   "via": "nom"
+  },
+  "Suillus grevillei": {
+   "cd": 29720,
+   "valid": "Suillus grevillei",
+   "vern": [
+    "Bolet élégant"
+   ],
+   "via": "nom"
+  },
+  "Thecotheus pelletieri": {
+   "cd": 50036,
+   "valid": "Thecotheus pelletieri",
+   "vern": [],
+   "via": "nom"
+  },
+  "Tomentella lapida": {
+   "cd": 464082,
+   "valid": "Tomentella lapida",
+   "vern": [],
+   "via": "nom"
+  },
+  "Trametes cinnabarina": {
+   "cd": 44209,
+   "valid": "Pycnoporus cinnabarinus",
+   "vern": [
+    "Tramète cinabre"
+   ],
+   "via": "nom"
+  },
+  "Trametes gibbosa": {
+   "cd": 44887,
+   "valid": "Trametes gibbosa",
+   "vern": [
+    "Tramète bossue"
+   ],
+   "via": "nom"
+  },
+  "Trametes ochracea": {
+   "cd": 464086,
+   "valid": "Trametes ochracea",
+   "vern": [
+    "Tramète zonée"
+   ],
+   "via": "nom"
+  },
+  "Trichaptum abietinum": {
+   "cd": 45025,
+   "valid": "Trichaptum abietinum",
+   "vern": [
+    "Tramète lilas"
+   ],
+   "via": "nom"
+  },
+  "Tricholoma batschii": {
+   "cd": 33240,
+   "valid": "Tricholoma batschii",
+   "vern": [],
+   "via": "nom"
+  },
+  "Tricholoma columbetta": {
+   "cd": 33219,
+   "valid": "Tricholoma columbetta",
+   "vern": [
+    "Colombette"
+   ],
+   "via": "nom"
+  },
+  "Tricholoma scalpturatum": {
+   "cd": 33362,
+   "valid": "Tricholoma scalpturatum",
+   "vern": [
+    "Tricholome gravé"
+   ],
+   "via": "nom"
+  },
+  "Tricholoma sejunctum": {
+   "cd": 33371,
+   "valid": "Tricholoma sejunctum",
+   "vern": [
+    "Jaunet"
+   ],
+   "via": "nom"
+  },
+  "Tricholomopsis rutilans": {
+   "cd": 33446,
+   "valid": "Tricholomopsis rutilans",
+   "vern": [
+    "Tricholome rutilant"
+   ],
+   "via": "nom"
+  },
+  "Tuber melanosporum": {
+   "cd": 50200,
+   "valid": "Tuber melanosporum",
+   "vern": [
+    "Truffe noire",
+    "Truffe du Périgord"
+   ],
+   "via": "nom"
+  },
+  "Verpa conica": {
+   "cd": 50296,
+   "valid": "Verpa conica",
+   "vern": [
+    "Verpe conique"
+   ],
+   "via": "nom"
+  },
+  "Volvariella murinella": {
+   "cd": 38936,
+   "valid": "Volvariella murinella",
+   "vern": [],
+   "via": "nom"
+  },
+  "Xanthoporia radiata": {
+   "cd": 995012,
+   "valid": "Mensularia radiata",
+   "vern": [
+    "Polypore radié"
+   ],
+   "via": "nom"
+  },
+  "Xerocomellus porosporus": {
+   "cd": 520774,
+   "valid": "Xerocomellus porosporus",
+   "vern": [
+    "Bolet fissuré"
+   ],
+   "via": "nom"
+  },
+  "Xerocomellus pruinatus": {
+   "cd": 520781,
+   "valid": "Xerocomellus pruinatus",
+   "vern": [
+    "Bolet pruineux"
+   ],
+   "via": "nom"
+  },
+  "Xerocomus subtomentosus": {
+   "cd": 29831,
+   "valid": "Xerocomus subtomentosus",
+   "vern": [
+    "Bolet subtomenteux"
+   ],
+   "via": "nom"
+  },
+  "Xerophorus donadinii": {
+   "cd": 971734,
+   "valid": "Xerophorus donadinii",
+   "vern": [],
+   "via": "nom"
+  }
+ }
+}

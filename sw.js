@@ -1,7 +1,7 @@
 /* Mycota — service worker
    L'app s'ouvre vite même avec une barre de réseau, les tuiles déjà vues restent consultables,
    et la carte préparée hors ligne (tuiles IGN autour des spots) vit dans son propre cache. */
-const SHELL_CACHE = 'mycota-shell-3.0.0';
+const SHELL_CACHE = 'mycota-shell-4.0.0';
 const TILE_CACHE = 'mycota-tiles';
 const OFFLINE_CACHE = 'mycota-offline';
 const FONT_CACHE = 'mycota-fonts';

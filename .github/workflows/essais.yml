@@ -1,0 +1,46 @@
+# Rejoue les essais à chaque envoi : la racine du dépôt doit correspondre à la source, et l'app doit passer l'essai de bout en bout.
+# Chromium fait foi. WebKit (le moteur de Safari) tourne à titre d'information : il approche l'iPhone sans le remplacer.
+name: Essais
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  essais:
+    name: Essais (${{ matrix.navigateur }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    continue-on-error: ${{ matrix.navigateur == 'webkit' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        navigateur: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Outils d'essai
+        run: |
+          pip install playwright pillow
+          python -m playwright install --with-deps ${{ matrix.navigateur }}
+      - name: La racine du dépôt correspond à la source
+        run: python dev/build.py --verifier
+      - name: Essai de bout en bout
+        env:
+          MYCOTA_NAVIGATEUR: ${{ matrix.navigateur }}
+        run: python dev/tests/e2e.py
+      - name: Service worker
+        if: matrix.navigateur == 'chromium'
+        run: python dev/tests/sw.py
+      - name: Captures d'écran
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: captures-${{ matrix.navigateur }}
+          path: dev/dist/captures
+          if-no-files-found: ignore
